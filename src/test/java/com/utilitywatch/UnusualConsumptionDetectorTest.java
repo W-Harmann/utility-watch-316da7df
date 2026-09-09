@@ -6,6 +6,12 @@ import java.util.List;
 
 class UnusualConsumptionDetectorTest {
 
+    private UnusualConsumptionDetector detector;
+    @BeforeEach
+    void setUp() {
+        detector = new UnusualConsumptionDetector();
+    }
+
     @Test
     void shouldFlagConsumptionMoreThanTenPercentAboveWeeklyMaximum() {
         // previous weeks normal readings
@@ -13,8 +19,6 @@ class UnusualConsumptionDetectorTest {
 
         // weekly max is 15.0, 10% above that is 16.5, so 18.0 should be flagged
         double currentConsumption = 18.0;
-
-        UnusualConsumptionDetector detector = new UnusualConsumptionDetector();
 
         boolean result = detector.isUnusual(currentConsumption, weeklyReadings);
         assertTrue(result);

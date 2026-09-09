@@ -34,4 +34,17 @@ class UnusualConsumptionDetectorTest {
         boolean result = detector.isUnusual(currentConsumption, weeklyReadings);
         assertTrue(result);
     }
+
+    @Test
+    void shouldNotFlagConsumptionWithinNormalRange() {
+        List<Double> weeklyReadings = List.of(10.0, 12.0, 11.0, 15.0, 9.0, 11.0, 12.0);
+        assertFalse(detector.isUnusual(11.5, weeklyReadings));
+    }
+
+    @Test
+    void shouldNotFlagConsumptionExactlyAtTenPercentBoundary() {
+        List<Double> weeklyReadings = List.of(10.0, 12.0, 11.0, 15.0, 9.0, 11.0, 12.0);
+        // exactly 10% above max (16.5) - not unusual since unusual range is more than 10%
+        assertFalse(detector.isUnusual(16.5, weeklyReadings));
+    }
 }

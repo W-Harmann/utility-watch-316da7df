@@ -1,0 +1,15 @@
+# Maven build output
+target/
+
+# IntelliJ
+*.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/shelf/
+
+# Compiled class files (in case anything builds outside target/)
+*.class
+
+# OS files
+.DS_Store
+Thumbs.db

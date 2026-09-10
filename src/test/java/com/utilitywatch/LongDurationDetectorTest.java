@@ -3,6 +3,7 @@ package com.utilitywatch;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 class LongDurationDetectorTest {
 

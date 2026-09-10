@@ -2,47 +2,47 @@ package com.utilitywatch;
 
 import org.junit.jupiter.api.*;
 
-import static java.lang.Float.NaN;
+import static java.lang.Double.NaN;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UtilityValidityTest {
-    private Utility utility;
+    private Reading reading;
 
     @BeforeEach
     void setUp() {
-        utility = new Utility();
+        reading = new Reading();
     }
 
     @Test
     void ShouldThrowExceptionAtNull() {
-        assertThrows(IllegalArgumentException.class, () -> utility.setQuantity(null));
+        assertThrows(IllegalArgumentException.class, () -> reading.setQuantity(null));
     }
 
     @Test
     void ShouldThrowExceptionAtNegative() {
-        assertThrows(IllegalArgumentException.class, () -> utility.setQuantity(-1));
+        assertThrows(IllegalArgumentException.class, () -> reading.setQuantity(-1));
     }
 
     @Test
     void ShouldThrowExceptionAtNaN() {
-        assertThrows(IllegalArgumentException.class, () -> utility.setQuantity(NaN));
+        assertThrows(IllegalArgumentException.class, () -> reading.setQuantity(NaN));
     }
 
     @Test
     void ShouldThrowExceptionAtString() {
-        assertThrows(IllegalArgumentException.class, () -> utility.setQuantity("Banana"));
+        assertThrows(IllegalArgumentException.class, () -> reading.setQuantity("Banana"));
     }
 
     @Test
     void ShouldStoreInteger() {
-        utility.setQuantity(3);
-        assertEquals(3, utility.getQuantity());
+        reading.setQuantity(3);
+        assertEquals(3, reading.getQuantity());
     }
 
     @Test
     void ShouldStoreDecimal() {
-        utility.setQuantity(6.7);
-        assertEquals(6.7, utility.getQuantity());
+        reading.setQuantity(6.7);
+        assertEquals(6.7, reading.getQuantity());
     }
 
 

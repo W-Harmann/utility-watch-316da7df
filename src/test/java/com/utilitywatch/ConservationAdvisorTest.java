@@ -3,6 +3,7 @@ package com.utilitywatch;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
+import java.util.Optional;
 
 class ConservationAdvisorTest {
 
@@ -45,4 +46,30 @@ class ConservationAdvisorTest {
         assertTrue(consumptionChange > 0);
     }
 
+    @Test
+    void shouldCompareUsageToPreviousSeasonWhenAvailable() {
+        // previous season average consumption was 10.0
+        List<Double> previousSeason = List.of(10.0, 10.0, 10.0);
+
+        // optional.of() represents previous season data being available
+        Optional<Double> seasonalComparison = advisor.compareToSeason(Optional.of(previousSeason), currentSeason);
+
+        // a comparison should exist since previous season data was provided
+        assertTrue(seasonalComparison.isPresent());
+
+        // 10.0 to 13.0 is a 30% increase (allow small margin for rounding)
+        assertEquals(30.0, seasonalComparison.get(), 0.01);
+    }
+
+    @Test
+    void shouldNotCompareToSeasonWhenNoPreviousSeasonDataAvailable() {
+        // this season average consumption is 13.0
+        List<Double> currentSeason = List.of(13.0, 13.0, 13.0);
+
+        // optional.empty() represents no previous season data being available at all
+        Optional<Double> seasonalComparison = advisor.compareToSeason(Optional.empty(), currentSeason);
+
+        // no comparison should be made since there is nothing to compare against
+        assertTrue(seasonalComparison.isEmpty());
+    }
 }

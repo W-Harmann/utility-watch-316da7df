@@ -1,4 +1,4 @@
-package com.utilitywatch;
+package com.utilitywatch.reports;
 
 // US7.2 - As a user, I want to view a detailed report of my energy and
 // water consumption so that I can analyse my usage over a selected period.

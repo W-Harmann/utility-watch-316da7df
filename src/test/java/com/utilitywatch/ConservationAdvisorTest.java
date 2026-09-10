@@ -26,4 +26,23 @@ class ConservationAdvisorTest {
         // allow a small difference for rounding
         assertEquals(20.0, percentIncrease, 0.01);
     }
+
+    @Test
+    void shouldCompareDurationAndHeightOfCommonPatterns() {
+        // previous pattern was consumption of 5.0 across 4 readings
+        List<Double> previousPeriod = List.of(5.0, 5.0, 5.0, 5.0);
+
+        // current pattern is consumption of 8.0 across 6 readings
+        List<Double> currentPeriod = List.of(8.0, 8.0, 8.0, 8.0, 8.0, 8.0);
+
+        int readingCountChange = advisor.compareDuration(previousPeriod, currentPeriod);
+        double consumptionChange = advisor.compareConsumptionLevel(previousPeriod, currentPeriod);
+
+        // check that the number of readings increased (6 readings compared to 4)
+        assertTrue(readingCountChange > 0);
+
+        // check that consumption increased (8.0 compared to 5.0)
+        assertTrue(consumptionChange > 0);
+    }
+
 }

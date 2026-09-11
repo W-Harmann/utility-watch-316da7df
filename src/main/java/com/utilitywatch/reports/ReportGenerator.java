@@ -16,9 +16,12 @@ public class ReportGenerator {
         double previousAverage = calculator.calculateAverage(previousPeriod.get());
         double currentAverage = calculator.calculateAverage(currentPeriod);
 
-        // % change from previous period to current period
-        double percentChange = ((currentAverage - previousAverage) / previousAverage) * 100;
-        return Optional.of(percentChange);
+        return Optional.of(calculatePercentChange(previousAverage, currentAverage));
+    }
+
+    // % change from previous period's average to current period's average
+    private double calculatePercentChange(double previousAverage, double currentAverage) {
+        return ((currentAverage - previousAverage) / previousAverage) * 100;
     }
 
     public boolean hasSufficientData(List<Double> readings) {

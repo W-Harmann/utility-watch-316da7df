@@ -22,12 +22,10 @@ public class ReadingEntryTest {
     void ShouldStoreEntryAsMap() {
 
         reading.setQuantity(3.0);
-        reading.setDate(2026, 3, 32, 12, 4, 5);
+        reading.setDate(2026, 3, 10, 12, 4, 5);
 
-        HashMap<LocalDateTime, Double> entry = new HashMap<>();
-        entry.put(LocalDateTime.of(2026, 3, 10, 12, 4, 5), 3.0);
-
-        assertEquals(entry, reading.toString());
+        assertEquals(LocalDateTime.of(2026, 3, 10, 12, 4, 5), reading.getDateTime());
+        assertEquals(3.0, reading.getQuantity());
     }
 
     @Test

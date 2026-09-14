@@ -112,3 +112,17 @@
     -fx-font-weight: bold;
     -fx-text-fill: #5FB2F5;
 }
+
+.cancel-button {
+    -fx-background-color: #CB0E11;
+    -fx-text-fill: white;
+}
+
+.report-note {
+    -fx-text-fill: #cccccc;
+    -fx-font-size: 11px;
+}
+
+.report-info-box .check-box {
+    -fx-text-fill: white;
+}

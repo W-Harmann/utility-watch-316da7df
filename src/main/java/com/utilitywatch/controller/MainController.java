@@ -25,12 +25,40 @@ public class MainController {
 
     @FXML
     protected void onReportsClick() {
+        showReportsOverview();
+    }
+
+    // loads the reports screen into the main content area
+    // public so other screens can call this to navigate back here
+    public void showReportsOverview() {
+        loadScreen("/com/utilitywatch/reports-overview-view.fxml");
+    }
+
+    // public so other controllers can use this method to navigate to the customise report screen
+    public void showCustomiseReport() {
+        loadScreen("/com/utilitywatch/customise-report-view.fxml");
+    }
+
+    // shared method for loading screens into the main content area
+    private void loadScreen(String fxmlPath) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/utilitywatch/reports-overview-view.fxml"));
-            Parent reportsOverviewView = fxmlLoader.load();
-            contentArea.getChildren().setAll(reportsOverviewView);
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent view = fxmlLoader.load();
+
+            // replace whatever is currently shown with the newly loaded screen
+            contentArea.getChildren().setAll(view);
+
+            // get the controller for the loaded fxml screen
+            Object controller = fxmlLoader.getController();
+
+            // check the controller type and give it access to MainController for navigation
+            if (controller instanceof ReportsController reportsController) {
+                reportsController.setMainController(this);
+            } else if (controller instanceof CustomiseReportController customiseController) {
+                customiseController.setMainController(this);
+            }
         } catch (IOException e) {
-            contentArea.getChildren().setAll(new Label("Failed to load reports screen"));
+            contentArea.getChildren().setAll(new Label("Failed to load screen"));
         }
     }
 

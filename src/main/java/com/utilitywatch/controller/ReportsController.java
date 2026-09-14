@@ -3,7 +3,15 @@ package com.utilitywatch.controller;
 import javafx.fxml.FXML;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
+
 public class ReportsController {
+
+    // reference to MainController for screen navigation
+    private MainController mainController;
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
     @FXML private VBox overviewContentBox;
     @FXML private Label comingSoonLabel;
@@ -13,10 +21,12 @@ public class ReportsController {
         // empty for now
     }
 
-    // temporary tests to make sure the buttons work
+    // sends user to the customise report screen
     @FXML
     protected void onGenerateReportClick() {
-        System.out.println("Generate report button clicked");
+        if (mainController != null) {
+            mainController.showCustomiseReport();
+        }
     }
 
     @FXML

@@ -1,55 +1,66 @@
 package com.utilitywatch.controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+
+import java.io.IOException;
 
 public class MainController {
 
     @FXML
-    private Label contentLabel;
+    private VBox contentArea;
 
     @FXML
     protected void onHomeClick() {
-        contentLabel.setText("Home");
+        contentArea.getChildren().setAll(new Label("Home"));
     }
 
     @FXML
     protected void onReadingsClick() {
-        contentLabel.setText("Readings");
+        contentArea.getChildren().setAll(new Label("Readings"));
     }
 
     @FXML
     protected void onReportsClick() {
-        contentLabel.setText("Reports");
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/utilitywatch/reports-overview-view.fxml"));
+            Parent reportsOverviewView = fxmlLoader.load();
+            contentArea.getChildren().setAll(reportsOverviewView);
+        } catch (IOException e) {
+            contentArea.getChildren().setAll(new Label("Failed to load reports screen"));
+        }
     }
 
     @FXML
     protected void onGoalsClick() {
-        contentLabel.setText("Goals");
+        contentArea.getChildren().setAll(new Label("Goals"));
     }
 
     @FXML
     protected void onCostsClick() {
-        contentLabel.setText("Costs");
+        contentArea.getChildren().setAll(new Label("Costs"));
     }
 
     @FXML
     protected void onImpactClick() {
-        contentLabel.setText("Impact");
+        contentArea.getChildren().setAll(new Label("Impact"));
     }
 
     @FXML
     protected void onAlertsClick() {
-        contentLabel.setText("Alerts");
+        contentArea.getChildren().setAll(new Label("Alerts"));
     }
 
     @FXML
     protected void onSettingsClick() {
-        contentLabel.setText("Settings");
+        contentArea.getChildren().setAll(new Label("Settings"));
     }
 
     @FXML
     protected void onLogOutClick() {
-        contentLabel.setText("Log out");
+        contentArea.getChildren().setAll(new Label("Log out"));
     }
 }

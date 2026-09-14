@@ -42,3 +42,44 @@
 .label {
     -fx-text-fill: #1e2a3a;
 }
+
+.reports-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.generate-report-button {
+    -fx-background-color: #139907;
+    -fx-text-fill: white;
+}
+
+.utility-toggle {
+    -fx-background-color: #eeeeee;
+    -fx-text-fill: #333333;
+}
+
+.both-toggle:selected {
+    -fx-background-color: #263238;
+    -fx-text-fill: white;
+}
+
+.energy-toggle:selected {
+    -fx-background-color: #FFBA4A;
+    -fx-text-fill: black;
+}
+
+.water-toggle:selected {
+    -fx-background-color: #5FB2F5;
+    -fx-text-fill: black;
+}
+
+.period-button {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4;
+}
+
+.report-tab-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+}

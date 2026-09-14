@@ -83,3 +83,32 @@
     -fx-background-color: transparent;
     -fx-text-fill: #333333;
 }
+
+.report-info-box {
+    -fx-background-color: #263238;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.report-info-box .label {
+    -fx-text-fill: white;
+}
+
+.report-info-box-title {
+    -fx-font-weight: bold;
+}
+
+.report-info-box-subtitle {
+    -fx-font-weight: bold;
+    -fx-padding: 6 0 0 0;
+}
+
+.report-info-box .energy-column-header {
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFBA4A;
+}
+
+.report-info-box .water-column-header {
+    -fx-font-weight: bold;
+    -fx-text-fill: #5FB2F5;
+}

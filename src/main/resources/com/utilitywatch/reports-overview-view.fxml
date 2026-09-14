@@ -9,6 +9,9 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.ReportsController"
       styleClass="reports-root">
@@ -49,5 +52,84 @@
         <Button text="Unusual Patterns" styleClass="report-tab-button" onAction="#onUnusualTabClick"/>
         <Button text="Statistics" styleClass="report-tab-button" onAction="#onStatisticsTabClick"/>
     </HBox>
+
+    <!-- overview tab content in 2x2 grid layout -->
+    <VBox fx:id="overviewContentBox" spacing="15.0" VBox.vgrow="ALWAYS">
+        <GridPane hgap="15.0" vgap="15.0" VBox.vgrow="ALWAYS">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="40.0"/>
+                <ColumnConstraints percentWidth="60.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints percentHeight="50.0"/>
+                <RowConstraints percentHeight="50.0"/>
+            </rowConstraints>
+
+            <!-- comparisons widget (row 1 column 1) -->
+            <VBox spacing="6.0" styleClass="report-info-box">
+                <Label text="Comparisons" styleClass="report-info-box-title"/>
+                <Label fx:id="totalEnergyLabel" text="Total Energy: 326 kWh"/>
+                <Label fx:id="totalWaterLabel" text="Total Water: 12,340 L"/>
+                <Label text="Compared to Jul 1 - Jul 31:" styleClass="report-info-box-subtitle"/>
+                <Label fx:id="energyChangeLabel" text="Energy usage increased by 8%"/>
+                <Label fx:id="waterChangeLabel" text="Water usage decreased by 5%"/>
+            </VBox>
+
+            <!-- consumption chart placeholder (row 1 column 2) -->
+            <VBox alignment="CENTER" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <Label text="Chart coming soon"/>
+            </VBox>
+
+            <!-- key statistics widget (row 2 column 1) -->
+            <VBox spacing="8.0" styleClass="report-info-box" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                <Label text="Key Statistics" styleClass="report-info-box-title"/>
+
+                <!-- nested grid for statistics table -->
+                <GridPane hgap="15.0" vgap="6.0">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="60.0"/>
+                        <ColumnConstraints minWidth="80.0"/>
+                        <ColumnConstraints minWidth="70.0"/>
+                    </columnConstraints>
+
+                    <!-- row 1 column 2 for energy header -->
+                    <Label text="Energy (kWh)" styleClass="energy-column-header" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <!-- row 1 column 3 for water header -->
+                    <Label text="Water (L)" styleClass="water-column-header" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+
+                    <!-- row 2 column 1 for average header -->
+                    <Label text="Average" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <!-- row 2 column 2 for average energy consumption -->
+                    <Label fx:id="avgEnergyLabel" text="10.2" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <!-- row 2 column 3 for average water consumption -->
+                    <Label fx:id="avgWaterLabel" text="354" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+
+                    <!-- row 3 column 1 for minimum header -->
+                    <Label text="Minimum" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <!-- row 3 column 2 for min energy consumption -->
+                    <Label fx:id="minEnergyLabel" text="18.6" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <!-- row 3 column 3 for min water consumption -->
+                    <Label fx:id="minWaterLabel" text="679" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+
+                    <!-- row 4 column 1 for maximum header -->
+                    <Label text="Maximum" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <!-- row 4 column 2 for max energy consumption -->
+                    <Label fx:id="maxEnergyLabel" text="5.1" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    <!-- row 4 column 3 for max water consumption -->
+                    <Label fx:id="maxWaterLabel" text="210" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                </GridPane>
+            </VBox>
+
+            <!-- unusual patterns table placeholder (row 2 column 2) -->
+            <VBox alignment="CENTER" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <Label text="Unusual Patterns table coming soon"/>
+            </VBox>
+
+        </GridPane>
+    </VBox>
+
+    <!-- placeholder for tabs not built yet -->
+    <!-- managed=false so the hidden label does not leave an empty space in the layout -->
+    <Label fx:id="comingSoonLabel"  text="Coming soon" visible="false" managed="false"/>
 
 </VBox>

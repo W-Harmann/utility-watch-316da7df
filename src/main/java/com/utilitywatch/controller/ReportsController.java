@@ -1,8 +1,12 @@
 package com.utilitywatch.controller;
 
 import javafx.fxml.FXML;
-
+import javafx.scene.layout.VBox;
+import javafx.scene.control.Label;
 public class ReportsController {
+
+    @FXML private VBox overviewContentBox;
+    @FXML private Label comingSoonLabel;
 
     @FXML
     public void initialize() {
@@ -17,27 +21,41 @@ public class ReportsController {
 
     @FXML
     protected void onOverviewTabClick() {
-        System.out.println("Overview tab clicked");
+        // show overview content and add it to the layout
+        overviewContentBox.setVisible(true);
+        overviewContentBox.setManaged(true);
+        // hide coming soon content and remove it from the layout
+        comingSoonLabel.setVisible(false);
+        comingSoonLabel.setManaged(false);
     }
 
     @FXML
     protected void onTrendsTabClick() {
-        System.out.println("Trends tab clicked");
+        showComingSoon();
     }
 
     @FXML
     protected void onComparisonsTabClick() {
-        System.out.println("Comparisons tab clicked");
+        showComingSoon();
     }
 
     @FXML
     protected void onUnusualTabClick() {
-        System.out.println("Unusual Patterns tab clicked");
+        showComingSoon();
     }
 
     @FXML
     protected void onStatisticsTabClick() {
-        System.out.println("Statistics tab clicked");
+        showComingSoon();
+    }
+
+    private void showComingSoon() {
+        // hide overview content and remove it from the layout
+        overviewContentBox.setVisible(false);
+        overviewContentBox.setManaged(false);
+        // show coming soon content and add it to the layout
+        comingSoonLabel.setVisible(true);
+        comingSoonLabel.setManaged(true);
     }
 }
 

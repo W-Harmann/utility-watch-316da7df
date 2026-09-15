@@ -46,13 +46,20 @@
         <Button fx:id="periodButton" text="Aug 1 - Sep 1, 2026" styleClass="period-button"/>
     </HBox>
 
-    <!-- report tab buttons -->
-    <HBox spacing="15.0">
-        <Button text="Overview" styleClass="report-tab-button" onAction="#onOverviewTabClick"/>
-        <Button text="Trends" styleClass="report-tab-button" onAction="#onTrendsTabClick"/>
-        <Button text="Comparisons" styleClass="report-tab-button" onAction="#onComparisonsTabClick"/>
-        <Button text="Unusual Patterns" styleClass="report-tab-button" onAction="#onUnusualTabClick"/>
-        <Button text="Statistics" styleClass="report-tab-button" onAction="#onStatisticsTabClick"/>
+    <!-- report tab buttons - uses a toggle group so the active tab stays visually marked -->
+    <!-- outer HBox stops the tab row and its underline from stretching to the full width -->
+    <HBox>
+        <HBox spacing="15.0" styleClass="report-tabs-row">
+            <fx:define>
+                <ToggleGroup fx:id="reportTabToggleGroup"/>
+            </fx:define>
+
+            <ToggleButton text="Overview" styleClass="report-tab-button" toggleGroup="$reportTabToggleGroup" selected="true" onAction="#onOverviewTabClick"/>
+            <ToggleButton text="Trends" styleClass="report-tab-button" toggleGroup="$reportTabToggleGroup" onAction="#onTrendsTabClick"/>
+            <ToggleButton text="Comparisons" styleClass="report-tab-button" toggleGroup="$reportTabToggleGroup" onAction="#onComparisonsTabClick"/>
+            <ToggleButton text="Unusual Patterns" styleClass="report-tab-button" toggleGroup="$reportTabToggleGroup" onAction="#onUnusualTabClick"/>
+            <ToggleButton text="Statistics" styleClass="report-tab-button" toggleGroup="$reportTabToggleGroup" onAction="#onStatisticsTabClick"/>
+        </HBox>
     </HBox>
 
     <!-- OVERVIEW TAB content in 2x2 grid layout -->

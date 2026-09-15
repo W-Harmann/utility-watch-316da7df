@@ -82,6 +82,26 @@
 .report-tab-button {
     -fx-background-color: transparent;
     -fx-text-fill: #333333;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.report-tab-button:hover {
+    -fx-background-color: #556671;
+    -fx-text-fill: white;
+}
+
+.report-tab-button:selected {
+    -fx-background-color: #263238;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-underline: true;
+    -fx-background-radius: 6 6 0 0;
+
+}
+
+.report-tabs-row {
+    -fx-border-color: transparent transparent #556671 transparent;
+    -fx-border-width: 0 0 2 0;
 }
 
 .report-info-box {

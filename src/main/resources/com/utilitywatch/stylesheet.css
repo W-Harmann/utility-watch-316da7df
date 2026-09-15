@@ -1,0 +1,44 @@
+.root {
+    -fx-background-color: #ffffff;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+.sidebar {
+    -fx-background-color: #263238;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 14px;
+    -fx-background-radius: 6;
+}
+
+.nav-button:hover {
+    -fx-background-color: #556671;
+    -fx-text-fill: white;
+}
+
+.nav-button:selected {
+    -fx-background-color: #556671;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.logout-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 14px;
+}
+
+.logout-button:hover {
+    -fx-text-fill: white;
+}
+
+.content-area {
+    -fx-background-color: white;
+}
+
+.label {
+    -fx-text-fill: #1e2a3a;
+}

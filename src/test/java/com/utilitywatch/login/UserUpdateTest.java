@@ -7,6 +7,8 @@ public class UserUpdateTest {
 
     private User user;
 
+    private AuthenticationService authService;
+
     @BeforeEach
     void setUp() {
         User user = new User("test@gmail.com", "password123");
@@ -15,40 +17,60 @@ public class UserUpdateTest {
 
     @Test
     void ShouldThrowExceptionAtDuplicateEmail() {
-        assertThrows(IllegalArgumentException.class, () -> user.setEmail("test@gmail.com"));
+        assertThrows(IllegalArgumentException.class, () -> authService.updateEmail(user, "test@gmail.com", "test@gmail.com"));
     }
 
     @Test
     void ShouldThrowExceptionAtDuplicatePassword() {
-        assertThrows(IllegalArgumentException.class, () -> user.setPassword("password123"));
+        assertThrows(IllegalArgumentException.class, () -> authService.updatePassword(user, "password123", "password123"));
+    }
+
+    @Test
+    void ShouldThrowExceptionAtDuplicatePropertyAddress() {
+        assertThrows(IllegalArgumentException.class, () -> authService.updatePropertyAddress(user, "123 Sesame Street", "123 Sesame Street"));
+    }
+
+    @Test
+    void ShouldThrowExceptionAtIncorrectOldEmail() {
+        assertThrows(IllegalArgumentException.class, () -> authService.updateEmail(user, "Incorrect@gmail.com", "NewEmail@gmail.com"));
+    }
+
+    @Test
+    void ShouldThrowExceptionAtIncorrectOldPassword() {
+        assertThrows(IllegalArgumentException.class, () -> authService.updatePassword(user, "Incorrect", "newPassword"));
+    }
+
+    @Test
+    void ShouldThrowExceptionAtIncorrectOldPropertyAddress() {
+        assertThrows(IllegalArgumentException.class, () -> authService.updatePropertyAddress(user, "123 Incorrect Street", "101 Fools Road"));
+    }
+
+    @Test
+    void ShouldThrowExceptionAtExistingEmail() {
+        User newUser = authService.signUp("Person@gmail.com", "PaSsWorDExaMple");
+        assertThrows(IllegalArgumentException.class, () -> authService.updateEmail(newUser, "Person@gmail.com", "test@gmail.com"));
     }
 
     @Test
     void ShouldThrowExceptionAtEmailWithoutAtSign() {
-        assertThrows(IllegalArgumentException.class, () -> user.setEmail("testgmail.com"));
+        assertThrows(IllegalArgumentException.class, () -> authService.updateEmail(user, "test@gmail.com", "NewEmailgmail.com"));
     }
 
     @Test
     void ShouldThrowExceptionAtEmailWithoutUserName() {
-        assertThrows(IllegalArgumentException.class, () -> user.setEmail("@gmail.com"));
+        assertThrows(IllegalArgumentException.class, () -> authService.updateEmail(user, "test@gmail.com", "@gmail.com"));
     }
 
     @Test
     void ShouldThrowExceptionAtEmailWithoutDomain() {
-        assertThrows(IllegalArgumentException.class, () -> user.setEmail("test@gmail"));
-    }
-
-    @Test
-    void ShouldCreateUserWithCorrectCredentialsAndHashedPassword() {
-        assertEquals("test@gmail.com", user.getEmail());
-        assertEquals("password123".hashCode(), user.getPassword());
+        assertThrows(IllegalArgumentException.class, () -> authService.updateEmail(user, "test@gmail.com", "NewEmail@gmail"));
     }
 
     @Test
     void ShouldUpdateUser() {
-        user.setEmail("Updated@gmail.com");
-        user.setPassword("2ndPassword");
-        user.setPropertyAddress("101 Real Street");
+        authService.updateEmail(user, "test@gmail.com", "Updated@gmail.com");
+        authService.updatePassword(user, "password123", "2ndPassword");
+        authService.updatePropertyAddress(user, "123 Sesame Street", "101 Real Street");
         assertEquals("Updated@gmail.com", user.getEmail());
         assertEquals("2ndPassword".hashCode(), user.getPassword());
         assertEquals("101 Real Street", user.getPropertyAddress());
@@ -56,9 +78,9 @@ public class UserUpdateTest {
 
     @Test
     void ShouldReusePreviousValueIfEmpty() {
-        user.setEmail("");
-        user.setPassword("");
-        user.setPropertyAddress("");
+        authService.updateEmail(user, "test@gmail.com", "");
+        authService.updatePassword(user, "password123", "");
+        authService.updatePropertyAddress(user, "123 Sesame Street", "");
         assertEquals("test@gmail.com", user.getEmail());
         assertEquals("password123".hashCode(), user.getPassword());
         assertEquals("123 Sesame Street", user.getPropertyAddress());

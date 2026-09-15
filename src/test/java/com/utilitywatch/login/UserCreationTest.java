@@ -7,6 +7,8 @@ public class UserCreationTest {
 
     private User user;
 
+    private AuthenticationService authService;
+
     @BeforeEach
     void setUp() {
         User user = new User("test@gmail.com", "password123");
@@ -14,32 +16,34 @@ public class UserCreationTest {
 
     @Test
     void ShouldThrowExceptionAtDuplicateEmail() {
-        assertThrows(IllegalArgumentException.class, () -> new User("test@gmail.com", "newPassword"));
+        assertThrows(IllegalArgumentException.class, () -> authService.signUp("test@gmail.com", "newPassword"));
     }
 
     @Test
     void ShouldThrowExceptionAtEmailWithoutAtSign() {
-        assertThrows(IllegalArgumentException.class, () -> new User("testgmail.com", "password123"));
+        assertThrows(IllegalArgumentException.class, () -> authService.signUp("testgmail.com", "password123"));
     }
 
     @Test
     void ShouldThrowExceptionAtEmailWithoutUserName() {
-        assertThrows(IllegalArgumentException.class, () -> new User("@gmail.com", "password123"));
+        assertThrows(IllegalArgumentException.class, () -> authService.signUp("@gmail.com", "password123"));
     }
 
     @Test
     void ShouldThrowExceptionAtEmailWithoutDomain() {
-        assertThrows(IllegalArgumentException.class, () -> new User("test@gmail", "password123"));
+        assertThrows(IllegalArgumentException.class, () -> authService.signUp("test@gmail", "password123"));
     }
 
     @Test
     void ShouldCreateUser() {
-        assertNotNull(user);
+        User newUser = authService.signUp("Person@gmail.com", "PaSsWorDExaMple");
+        assertNotNull(newUser);
     }
 
     @Test
     void ShouldCreateUserWithCorrectCredentialsAndHashedPassword() {
-        assertEquals("test@gmail.com", user.getEmail());
-        assertEquals("password123".hashCode(), user.getPassword());
+        User newUser = authService.signUp("Person@gmail.com", "PaSsWorDExaMple");
+        assertEquals("Person@gmail.com", newUser.getEmail());
+        assertEquals("PaSsWorDExaMple".hashCode(), newUser.getPassword());
     }
 }

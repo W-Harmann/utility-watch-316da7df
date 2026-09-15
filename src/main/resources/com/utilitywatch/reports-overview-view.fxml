@@ -14,7 +14,9 @@
 <?import javafx.scene.layout.RowConstraints?>
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.ReportsController"
-      styleClass="reports-root">
+      styleClass="reports-root"
+      VBox.vgrow="ALWAYS"
+      maxHeight="Infinity">
     <padding>
         <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
     </padding>
@@ -129,7 +131,7 @@
     </VBox>
 
     <!-- STATISTICS TAB content -->
-    <VBox fx:id="statisticsContentBox" spacing="15.0" visible="false" managed="false">
+    <VBox fx:id="statisticsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
         <HBox spacing="15.0">
             <!-- median consumption widget -->
             <!-- maxWidth and prefWidth makes both statistic boxes share the available space equally -->
@@ -139,13 +141,39 @@
                 <Label text="Your typical day's usage"/>
             </VBox>
 
-            <!-- standard deivaiton consumption widget -->
+            <!-- standard deviation consumption widget -->
             <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
                 <Label text="Standard deviation" styleClass="report-info-box-title"/>
                 <Label text="3.2 kWh" styleClass="stat-value"/>
                 <Label text="How much your usage varies day to day"/>
             </VBox>
         </HBox>
+
+        <!-- daily usage distribution chart placeholder -->
+        <!-- maxHeight=Infinity lets this box grow to fill the extra vertical space -->
+        <VBox alignment="CENTER" styleClass="report-info-box" VBox.vgrow="ALWAYS" maxHeight="Infinity">
+            <Label text="Daily usage distribution" styleClass="report-info-box-title"/>
+            <Label text="Chart coming soon"/>
+        </VBox>
+
+        <!-- bottom row for most common range, variability, and days recorded widgets -->
+        <HBox spacing="15.0">
+            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                <Label text="Most common range" styleClass="report-info-box-title"/>
+                <Label text="9-11 kWh" styleClass="stat-value"/>
+            </VBox>
+
+            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                <Label text="Variability" styleClass="report-info-box-title"/>
+                <Label text="Moderate" styleClass="stat-value"/>
+            </VBox>
+
+            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                <Label text="Days recorded" styleClass="report-info-box-title"/>
+                <Label text="30 of 30" styleClass="stat-value"/>
+            </VBox>
+        </HBox>
+
     </VBox>
 
     <!-- placeholder for tabs not built yet -->

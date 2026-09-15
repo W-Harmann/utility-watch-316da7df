@@ -23,6 +23,6 @@ public class CustomiseReportController {
     // temporary placeholder for report validation and generation
     @FXML
     protected void onGenerateReportClick() {
-        System.out.println("Generate report button clicked from customise screen");
+        System.out.println("Generate report button clicked from customise report screen");
     }
 }

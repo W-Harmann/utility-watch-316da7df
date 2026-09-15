@@ -126,3 +126,9 @@
 .report-info-box .check-box {
     -fx-text-fill: white;
 }
+
+.stat-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+

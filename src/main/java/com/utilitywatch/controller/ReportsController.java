@@ -1,10 +1,19 @@
 package com.utilitywatch.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 
 public class ReportsController {
+
+    @FXML private VBox overviewContentBox;
+    @FXML private Label comingSoonLabel;
+    @FXML private VBox statisticsContentBox;
+
+    @FXML private ToggleButton energyToggle;
+    @FXML private ToggleButton waterToggle;
+    @FXML private ToggleButton bothToggle;
 
     // reference to MainController for screen navigation
     private MainController mainController;
@@ -12,9 +21,6 @@ public class ReportsController {
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
-
-    @FXML private VBox overviewContentBox;
-    @FXML private Label comingSoonLabel;
 
     @FXML
     public void initialize() {
@@ -31,12 +37,7 @@ public class ReportsController {
 
     @FXML
     protected void onOverviewTabClick() {
-        // show overview content and add it to the layout
-        overviewContentBox.setVisible(true);
-        overviewContentBox.setManaged(true);
-        // hide coming soon content and remove it from the layout
-        comingSoonLabel.setVisible(false);
-        comingSoonLabel.setManaged(false);
+        showOverview();
     }
 
     @FXML
@@ -56,16 +57,45 @@ public class ReportsController {
 
     @FXML
     protected void onStatisticsTabClick() {
-        showComingSoon();
+        showStatistics();
     }
 
+    // shows the reports overview tab content and hides everything else
+    // defaults the utility toggle to 'both'
+    private void showOverview() {
+        hideAllTabContent();
+        overviewContentBox.setVisible(true);
+        overviewContentBox.setManaged(true);
+        bothToggle.setSelected(true);
+    }
+
+    // shows the statistics tab content and hides everything else
+    // currently defaults the utility toggle to 'energy'
+    private void showStatistics() {
+        hideAllTabContent();
+        statisticsContentBox.setVisible(true);
+        statisticsContentBox.setManaged(true);
+        energyToggle.setSelected(true);
+    }
+
+    // shows coming soon placeholder and hides everything else
     private void showComingSoon() {
-        // hide overview content and remove it from the layout
-        overviewContentBox.setVisible(false);
-        overviewContentBox.setManaged(false);
-        // show coming soon content and add it to the layout
+        hideAllTabContent();
         comingSoonLabel.setVisible(true);
         comingSoonLabel.setManaged(true);
+    }
+
+    // hides all tab content and removes it from the layout
+    // each show() method can then show only the needed content for that tab
+    private void hideAllTabContent() {
+        overviewContentBox.setVisible(false);
+        overviewContentBox.setManaged(false);
+
+        statisticsContentBox.setVisible(false);
+        statisticsContentBox.setManaged(false);
+
+        comingSoonLabel.setVisible(false);
+        comingSoonLabel.setManaged(false);
     }
 }
 

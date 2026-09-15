@@ -53,7 +53,7 @@
         <Button text="Statistics" styleClass="report-tab-button" onAction="#onStatisticsTabClick"/>
     </HBox>
 
-    <!-- overview tab content in 2x2 grid layout -->
+    <!-- OVERVIEW TAB content in 2x2 grid layout -->
     <VBox fx:id="overviewContentBox" spacing="15.0" VBox.vgrow="ALWAYS">
         <GridPane hgap="15.0" vgap="15.0" VBox.vgrow="ALWAYS">
             <columnConstraints>
@@ -126,6 +126,26 @@
             </VBox>
 
         </GridPane>
+    </VBox>
+
+    <!-- STATISTICS TAB content -->
+    <VBox fx:id="statisticsContentBox" spacing="15.0" visible="false" managed="false">
+        <HBox spacing="15.0">
+            <!-- median consumption widget -->
+            <!-- maxWidth and prefWidth makes both statistic boxes share the available space equally -->
+            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                <Label text="Median" styleClass="report-info-box-title"/>
+                <Label text="10.4 kWh" styleClass="stat-value"/>
+                <Label text="Your typical day's usage"/>
+            </VBox>
+
+            <!-- standard deivaiton consumption widget -->
+            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                <Label text="Standard deviation" styleClass="report-info-box-title"/>
+                <Label text="3.2 kWh" styleClass="stat-value"/>
+                <Label text="How much your usage varies day to day"/>
+            </VBox>
+        </HBox>
     </VBox>
 
     <!-- placeholder for tabs not built yet -->

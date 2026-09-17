@@ -172,3 +172,16 @@
 .default-color1.chart-line-symbol {
     -fx-background-color: #5FB2F5, white;
 }
+
+/* bar colour for the statistics distribution chart based on selected utility toggle */
+.energy-selected .chart-bar {
+    -fx-bar-fill: #FFBA4A;
+}
+
+.water-selected .chart-bar {
+    -fx-bar-fill: #5FB2F5;
+}
+
+.both-selected .chart-bar {
+    -fx-bar-fill: #263238;
+}

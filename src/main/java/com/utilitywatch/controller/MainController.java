@@ -31,12 +31,12 @@ public class MainController {
     // loads the reports screen into the main content area
     // public so other screens can call this to navigate back here
     public void showReportsOverview() {
-        loadScreen("/com/utilitywatch/reports-overview-view.fxml");
+        loadScreen("/com/utilitywatch/reports/reports-view.fxml");
     }
 
     // public so other controllers can use this method to navigate to the customise report screen
     public void showCustomiseReport() {
-        loadScreen("/com/utilitywatch/customise-report-view.fxml");
+        loadScreen("/com/utilitywatch/reports/customise-report-view.fxml");
     }
 
     // shared method for loading screens into the main content area

@@ -4,21 +4,35 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import java.util.List;
+import javafx.scene.chart.BarChart;
+import javafx.application.Platform;
 
 public class ReportsController {
-
-    @FXML private VBox overviewContentBox;
-    @FXML private Label comingSoonLabel;
-    @FXML private VBox statisticsContentBox;
-
-    @FXML private ToggleButton energyToggle;
-    @FXML private ToggleButton waterToggle;
-    @FXML private ToggleButton bothToggle;
-
-    @FXML private LineChart<String, Number> consumptionChart;
+    // display content
+    @FXML
+    private VBox overviewContentBox;
+    @FXML
+    private Label comingSoonLabel;
+    @FXML
+    private VBox statisticsContentBox;
+    // utility toggle buttons
+    @FXML
+    private ToggleButton energyToggle;
+    @FXML
+    private ToggleButton waterToggle;
+    @FXML
+    private ToggleButton bothToggle;
+    @FXML
+    private ToggleGroup utilityToggleGroup;
+    // utility consumption charts
+    @FXML
+    private LineChart<String, Number> consumptionChart;
+    @FXML
+    private BarChart<String, Number> distributionChart;
 
     // reference to MainController for screen navigation
     private MainController mainController;
@@ -30,6 +44,13 @@ public class ReportsController {
     @FXML
     public void initialize() {
         loadMockChartData();
+        loadMockDistributionData();
+
+        // updates the chart style whenever the utility toggle changes
+        utilityToggleGroup.selectedToggleProperty().addListener(
+                (obs, oldToggle, newToggle) -> updateDistributionChartColour());
+        // applies the correct chart style when the screen first loads
+        updateDistributionChartColour();
     }
 
     // loads sample energy and water consumption data
@@ -45,7 +66,7 @@ public class ReportsController {
             energySeries.getData().add(new XYChart.Data<>(days.get(day), energyValues.get(day)));
         }
 
-        // creates the water consumption data series and adds each energy value to its date
+        // creates the water consumption data series and adds each water value to its date
         XYChart.Series<String, Number> waterSeries = new XYChart.Series<>();
         waterSeries.setName("Water (L)");
         for (int day = 0; day < days.size(); day++) {
@@ -97,6 +118,9 @@ public class ReportsController {
         overviewContentBox.setVisible(true);
         overviewContentBox.setManaged(true);
         bothToggle.setSelected(true);
+
+        // refreshes the consumption chart layout after the content becomes visible
+        Platform.runLater(consumptionChart::requestLayout);
     }
 
     // shows the statistics tab content and hides everything else
@@ -106,6 +130,48 @@ public class ReportsController {
         statisticsContentBox.setVisible(true);
         statisticsContentBox.setManaged(true);
         energyToggle.setSelected(true);
+        loadMockDistributionData();
+
+        // refreshes the distribution chart layout after the content becomes visible
+        Platform.runLater(distributionChart::requestLayout);
+    }
+
+    // loads sample consumption distribution data into the chart
+    private void loadMockDistributionData() {
+        // prevents duplicate data from being added to the chart
+        if (!distributionChart.getData().isEmpty()) {
+            return;
+        }
+
+        // creates a series containing sample utility distribution values
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+
+        // adds sample consumption values for each time period
+        series.getData().add(new XYChart.Data<>("5-7", 2));
+        series.getData().add(new XYChart.Data<>("7-9", 2));
+        series.getData().add(new XYChart.Data<>("9-11", 4));
+        series.getData().add(new XYChart.Data<>("11-13", 6));
+        series.getData().add(new XYChart.Data<>("13-15", 3));
+        series.getData().add(new XYChart.Data<>("15-17", 2));
+        series.getData().add(new XYChart.Data<>("17-19", 1));
+
+        // adds the sample series to the distribution chart
+        distributionChart.getData().add(series);
+    }
+
+    // updates the chart colour based on the selected utility toggle
+    private void updateDistributionChartColour() {
+        // removes any previously applied utility toggle
+        distributionChart.getStyleClass().removeAll("energy-selected", "water-selected", "both-selected");
+
+        // applies the specific chart style related to the selected utility type
+        if (energyToggle.isSelected()) {
+            distributionChart.getStyleClass().add("energy-selected");
+        } else if (waterToggle.isSelected()) {
+            distributionChart.getStyleClass().add("water-selected");
+        } else if (bothToggle.isSelected()) {
+            distributionChart.getStyleClass().add("both-selected");
+        }
     }
 
     // shows coming soon placeholder and hides everything else

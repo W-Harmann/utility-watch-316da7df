@@ -14,6 +14,7 @@
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.BarChart?>
 
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.ReportsController"
@@ -78,7 +79,7 @@
             </rowConstraints>
 
             <!-- comparisons widget (row 1 column 1) -->
-            <VBox spacing="6.0" styleClass="report-info-box">
+            <VBox spacing="14.0" styleClass="report-info-box">
                 <Label text="Comparisons" styleClass="report-info-box-title"/>
                 <Label fx:id="totalEnergyLabel" text="Total Energy: 326 kWh"/>
                 <Label fx:id="totalWaterLabel" text="Total Water: 12,340 L"/>
@@ -98,11 +99,11 @@
             </LineChart>
 
             <!-- key statistics widget (row 2 column 1) -->
-            <VBox spacing="8.0" styleClass="report-info-box" GridPane.columnIndex="0" GridPane.rowIndex="1">
+            <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="0" GridPane.rowIndex="1">
                 <Label text="Key Statistics" styleClass="report-info-box-title"/>
 
                 <!-- nested grid for statistics table -->
-                <GridPane hgap="15.0" vgap="6.0">
+                <GridPane hgap="15.0" vgap="12.0">
                     <columnConstraints>
                         <ColumnConstraints minWidth="60.0"/>
                         <ColumnConstraints minWidth="80.0"/>
@@ -137,9 +138,39 @@
                 </GridPane>
             </VBox>
 
-            <!-- unusual patterns table placeholder (row 2 column 2) -->
-            <VBox alignment="CENTER" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                <Label text="Unusual Patterns table coming soon"/>
+            <!-- unusual patterns table (row 2 column 2) -->
+            <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <Label text="Unusual Patterns Detected" styleClass="report-info-box-title"/>
+
+                <GridPane hgap="15.0" vgap="12.0">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="70.0"/>
+                        <ColumnConstraints minWidth="75.0"/>
+                        <ColumnConstraints minWidth="70.0"/>
+                        <ColumnConstraints minWidth="110.0"/>
+                    </columnConstraints>
+
+                    <!-- table headings -->
+                    <Label text="Date/Period" styleClass="report-info-box-subtitle" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <Label text="Type" styleClass="report-info-box-subtitle" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="Severity" styleClass="report-info-box-subtitle" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                    <Label text="Details" styleClass="report-info-box-subtitle" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+                    <Label text="Aug 22 (2h)" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <Label text="High Usage" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <Label text="Severe" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                    <Label text="+32% above usual" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+                    <Label text="Aug 24 (1h)" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <Label text="Spike" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <Label text="Moderate" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                    <Label text="Short spike detected" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+
+                    <Label text="Aug 26 (6h)" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <Label text="Long duration" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    <Label text="Moderate" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                    <Label text="Usage for 6+ hours" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                </GridPane>
             </VBox>
 
         </GridPane>
@@ -164,12 +195,15 @@
             </VBox>
         </HBox>
 
-        <!-- daily usage distribution chart placeholder -->
-        <!-- maxHeight=Infinity lets this box grow to fill the extra vertical space -->
-        <VBox alignment="CENTER" styleClass="report-info-box" VBox.vgrow="ALWAYS" maxHeight="Infinity">
-            <Label text="Daily usage distribution" styleClass="report-info-box-title"/>
-            <Label text="Chart coming soon"/>
-        </VBox>
+        <!-- daily usage distribution chart -->
+        <BarChart fx:id="distributionChart" title="Daily usage distrubition" legendVisible="false" VBox.vgrow="ALWAYS">
+            <xAxis>
+                <CategoryAxis/>
+            </xAxis>
+            <yAxis>
+                <NumberAxis/>
+            </yAxis>
+        </BarChart>
 
         <!-- bottom row for most common range, variability, and days recorded widgets -->
         <HBox spacing="15.0">

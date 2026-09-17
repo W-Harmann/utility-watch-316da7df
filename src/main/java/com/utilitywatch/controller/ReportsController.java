@@ -3,8 +3,10 @@ package com.utilitywatch.controller;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import java.util.List;
@@ -16,10 +18,15 @@ public class ReportsController {
     @FXML
     private VBox overviewContentBox;
     @FXML
+    private VBox trendsContentBox;
+    @FXML
     private Label comingSoonLabel;
     @FXML
     private VBox statisticsContentBox;
     // utility toggle buttons
+    @FXML
+    private HBox utilityToggle;
+
     @FXML
     private ToggleButton energyToggle;
     @FXML
@@ -28,11 +35,24 @@ public class ReportsController {
     private ToggleButton bothToggle;
     @FXML
     private ToggleGroup utilityToggleGroup;
+
     // utility consumption charts
     @FXML
     private LineChart<String, Number> consumptionChart;
     @FXML
     private BarChart<String, Number> distributionChart;
+
+    // trend mode toggle buttons
+    @FXML private HBox trendmodeToggle;
+
+    @FXML private ToggleButton trendmodeTotalToggle;
+    @FXML private ToggleButton trendmodeChangeToggle;
+
+    @FXML private HBox trendEnergyDisplay;
+    @FXML private HBox trendWaterDisplay;
+
+    @FXML private CheckBox trendShowEnergyTrendButton;
+    @FXML private CheckBox trendShowWaterTrendButton;
 
     // reference to MainController for screen navigation
     private MainController mainController;
@@ -93,7 +113,7 @@ public class ReportsController {
 
     @FXML
     protected void onTrendsTabClick() {
-        showComingSoon();
+        showTrends();
     }
 
     @FXML
@@ -121,6 +141,43 @@ public class ReportsController {
 
         // refreshes the consumption chart layout after the content becomes visible
         Platform.runLater(consumptionChart::requestLayout);
+    }
+
+    // shows the trends tab content and hides everything else
+    // Trend Mode: Total <Selected by Default>
+    private void showTrends() {
+        hideAllTabContent();
+        utilityToggle.setVisible(false);
+        utilityToggle.setManaged(false);
+
+        trendmodeToggle.setVisible(true);
+        trendmodeToggle.setManaged(true);
+
+        trendsContentBox.setVisible(true);
+        trendsContentBox.setManaged(true);
+        trendmodeTotalToggle.setSelected(true);
+    }
+
+    @FXML
+    private void onShowEnergyTrendClick() {
+        boolean selected = trendShowEnergyTrendButton.isSelected();
+
+        trendEnergyDisplay.setVisible(selected);
+        trendEnergyDisplay.setManaged(selected);
+        if (selected) {
+//            trendWaterDisplay.setMinHeight(250);
+        };
+    }
+
+    @FXML
+    private void onShowWaterTrendClick() {
+        boolean selected = trendShowWaterTrendButton.isSelected();
+
+        trendWaterDisplay.setVisible(selected);
+        trendWaterDisplay.setManaged(selected);
+        if (selected) {
+
+        };
     }
 
     // shows the statistics tab content and hides everything else
@@ -184,6 +241,14 @@ public class ReportsController {
     // hides all tab content and removes it from the layout
     // each show() method can then show only the needed content for that tab
     private void hideAllTabContent() {
+        // The 3 Toggle Buttons are on by default, currently only in
+        // Trends and Comparisons do they need to disappear
+        utilityToggle.setVisible(true);
+        utilityToggle.setManaged(true);
+
+        trendmodeToggle.setVisible(false);
+        trendmodeToggle.setManaged(false);
+
         overviewContentBox.setVisible(false);
         overviewContentBox.setManaged(false);
 
@@ -194,4 +259,3 @@ public class ReportsController {
         comingSoonLabel.setManaged(false);
     }
 }
-

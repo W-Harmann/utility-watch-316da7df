@@ -51,6 +51,9 @@ class ConservationAdvisorTest {
         // previous season average consumption was 10.0
         List<Double> previousSeason = List.of(10.0, 10.0, 10.0);
 
+        // this season average consumption is 13.0
+        List<Double> currentSeason = List.of(13.0, 13.0, 13.0);
+
         // optional.of() represents previous season data being available
         Optional<Double> seasonalComparison = advisor.compareToSeason(Optional.of(previousSeason), currentSeason);
 

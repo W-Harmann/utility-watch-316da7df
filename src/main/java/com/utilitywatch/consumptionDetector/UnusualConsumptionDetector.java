@@ -1,4 +1,4 @@
-package com.utilitywatch;
+package com.utilitywatch.consumptionDetector;
 
 import java.util.Collections;
 import java.util.List;

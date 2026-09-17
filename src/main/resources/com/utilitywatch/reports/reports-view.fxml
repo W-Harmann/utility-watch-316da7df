@@ -16,9 +16,6 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.BarChart?>
 
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.control.CheckBox?>
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.ReportsController"
       styleClass="reports-root"
@@ -36,7 +33,7 @@
     </HBox>
 
     <!-- utility toggle and period selector button -->
-    <HBox alignment="CENTER_LEFT" fx:id="utilityToggle" spacing="10.0">
+    <HBox alignment="CENTER_LEFT" spacing="10.0">
         <Label text="Utility:"/>
 
         <fx:define>
@@ -51,20 +48,6 @@
 
         <Label text="Period:"/>
         <Button fx:id="periodButton" text="Aug 1 - Sep 1, 2026" styleClass="period-button"/>
-    </HBox>
-
-    <!-- utility toggle and period selector button -->
-    <HBox alignment="CENTER_LEFT" fx:id="trendmodeToggle" spacing="10.0" visible="false" managed="false">
-        <Label text="Mode:"/>
-
-        <fx:define>
-            <ToggleGroup fx:id="trendmodeToggleGroup"/>
-        </fx:define>
-
-        <ToggleButton fx:id="trendmodeTotalToggle" text="Total" styleClass="utility-toggle, both-toggle" toggleGroup="$trendmodeToggleGroup" selected="true"/>
-        <ToggleButton fx:id="trendmodeChangeToggle" text="Change" styleClass="utility-toggle, both-toggle" toggleGroup="$trendmodeToggleGroup"/>
-
-        <Region HBox.hgrow="ALWAYS"/>
     </HBox>
 
     <!-- report tab buttons - uses a toggle group so the active tab stays visually marked -->
@@ -191,52 +174,6 @@
             </VBox>
 
         </GridPane>
-    </VBox>
-
-    <!-- TRENDS TAB content -->
-    <VBox fx:id="trendsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS" maxHeight="Infinity">
-        <!-- Scroll Bar -->
-        <ScrollPane hbarPolicy="never" vbarPolicy="always" VBox.vgrow="NEVER" fitToWidth="true" prefHeight="1000">
-            <VBox>
-                <!-- Energy Display -->
-                <HBox spacing="15.0" alignment="CENTER" styleClass="report-info-box" maxHeight="80">
-                    <Label text="Energy" styleClass="stat-value"/>
-                    <Pane HBox.hgrow="ALWAYS" />
-                    <CheckBox fx:id="trendShowEnergyTrendButton" text="Show" onAction="#onShowEnergyTrendClick"/>
-                </HBox>
-                <!-- Energy Display | Graph -->
-                <HBox spacing="15.0" fx:id="trendEnergyDisplay" styleClass="report-info-box"  visible="false" managed="false" prefHeight="300">
-                    <!-- Graph -->
-                    <BarChart title="Test Chart" legendVisible="false" VBox.vgrow="ALWAYS">
-                        <xAxis>
-                            <CategoryAxis/>
-                        </xAxis>
-                        <yAxis>
-                            <NumberAxis/>
-                        </yAxis>
-                    </BarChart>
-                </HBox>
-
-                <!-- Water Display-->
-                <HBox spacing="15.0" alignment="CENTER" styleClass="report-info-box" maxHeight="80">
-                    <Label text="Water" styleClass="stat-value"/>
-                    <Pane HBox.hgrow="ALWAYS" />
-                    <CheckBox fx:id="trendShowWaterTrendButton" text="Show" onAction="#onShowWaterTrendClick"/>
-                </HBox>
-                <!-- Water Display | Graph -->
-                <HBox spacing="15.0" fx:id="trendWaterDisplay" styleClass="report-info-box" visible="false" managed="false" prefHeight="300">
-                    <!-- Graph -->
-                    <BarChart title="Test Chart" legendVisible="false" VBox.vgrow="ALWAYS">
-                        <xAxis>
-                            <CategoryAxis/>
-                        </xAxis>
-                        <yAxis>
-                            <NumberAxis/>
-                        </yAxis>
-                    </BarChart>
-                </HBox>
-            </VBox>
-        </ScrollPane>
     </VBox>
 
     <!-- STATISTICS TAB content -->

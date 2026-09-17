@@ -1,9 +1,12 @@
 package com.utilitywatch.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
+import java.util.List;
 
 public class ReportsController {
 
@@ -15,6 +18,8 @@ public class ReportsController {
     @FXML private ToggleButton waterToggle;
     @FXML private ToggleButton bothToggle;
 
+    @FXML private LineChart<String, Number> consumptionChart;
+
     // reference to MainController for screen navigation
     private MainController mainController;
 
@@ -24,8 +29,33 @@ public class ReportsController {
 
     @FXML
     public void initialize() {
-        // empty for now
+        loadMockChartData();
     }
+
+    // loads sample energy and water consumption data
+    private void loadMockChartData() {
+        List<String> days = List.of("Aug 1", "Aug 8", "Aug 15", "Aug 22");
+        List<Double> energyValues = List.of(300.0, 450.0, 380.0, 500.0);
+        List<Double> waterValues = List.of(200.0, 150.0, 300.0, 250.0);
+
+        // creates the energy consumption data series and adds each energy value to its date
+        XYChart.Series<String, Number> energySeries = new XYChart.Series<>();
+        energySeries.setName("Energy (kWh)");
+        for (int day = 0; day < days.size(); day++) {
+            energySeries.getData().add(new XYChart.Data<>(days.get(day), energyValues.get(day)));
+        }
+
+        // creates the water consumption data series and adds each energy value to its date
+        XYChart.Series<String, Number> waterSeries = new XYChart.Series<>();
+        waterSeries.setName("Water (L)");
+        for (int day = 0; day < days.size(); day++) {
+            waterSeries.getData().add(new XYChart.Data<>(days.get(day), waterValues.get(day)));
+        }
+
+        // adds both data series to the consumption chart
+        consumptionChart.getData().addAll(energySeries, waterSeries);
+    }
+
 
     // sends user to the customise report screen
     @FXML

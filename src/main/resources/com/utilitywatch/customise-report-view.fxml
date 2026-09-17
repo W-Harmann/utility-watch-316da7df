@@ -44,14 +44,14 @@
         <VBox spacing="8.0" styleClass="report-info-box" HBox.hgrow="ALWAYS">
             <Label text="Select information to include:" styleClass="report-info-box-title"/>
 
-            <CheckBox text="Select All"/>
-            <CheckBox text="Consumption Statistics" selected="true"/>
-            <CheckBox text="Trends Analysis" selected="true"/>
-            <CheckBox text="Comparisons" selected="true"/>
-            <CheckBox text="Unusual Patterns" selected="true"/>
-            <CheckBox text="Conservation Opportunities"/>
-            <CheckBox text="Cost Summary" selected="true"/>
-            <CheckBox text="Environmental Impact"/>
+            <CheckBox fx:id="selectAllCheckBox" text="Select All" onAction="#onSelectAllClick"/>
+            <CheckBox fx:id="consumptionStatisticsCheckBox" text="Consumption Statistics" onAction="#handleCheckboxAction"/>
+            <CheckBox fx:id="trendsAnalysisCheckBox" text="Trends Analysis" onAction="#handleCheckboxAction"/>
+            <CheckBox fx:id="comparisonsCheckBox" text="Comparisons" onAction="#handleCheckboxAction"/>
+            <CheckBox fx:id="unusualPatternsCheckBox" text="Unusual Patterns" onAction="#handleCheckboxAction"/>
+            <CheckBox fx:id="conservationOpportunitiesCheckBox" text="Conservation Opportunities" onAction="#handleCheckboxAction"/>
+            <CheckBox fx:id="costSummaryCheckBox" text="Cost Summary" onAction="#handleCheckboxAction"/>
+            <CheckBox fx:id="environmentalImpactCheckBox" text="Environmental Impact" onAction="#handleCheckboxAction"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
@@ -61,13 +61,8 @@
 
         <!-- right widget - preview of selected choices (static text for now) -->
         <!-- TODO: update to add the options based on which checkboxes are checked -->
-        <VBox spacing="8.0" styleClass="report-info-box" HBox.hgrow="ALWAYS">
+        <VBox fx:id="previewContainer" spacing="8.0" styleClass="report-info-box" HBox.hgrow="ALWAYS">
             <Label text="Your report will include:" styleClass="report-info-box-title"/>
-            <Label text="Consumption Statistics"/>
-            <Label text="Trends Analysis"/>
-            <Label text="Comparisons"/>
-            <Label text="Unusual Patterns"/>
-            <Label text="Cost Summary"/>
         </VBox>
 
     </HBox>

@@ -8,10 +8,13 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.ReportsController"
       styleClass="reports-root"
@@ -70,8 +73,8 @@
                 <ColumnConstraints percentWidth="60.0"/>
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints percentHeight="50.0"/>
-                <RowConstraints percentHeight="50.0"/>
+                <RowConstraints percentHeight="55.0"/>
+                <RowConstraints percentHeight="45.0"/>
             </rowConstraints>
 
             <!-- comparisons widget (row 1 column 1) -->
@@ -84,10 +87,15 @@
                 <Label fx:id="waterChangeLabel" text="Water usage decreased by 5%"/>
             </VBox>
 
-            <!-- consumption chart placeholder (row 1 column 2) -->
-            <VBox alignment="CENTER" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                <Label text="Chart coming soon"/>
-            </VBox>
+            <!-- consumption chart (row 1 column 2) -->
+            <LineChart fx:id="consumptionChart" title="Consumption over time" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <xAxis>
+                    <CategoryAxis/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis/>
+                </yAxis>
+            </LineChart>
 
             <!-- key statistics widget (row 2 column 1) -->
             <VBox spacing="8.0" styleClass="report-info-box" GridPane.columnIndex="0" GridPane.rowIndex="1">

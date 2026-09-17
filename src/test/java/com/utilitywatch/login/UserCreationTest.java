@@ -1,17 +1,17 @@
 package com.utilitywatch.login;
 
+import com.utilitywatch.PasswordHasher;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserCreationTest {
 
-    private User user;
-
     private AuthenticationService authService;
 
     @BeforeEach
     void setUp() {
-        User user = new User("test@gmail.com", "password123");
+        authService = new AuthenticationService();
+        authService.signUp("test@gmail.com", "password123");
     }
 
     @Test
@@ -44,6 +44,6 @@ public class UserCreationTest {
     void ShouldCreateUserWithCorrectCredentialsAndHashedPassword() {
         User newUser = authService.signUp("Person@gmail.com", "PaSsWorDExaMple");
         assertEquals("Person@gmail.com", newUser.getEmail());
-        assertEquals("PaSsWorDExaMple".hashCode(), newUser.getPassword());
+        assertEquals(PasswordHasher.hash("PaSsWorDExaMple"), newUser.getPassword());
     }
 }

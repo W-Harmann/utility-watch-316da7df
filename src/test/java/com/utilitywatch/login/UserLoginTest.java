@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserLoginTest {
 
     private User user;
-
     private AuthenticationService authService;
 
     @BeforeEach
     void setUp() {
-        User user = new User("test@gmail.com", "password123");
+        authService = new AuthenticationService();
+        user = authService.signUp("test@gmail.com", "password123");
     }
 
     @Test
@@ -34,5 +34,4 @@ public class UserLoginTest {
         User currentUser = authService.logIn("test@gmail.com", "password123");
         assertTrue(authService.logOut(currentUser));
     }
-
 }

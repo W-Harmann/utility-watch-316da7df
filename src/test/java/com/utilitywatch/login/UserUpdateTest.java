@@ -1,17 +1,18 @@
 package com.utilitywatch.login;
 
+import com.utilitywatch.PasswordHasher;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserUpdateTest {
 
     private User user;
-
     private AuthenticationService authService;
 
     @BeforeEach
     void setUp() {
-        User user = new User("test@gmail.com", "password123");
+        authService = new AuthenticationService();
+        user = authService.signUp("test@gmail.com", "password123");
         user.setPropertyAddress("123 Sesame Street");
     }
 
@@ -72,7 +73,7 @@ public class UserUpdateTest {
         authService.updatePassword(user, "password123", "2ndPassword");
         authService.updatePropertyAddress(user, "123 Sesame Street", "101 Real Street");
         assertEquals("Updated@gmail.com", user.getEmail());
-        assertEquals("2ndPassword".hashCode(), user.getPassword());
+        assertEquals(PasswordHasher.hash("2ndPassword"), user.getPassword());
         assertEquals("101 Real Street", user.getPropertyAddress());
     }
 
@@ -82,7 +83,7 @@ public class UserUpdateTest {
         authService.updatePassword(user, "password123", "");
         authService.updatePropertyAddress(user, "123 Sesame Street", "");
         assertEquals("test@gmail.com", user.getEmail());
-        assertEquals("password123".hashCode(), user.getPassword());
+        assertEquals(PasswordHasher.hash("password123"), user.getPassword());
         assertEquals("123 Sesame Street", user.getPropertyAddress());
     }
 }

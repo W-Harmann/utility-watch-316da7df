@@ -27,6 +27,8 @@ public class ReportsController {
     @FXML
     private VBox trendsContentBox;
     @FXML
+    private VBox comparisonsContentBox;
+    @FXML
     private Label comingSoonLabel;
     @FXML
     private VBox statisticsContentBox;
@@ -135,7 +137,7 @@ public class ReportsController {
 
     @FXML
     protected void onComparisonsTabClick() {
-        showComingSoon();
+        showComparisons();
     }
 
     @FXML
@@ -282,6 +284,7 @@ public class ReportsController {
             }
             case "Semester" -> {
                 if (PeriodSelected == null) { return; } //Ignore Spam Requests (from app)
+                //fixme: PeriodSelected is the start of the ListIDX, so set it to where the months start for that sem..mester
                 x_axis = new ArrayList<>(list_months.subList(Integer.parseInt(PeriodSelected), list_months.size()/2)); // Seperate Months into Semester
             }
             case "Trimester" -> {
@@ -365,6 +368,13 @@ public class ReportsController {
         }
     }
 
+    private void showComparisons() {
+        hideAllTabContent();
+        comparisonsContentBox.setVisible(true);
+        comparisonsContentBox.setManaged(true);
+        energyToggle.setSelected(true);
+    }
+
     // shows the statistics tab content and hides everything else
     // currently defaults the utility toggle to 'energy'
     private void showStatistics() {
@@ -436,6 +446,9 @@ public class ReportsController {
 
         trendsContentBox.setVisible(false);
         trendsContentBox.setManaged(false);
+
+        comparisonsContentBox.setVisible(false);
+        comparisonsContentBox.setManaged(false);
 
         overviewContentBox.setVisible(false);
         overviewContentBox.setManaged(false);

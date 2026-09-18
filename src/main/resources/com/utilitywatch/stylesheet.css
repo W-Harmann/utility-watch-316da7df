@@ -133,6 +133,48 @@
     -fx-text-fill: #5FB2F5;
 }
 
+.trends-tab-utility-unactive {
+    -fx-background-color: #556671;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.trends-tab-utility-unactive .label {
+    -fx-text-fill: darkgray;
+    -fx-font-style: italic;
+}
+
+.trends-tab-utility-unactive .check-box {
+    -fx-text-fill: darkgray;
+}
+
+.trends-tab-utility-active {
+    -fx-background-color: #263238;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.trends-tab-utility-active .label {
+    -fx-text-fill: white;
+    -fx-font-style: normal;
+}
+
+.trends-tab-utility-active .check-box {
+    -fx-text-fill: white;
+}
+
+.trends-tab-utility-display {
+    -fx-background-color: #eeeeee;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.trends-tab-utility-display .label {
+    -fx-text-fill: black;
+}
+
+.trends-tab-utility-display .chart-series-line {}
+
 .cancel-button {
     -fx-background-color: #CB0E11;
     -fx-text-fill: white;

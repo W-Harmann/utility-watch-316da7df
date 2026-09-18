@@ -19,6 +19,9 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.ReportsController"
       styleClass="reports-root"
@@ -53,7 +56,7 @@
         <Button fx:id="periodButton" text="Aug 1 - Sep 1, 2026" styleClass="period-button"/>
     </HBox>
 
-    <!-- utility toggle and period selector button -->
+    <!-- trend mode toggle, period view and period selector button -->
     <HBox alignment="CENTER_LEFT" fx:id="trendmodeToggle" spacing="10.0" visible="false" managed="false">
         <Label text="Mode:"/>
 
@@ -65,6 +68,43 @@
         <ToggleButton fx:id="trendmodeChangeToggle" text="Change" styleClass="utility-toggle, both-toggle" toggleGroup="$trendmodeToggleGroup"/>
 
         <Region HBox.hgrow="ALWAYS"/>
+
+        <Label text="View:"/>
+
+        <ComboBox fx:id="trendViewDropdown" promptText="Please Select A Report" onAction="#onTrendsViewSelected" maxWidth="100">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Annual"/>
+                    <String fx:value="Semester"/>
+                    <String fx:value="Trimester"/>
+                    <String fx:value="Quarter"/>
+                    <String fx:value="Month"/>
+                    <String fx:value="This Week"/>
+                </FXCollections>
+            </items>
+        </ComboBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Label text="Year:"/>
+
+        <ComboBox fx:id="trendYearDropdown" promptText="Select Year" onAction="#onTrendsPeriodSelected"  maxWidth="100">
+<!--            <items>-->
+<!--                <FXCollections fx:factory="observableArrayList">-->
+<!--                </FXCollections>-->
+<!--            </items>-->
+        </ComboBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Label text="Period:"/>
+
+        <ComboBox fx:id="trendPeriodDropdown" promptText="Select Period" onAction="#onTrendsPeriodSelected" maxWidth="100">
+<!--            <items>-->
+<!--                <FXCollections fx:factory="observableArrayList">-->
+<!--                </FXCollections>-->
+<!--            </items>-->
+        </ComboBox>
     </HBox>
 
     <!-- report tab buttons - uses a toggle group so the active tab stays visually marked -->
@@ -194,46 +234,49 @@
     </VBox>
 
     <!-- TRENDS TAB content -->
+    <!--todo: add button for SUM, AVERAGE and Data-Point-->
+    <!--todo: add other visuals-->
+    <!--todo: clean up-->
     <VBox fx:id="trendsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS" maxHeight="Infinity">
         <!-- Scroll Bar -->
-        <ScrollPane hbarPolicy="never" vbarPolicy="always" VBox.vgrow="NEVER" fitToWidth="true" prefHeight="1000">
+        <ScrollPane style="-fx-background: #FFFFFF; -fx-box-border: transparent;" hbarPolicy="never" vbarPolicy="always" VBox.vgrow="NEVER" fitToWidth="true" prefHeight="1000">
             <VBox>
                 <!-- Energy Display -->
-                <HBox spacing="15.0" alignment="CENTER" styleClass="report-info-box" maxHeight="80">
+                <HBox spacing="15.0" fx:id="trendEnergyMain" styleClass="trends-tab-utility-unactive" alignment="CENTER"  maxHeight="80">
                     <Label text="Energy" styleClass="stat-value"/>
                     <Pane HBox.hgrow="ALWAYS" />
                     <CheckBox fx:id="trendShowEnergyTrendButton" text="Show" onAction="#onShowEnergyTrendClick"/>
                 </HBox>
                 <!-- Energy Display | Graph -->
-                <HBox spacing="15.0" fx:id="trendEnergyDisplay" styleClass="report-info-box"  visible="false" managed="false" prefHeight="300">
+                <HBox spacing="15.0" fx:id="trendEnergyDisplay" styleClass="trends-tab-utility-display" visible="false" managed="false" prefHeight="300">
                     <!-- Graph -->
-                    <BarChart title="Test Chart" legendVisible="false" VBox.vgrow="ALWAYS">
+                    <LineChart fx:id="trendEnergyGraph" title="Energy Trend Graph" animated="false" legendVisible="false" VBox.vgrow="ALWAYS" prefWidth="700">
                         <xAxis>
                             <CategoryAxis/>
                         </xAxis>
                         <yAxis>
                             <NumberAxis/>
                         </yAxis>
-                    </BarChart>
+                    </LineChart>
                 </HBox>
 
                 <!-- Water Display-->
-                <HBox spacing="15.0" alignment="CENTER" styleClass="report-info-box" maxHeight="80">
+                <HBox spacing="15.0" fx:id="trendWaterMain" styleClass="trends-tab-utility-unactive" alignment="CENTER" maxHeight="80">
                     <Label text="Water" styleClass="stat-value"/>
                     <Pane HBox.hgrow="ALWAYS" />
                     <CheckBox fx:id="trendShowWaterTrendButton" text="Show" onAction="#onShowWaterTrendClick"/>
                 </HBox>
                 <!-- Water Display | Graph -->
-                <HBox spacing="15.0" fx:id="trendWaterDisplay" styleClass="report-info-box" visible="false" managed="false" prefHeight="300">
+                <HBox spacing="15.0" fx:id="trendWaterDisplay" styleClass="trends-tab-utility-display" visible="false" managed="false" prefHeight="300">
                     <!-- Graph -->
-                    <BarChart title="Test Chart" legendVisible="false" VBox.vgrow="ALWAYS">
+                    <LineChart fx:id="trendWaterGraph" title="Water Trend Graph" animated="false" legendVisible="false" VBox.vgrow="ALWAYS" prefWidth="700">
                         <xAxis>
                             <CategoryAxis/>
                         </xAxis>
                         <yAxis>
                             <NumberAxis/>
                         </yAxis>
-                    </BarChart>
+                    </LineChart>
                 </HBox>
             </VBox>
         </ScrollPane>

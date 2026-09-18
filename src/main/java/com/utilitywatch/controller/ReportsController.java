@@ -1,15 +1,22 @@
 package com.utilitywatch.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.Label;
+
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.Period;
+import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.IntStream;
+
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
 
@@ -47,9 +54,19 @@ public class ReportsController {
 
     @FXML private ToggleButton trendmodeTotalToggle;
     @FXML private ToggleButton trendmodeChangeToggle;
+    @FXML private ComboBox<String> trendViewDropdown;
+    @FXML private ComboBox<String> trendYearDropdown;
+    @FXML private ComboBox<String> trendPeriodDropdown;
 
+    private String trendPreviousViewSelection;
+
+    @FXML private HBox trendEnergyMain;
     @FXML private HBox trendEnergyDisplay;
+    @FXML private HBox trendWaterMain;
     @FXML private HBox trendWaterDisplay;
+
+    @FXML private LineChart<String, Number> trendEnergyGraph;
+    @FXML private LineChart<String, Number> trendWaterGraph;
 
     @FXML private CheckBox trendShowEnergyTrendButton;
     @FXML private CheckBox trendShowWaterTrendButton;
@@ -156,28 +173,196 @@ public class ReportsController {
         trendsContentBox.setVisible(true);
         trendsContentBox.setManaged(true);
         trendmodeTotalToggle.setSelected(true);
+
+        // Dropdown Initialization
+        trendViewDropdown.setValue("Annual"); // Default Selection
+
+        //todo: Database integration
+        //fixme: Set year by years collected in DataBase readings
+        trendYearDropdown.getItems().setAll("2026","2025","2023","2022","2021","2020");
+
+        // Set to first option for Years
+        trendYearDropdown.setValue(trendYearDropdown.getItems().getFirst());
     }
 
     @FXML
     private void onShowEnergyTrendClick() {
         boolean selected = trendShowEnergyTrendButton.isSelected();
-
-        trendEnergyDisplay.setVisible(selected);
-        trendEnergyDisplay.setManaged(selected);
-        if (selected) {
-//            trendWaterDisplay.setMinHeight(250);
-        };
+        onShowAnyTrendClick(selected, trendEnergyMain, trendEnergyDisplay);
     }
 
     @FXML
     private void onShowWaterTrendClick() {
         boolean selected = trendShowWaterTrendButton.isSelected();
+        onShowAnyTrendClick(selected, trendWaterMain, trendWaterDisplay);
+    }
 
-        trendWaterDisplay.setVisible(selected);
-        trendWaterDisplay.setManaged(selected);
+    private void onShowAnyTrendClick(Boolean selected, HBox UtilityMain, HBox UtilityDisplay) {
+        UtilityDisplay.setVisible(selected);
+        UtilityDisplay.setManaged(selected);
         if (selected) {
+            UtilityMain.getStyleClass().remove("trends-tab-utility-inactive");
+            UtilityMain.getStyleClass().add("trends-tab-utility-active");
 
+        } else {
+            UtilityMain.getStyleClass().remove("trends-tab-utility-active");
+            UtilityMain.getStyleClass().add("trends-tab-utility-inactive");
         };
+
+        updateTrendDisplays();
+    }
+
+    //todo: make a method for each: (SUM, AVERAGE, Data-Point)
+    // to show the plot lines for each data sets and show the data dots
+
+    @FXML
+    private void onTrendsViewSelected() {
+        String ViewSelected = trendViewDropdown.getValue();
+
+        // Set Period-Options to corresponding View-Selected
+        switch (ViewSelected) {
+            case "Annual", "This Week" -> {
+                trendPeriodDropdown.setPromptText("<No Options>");
+            }
+            case "Semester" -> {
+                trendPeriodDropdown.getItems().setAll("1","2");
+            }
+            case "Trimester" -> {
+                trendPeriodDropdown.getItems().setAll("1","2","3");
+            }
+            case "Quarter" -> {
+                trendPeriodDropdown.getItems().setAll("1","2","3","4");
+            }
+            case "Month" -> {
+                trendPeriodDropdown.getItems().setAll("January","February","March","April","May","June","July","August","September","October","November","December");
+            }
+            default -> {}
+        }
+
+        // Set Default Period Selection Value -> View-Selected
+        // Update Graph
+        trendPeriodDropdown.getSelectionModel().clearSelection();
+        if (Objects.equals(ViewSelected,"Annual") || Objects.equals(ViewSelected,"This Week")) {
+            trendPeriodDropdown.setValue(null);
+            // Exception case for selecting between Annual and This Week. Both returns null value for Period
+            // so App doesn't recognize the selection.
+            if (!ViewSelected.equals(trendPreviousViewSelection)) {
+                onTrendsPeriodSelected();
+            }
+        } else {
+            trendPeriodDropdown.setValue(trendPeriodDropdown.getItems().getFirst());
+        }
+
+        trendPreviousViewSelection = ViewSelected;
+    }
+
+    @FXML
+    private void onTrendsPeriodSelected() {
+        updateTrendDisplays();
+    }
+
+    @FXML
+    private void updateTrendDisplays () {
+        String ViewSelected = trendViewDropdown.getValue();
+
+        // No Options Selected
+        if (trendYearDropdown.getValue() == null) { return; }
+
+        int YearSelected = Integer.parseInt(trendYearDropdown.getValue());
+        int MonthSelected;
+        String PeriodSelected = trendPeriodDropdown.getValue();
+
+        List<String> list_months = List.of("January","February","March","April","May","June","July","August","September","October","November","December");
+        List<String> x_axis = List.of();
+
+        // Set X-Axis Keys for Graph
+        switch (ViewSelected) {
+            case "Annual" -> {
+                x_axis = list_months;
+            }
+            case "Semester" -> {
+                if (PeriodSelected == null) { return; } //Ignore Spam Requests (from app)
+                x_axis = new ArrayList<>(list_months.subList(Integer.parseInt(PeriodSelected), list_months.size()/2)); // Seperate Months into Semester
+            }
+            case "Trimester" -> {
+                if (PeriodSelected == null) { return; }
+                x_axis = new ArrayList<>(list_months.subList(Integer.parseInt(PeriodSelected), list_months.size()/3));
+            }
+            case "Quarter" -> {
+                if (PeriodSelected == null) { return; }
+                x_axis = new ArrayList<>(list_months.subList(Integer.parseInt(PeriodSelected), list_months.size()/4));
+            }
+            case "Month" -> {
+                if (PeriodSelected == null) { return; }
+                MonthSelected = Month.valueOf(PeriodSelected.toUpperCase()).getValue();
+                //fixme: debug, remove in final
+                System.out.println("Month: " + MonthSelected);
+                LocalDateTime DaysInMonth_Parsing;
+                try {
+                    DaysInMonth_Parsing = LocalDateTime.of(YearSelected, MonthSelected, 1, 0, 0, 0);
+                } catch (Exception e) {
+                    System.out.println("Exception: " + e);
+                    return;
+                }
+                int DaysInMonth = DaysInMonth_Parsing.getMonth().length(DaysInMonth_Parsing.toLocalDate().isLeapYear());
+
+                x_axis = IntStream.rangeClosed(1, DaysInMonth).boxed().map(String::valueOf).toList();
+            }
+            case "This Week" -> {
+                x_axis = new ArrayList<>(List.of("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"));
+            }
+            default -> {}
+        }
+
+        //fixme: debug, remove in final
+        System.out.println("View: " + ViewSelected + "\t\tYear: " + YearSelected + "\t\tPeriod: " + PeriodSelected);
+
+        //fixme: Insert values from Reading on-to graph
+        // current values are placeholders
+        List<Double> EnergyReadingsByPeriod = IntStream.rangeClosed(1, x_axis.size()).boxed().map(Double::valueOf).toList();
+        List<Double> WaterReadingsByPeriod = IntStream.rangeClosed(1, x_axis.size()).boxed().map(Double::valueOf).toList();
+
+        // creates the energy consumption data series and adds each energy value to its date
+        XYChart.Series<String, Number> EnergyGraph = new XYChart.Series<>();
+        EnergyGraph.setName("Energy Trend " + YearSelected);
+        for (int idx = 0; idx < x_axis.size(); idx++) {
+            EnergyGraph.getData().add(new XYChart.Data<>(x_axis.get(idx), EnergyReadingsByPeriod.get(idx)));
+        }
+
+        // creates the water consumption data series and adds each water value to its date
+        XYChart.Series<String, Number> WaterGraph = new XYChart.Series<>();
+        WaterGraph.setName("Water Trend " + YearSelected);
+        for (int idx = 0; idx < x_axis.size(); idx++) {
+            WaterGraph.getData().add(new XYChart.Data<>(x_axis.get(idx), WaterReadingsByPeriod.get(idx)));
+        }
+
+        // clean graph
+        trendEnergyGraph.getData().clear();
+        trendWaterGraph.getData().clear();
+
+        // adds data series to the consumption chart
+        trendEnergyGraph.getData().addAll(EnergyGraph);
+        trendWaterGraph.getData().addAll(WaterGraph);
+
+        //todo: add data for AVERAGE line
+        //todo: add datapoints for Graph
+        //todo: show legends/keys?
+
+        Node EnergyLine = EnergyGraph.getNode().lookup(".trends-tab-utility-display .chart-series-line");
+        EnergyLine.setStyle("-fx-stroke: #FFBA4A;");
+
+        for (XYChart.Data<String, Number> datapoint : EnergyGraph.getData()) {
+            Node node = datapoint.getNode();
+            node.setStyle("-fx-background-color: #FFBA4A;");
+        }
+
+        Node WaterLine = WaterGraph.getNode().lookup(".trends-tab-utility-display .chart-series-line");
+        WaterLine.setStyle("-fx-stroke: #5FB2F5;");
+
+        for (XYChart.Data<String, Number> datapoint : WaterGraph.getData()) {
+            Node node = datapoint.getNode();
+            node.setStyle("-fx-background-color: #5FB2F5;");
+        }
     }
 
     // shows the statistics tab content and hides everything else
@@ -248,6 +433,9 @@ public class ReportsController {
 
         trendmodeToggle.setVisible(false);
         trendmodeToggle.setManaged(false);
+
+        trendsContentBox.setVisible(false);
+        trendsContentBox.setManaged(false);
 
         overviewContentBox.setVisible(false);
         overviewContentBox.setManaged(false);

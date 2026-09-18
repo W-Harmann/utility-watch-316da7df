@@ -93,9 +93,7 @@ public class MainController {
     }
 
     @FXML
-    protected void onAlertsClick() {
-        showLabel("Alerts");
-    }
+    protected void onAlertsClick() { loadScreen("/com/utilitywatch/alerts-view.fxml"); }
 
     @FXML
     protected void onSettingsClick() {

@@ -45,6 +45,4 @@ public class UtilityValidityTest {
         assertEquals(6.7, reading.getQuantity());
     }
 
-
-
 }

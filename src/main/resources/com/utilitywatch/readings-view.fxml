@@ -21,7 +21,7 @@
         <DatePicker fx:id="datePicker"/>
         <ComboBox fx:id="resourceTypeBox" promptText="Type"/>
         <TextField fx:id="quantityField" promptText="Quantity"/>
-        <Button text="Save Reading" styleClass="primary-button" onAction="#onSaveClick"/>
+        <Button fx:id="saveButton" text="Save Reading" styleClass="primary-button" onAction="#onSaveClick"/>
         <Button text="Import CSV" styleClass="primary-button" onAction="#onImportClick"/>
     </HBox>
     <Label fx:id="errorLabel" styleClass="error-label"/>
@@ -33,6 +33,7 @@
             <TableColumn fx:id="quantityColumn" text="Quantity" prefWidth="90"/>
             <TableColumn fx:id="resourceTypeColumn" text="Type" prefWidth="80"/>
             <TableColumn fx:id="unitColumn" text="Unit" prefWidth="80"/>
+            <TableColumn fx:id="actionsColumn" text="Actions" prefWidth="140"/>
         </columns>
     </TableView>
 

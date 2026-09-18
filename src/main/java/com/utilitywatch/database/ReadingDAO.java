@@ -19,10 +19,6 @@ public class ReadingDAO implements IReadingDAO {
     public void createTable() {
         try {
             Statement statement = connection.createStatement();
-            // resourceType is nullable - older/simple inserts (like the
-            // original persistence test) don't set one, and that's fine.
-            // userId defaults to 0 for the same reason - it's an int, so it
-            // never comes back as null from Java's side either way.
             statement.execute("CREATE TABLE IF NOT EXISTS readings ("
                     + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + "dateTime VARCHAR NOT NULL,"
@@ -38,11 +34,41 @@ public class ReadingDAO implements IReadingDAO {
     public void insert(Reading reading) {
         try {
             PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO readings (dateTime, quantity, resourceType, userId) VALUES (?, ?, ?, ?)");
+                    "INSERT INTO readings (dateTime, quantity, resourceType, userId) VALUES (?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, reading.getDateTime().toString());
             statement.setDouble(2, reading.getQuantity());
-            statement.setString(3, reading.getResourceType()); // may be null
+            statement.setString(3, reading.getResourceType());
             statement.setInt(4, reading.getUserId());
+            statement.executeUpdate();
+
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                reading.setId(generatedKeys.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateReading(Reading reading) {
+        try {
+            PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE readings SET dateTime = ?, quantity = ?, resourceType = ? WHERE id = ?");
+            statement.setString(1, reading.getDateTime().toString());
+            statement.setDouble(2, reading.getQuantity());
+            statement.setString(3, reading.getResourceType());
+            statement.setInt(4, reading.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteReading(int id) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM readings WHERE id = ?");
+            statement.setInt(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -103,11 +129,10 @@ public class ReadingDAO implements IReadingDAO {
             reading.setResourceType(resourceType);
         }
         reading.setUserId(resultSet.getInt("userId"));
+        reading.setId(resultSet.getInt("id"));
         return reading;
     }
 
-    // closes the shared connection so a later "new ReadingDAO()" opens a
-    // genuinely fresh one - see UtilityWatchConnection.reset() for the caveat
     public void close() {
         UtilityWatchConnection.reset();
     }

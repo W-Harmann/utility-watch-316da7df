@@ -9,4 +9,6 @@ public interface IReadingDAO {
     Reading getLastReading();
     List<Reading> getAllReadings();
     List<Reading> getReadingsForUser(int userId);
+    void updateReading(Reading reading);
+    void deleteReading(int id);
 }

@@ -4,8 +4,11 @@ import java.time.LocalDateTime;
 
 public class Reading {
 
+    private int id; // assigned by the DAO on insert, 0 until then
+    private int userId;
     private double quantity;
     private LocalDateTime dateTime;
+    private String resourceType; // "energy" or "water"
 
     public Reading() {
     }
@@ -41,6 +44,8 @@ public class Reading {
     }
 
     public void setDate(int year, int month, int day, int hour, int minute, int second) {
+        // don't catch this - an invalid day like 32 should just throw
+        // DateTimeException on its own
         LocalDateTime dt = LocalDateTime.of(year, month, day, hour, minute, second);
 
         if (year < 1900) {
@@ -58,5 +63,37 @@ public class Reading {
 
     public LocalDateTime getDateTime() {
         return dateTime;
+    }
+
+    /** @throws IllegalArgumentException if not exactly "energy" or "water" */
+    public void setResourceType(String resourceType) {
+        if (!"energy".equals(resourceType) && !"water".equals(resourceType)) {
+            throw new IllegalArgumentException("Resource type must be 'energy' or 'water'");
+        }
+        this.resourceType = resourceType;
+    }
+
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public String getUnit() {
+        return "energy".equals(resourceType) ? "kWh" : "litres";
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }

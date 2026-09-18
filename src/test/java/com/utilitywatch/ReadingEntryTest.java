@@ -4,14 +4,12 @@ import org.junit.jupiter.api.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ReadingEntryTest {
     private Reading reading;
-
 
     @BeforeEach
     void setUp() {
@@ -20,7 +18,6 @@ public class ReadingEntryTest {
 
     @Test
     void ShouldStoreEntryAsMap() {
-
         reading.setQuantity(3.0);
         reading.setDate(2026, 3, 10, 12, 4, 5);
 
@@ -30,7 +27,6 @@ public class ReadingEntryTest {
 
     @Test
     void ShouldStoreEntry() {
-
         List<Reading> readings = new ArrayList<>();
 
         reading.setQuantity(3.0);
@@ -42,5 +38,4 @@ public class ReadingEntryTest {
 
         assertEquals(readings.getFirst(), reading);
     }
-
 }

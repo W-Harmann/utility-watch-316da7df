@@ -1,12 +1,23 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.login.AuthenticationService;
+import com.utilitywatch.login.Session;
+
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class MainController {
 
     @FXML
     private Label contentLabel;
+
+    private final AuthenticationService authService = SharedAuth.getService();
 
     @FXML
     protected void onHomeClick() {
@@ -50,6 +61,13 @@ public class MainController {
 
     @FXML
     protected void onLogOutClick() {
-        contentLabel.setText("Log out");
+        authService.logOut(Session.getInstance().getCurrentUser());
+        try {
+            Stage stage = (Stage) contentLabel.getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource("/com/utilitywatch/login-view.fxml"));
+            stage.setScene(new Scene(root, 400, 400));
+        } catch (IOException e) {
+            contentLabel.setText("Couldn't load the login screen");
+        }
     }
 }

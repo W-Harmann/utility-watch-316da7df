@@ -33,8 +33,8 @@
 
         <Region HBox.hgrow="ALWAYS"/>
 
-        <Label text="Period:"/>
-        <Button text="Aug 1 - Sep 1, 2026" styleClass="period-button"/>
+        <!-- shows period picker -->
+        <fx:include source="period-picker.fxml" fx:id="periodPicker"/>
     </HBox>
 
     <!-- two side by side widgets -->

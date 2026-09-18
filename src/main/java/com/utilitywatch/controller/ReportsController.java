@@ -11,7 +11,11 @@ import java.util.List;
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
 
+
 public class ReportsController {
+    private java.time.LocalDate periodStart;
+    private java.time.LocalDate periodEnd;
+
     // display content
     @FXML
     private VBox overviewContentBox;
@@ -19,6 +23,8 @@ public class ReportsController {
     private Label comingSoonLabel;
     @FXML
     private VBox statisticsContentBox;
+    @FXML
+    private PeriodPickerController periodPickerController;
     // utility toggle buttons
     @FXML
     private ToggleButton energyToggle;
@@ -51,6 +57,11 @@ public class ReportsController {
                 (obs, oldToggle, newToggle) -> updateDistributionChartColour());
         // applies the correct chart style when the screen first loads
         updateDistributionChartColour();
+
+        // period start and end for period date picker
+        periodStart = periodPickerController.getStart();
+        periodEnd = periodPickerController.getEnd();
+        periodPickerController.setOnPeriodChanged(this::handlePeriodChanged);
     }
 
     // loads sample energy and water consumption data
@@ -77,6 +88,14 @@ public class ReportsController {
         consumptionChart.getData().addAll(energySeries, waterSeries);
     }
 
+    // called whenever the user picks a new from/to date in the period picker
+    private void handlePeriodChanged() {
+        periodStart = periodPickerController.getStart();
+        periodEnd = periodPickerController.getEnd();
+
+        // TODO: once database integration is implemented, refresh consumption chart / stats using periodStart/periodEnd
+        System.out.println("Reports period changed: " + periodStart + " to " + periodEnd);
+    }
 
     // sends user to the customise report screen
     @FXML

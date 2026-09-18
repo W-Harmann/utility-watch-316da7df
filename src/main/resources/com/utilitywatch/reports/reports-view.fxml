@@ -46,8 +46,8 @@
 
         <Region HBox.hgrow="ALWAYS"/>
 
-        <Label text="Period:"/>
-        <Button fx:id="periodButton" text="Aug 1 - Sep 1, 2026" styleClass="period-button"/>
+        <!-- shows period picker -->
+        <fx:include source="period-picker.fxml" fx:id="periodPicker"/>
     </HBox>
 
     <!-- report tab buttons - uses a toggle group so the active tab stays visually marked -->

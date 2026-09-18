@@ -3,7 +3,7 @@ package com.utilitywatch.login;
 import java.util.ArrayList;
 import java.util.List;
 
-// just a list in memory - good enough until real persistence is wired in
+// list in memory
 public class InMemoryUserDAO implements IUserDAO {
 
     private final List<User> users = new ArrayList<>();

@@ -20,6 +20,7 @@ import java.nio.file.Files;
 public class ReadingsController {
 
     @FXML private DatePicker datePicker;
+    @FXML private ComboBox<String> resourceTypeBox;
     @FXML private TextField quantityField;
     @FXML private Label errorLabel;
     @FXML private Label importResultLabel;
@@ -38,6 +39,8 @@ public class ReadingsController {
         User currentUser = Session.getInstance().getCurrentUser();
         currentUserId = currentUser.getId();
 
+        resourceTypeBox.setItems(FXCollections.observableArrayList("energy", "water"));
+
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("dateTime"));
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         resourceTypeColumn.setCellValueFactory(new PropertyValueFactory<>("resourceType"));
@@ -51,15 +54,20 @@ public class ReadingsController {
             if (datePicker.getValue() == null) {
                 throw new IllegalArgumentException("Date is required");
             }
+            if (resourceTypeBox.getValue() == null) {
+                throw new IllegalArgumentException("Type is required");
+            }
             double quantity = Double.parseDouble(quantityField.getText());
 
             Reading reading = new Reading(datePicker.getValue().atStartOfDay(), quantity);
+            reading.setResourceType(resourceTypeBox.getValue());
             reading.setUserId(currentUserId);
             readingDAO.insert(reading);
 
             errorLabel.setText("");
             quantityField.clear();
             datePicker.setValue(null);
+            resourceTypeBox.setValue(null);
             refreshTable();
         } catch (NumberFormatException e) {
             errorLabel.setText("Quantity must be a number");

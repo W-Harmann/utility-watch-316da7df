@@ -1,9 +1,9 @@
 package com.utilitywatch.database;
 
+import com.utilitywatch.Reading;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,18 +22,15 @@ public class DatabasePersistenceTest {
         readingDAO.close();
     }
 
-
     @Test
     void ShouldStoreInsertedValue() {
-        readingDAO.insert(new reading(LocalDateTime.of(2026, 3, 10, 12, 4, 5), 3.0));
+        readingDAO.insert(new Reading(LocalDateTime.of(2026, 3, 10, 12, 4, 5), 3.0));
         readingDAO.close();
 
         readingDAO = new ReadingDAO();
         Reading reading = readingDAO.getLastReading();
 
-        HashMap<LocalDateTime, Double> entry = new HashMap<>();
-        entry.put(LocalDateTime.of(2026, 3, 10, 12, 4, 5), 3.0);
-
-        assertEquals(entry, reading.toString());
+        assertEquals(LocalDateTime.of(2026, 3, 10, 12, 4, 5), reading.getDateTime());
+        assertEquals(3.0, reading.getQuantity());
     }
 }

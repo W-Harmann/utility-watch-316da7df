@@ -79,6 +79,13 @@
     -fx-border-radius: 4;
 }
 
+.flag-navigation-button {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4;
+    -fx-font-size: 20px;
+}
+
 .report-tab-button {
     -fx-background-color: transparent;
     -fx-text-fill: #333333;
@@ -158,19 +165,45 @@
 }
 
 /* energy series line and data point for graph */
-.default-color0.chart-series-line {
+#consumptionChart .default-color0.chart-series-line {
     -fx-stroke: #FFBA4A;
 }
-.default-color0.chart-line-symbol {
+#consumptionChart .default-color0.chart-line-symbol {
     -fx-background-color: #FFBA4A, white;
 }
 
 /* water series line and data point for graph */
-.default-color1.chart-series-line {
+#consumptionChart .default-color1.chart-series-line {
     -fx-stroke: #5FB2F5;
 }
-.default-color1.chart-line-symbol {
+#consumptionChart .default-color1.chart-line-symbol {
     -fx-background-color: #5FB2F5, white;
+}
+
+/* line colour for the unusual consumption chart based on selected utility toggle */
+#unusualConsumptionChart.energy-selected .default-color0.chart-series-line {
+    -fx-stroke: #FFBA4A;
+}
+#unusualConsumptionChart.energy-selected .default-color0.chart-line-symbol {
+    -fx-background-color: #FFBA4A, white;
+}
+#unusualConsumptionChart.water-selected .default-color0.chart-series-line {
+    -fx-stroke: #5FB2F5;
+}
+#unusualConsumptionChart.water-selected .default-color0.chart-line-symbol {
+    -fx-background-color: #5FB2F5, white;
+}
+#unusualConsumptionChart.both-selected .default-color0.chart-series-line {
+    -fx-stroke: #263238;
+}
+#unusualConsumptionChart.both-selected .default-color0.chart-line-symbol {
+    -fx-background-color: #263238, white;
+}
+#unusualConsumptionChart .default-color1.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color1.chart-line-symbol {
+    -fx-background-color: #CB0E11, white;
 }
 
 /* bar colour for the statistics distribution chart based on selected utility toggle */

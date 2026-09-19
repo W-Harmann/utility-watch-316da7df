@@ -42,3 +42,160 @@
 .label {
     -fx-text-fill: #1e2a3a;
 }
+
+.reports-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.generate-report-button {
+    -fx-background-color: #139907;
+    -fx-text-fill: white;
+}
+
+.utility-toggle {
+    -fx-background-color: #eeeeee;
+    -fx-text-fill: #333333;
+}
+
+.both-toggle:selected {
+    -fx-background-color: #263238;
+    -fx-text-fill: white;
+}
+
+.energy-toggle:selected {
+    -fx-background-color: #FFBA4A;
+    -fx-text-fill: black;
+}
+
+.water-toggle:selected {
+    -fx-background-color: #5FB2F5;
+    -fx-text-fill: black;
+}
+
+.period-button {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4;
+}
+
+.report-tab-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.report-tab-button:hover {
+    -fx-background-color: #556671;
+    -fx-text-fill: white;
+}
+
+.report-tab-button:selected {
+    -fx-background-color: #263238;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-underline: true;
+    -fx-background-radius: 6 6 0 0;
+
+}
+
+.report-tabs-row {
+    -fx-border-color: transparent transparent #556671 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+.report-info-box {
+    -fx-background-color: #263238;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.report-info-box .label {
+    -fx-text-fill: white;
+}
+
+.report-info-box-title {
+    -fx-font-weight: bold;
+}
+
+.report-info-box-subtitle {
+    -fx-font-weight: bold;
+    -fx-padding: 6 0 0 0;
+}
+
+.report-info-box .energy-column-header {
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFBA4A;
+}
+
+.report-info-box .water-column-header {
+    -fx-font-weight: bold;
+    -fx-text-fill: #5FB2F5;
+}
+
+.cancel-button {
+    -fx-background-color: #CB0E11;
+    -fx-text-fill: white;
+}
+
+.report-note {
+    -fx-text-fill: #cccccc;
+    -fx-font-size: 11px;
+}
+
+.report-info-box .check-box {
+    -fx-text-fill: white;
+}
+
+.stat-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.chart-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* energy series line and data point for graph */
+.default-color0.chart-series-line {
+    -fx-stroke: #FFBA4A;
+}
+.default-color0.chart-line-symbol {
+    -fx-background-color: #FFBA4A, white;
+}
+
+/* water series line and data point for graph */
+.default-color1.chart-series-line {
+    -fx-stroke: #5FB2F5;
+}
+.default-color1.chart-line-symbol {
+    -fx-background-color: #5FB2F5, white;
+}
+
+/* bar colour for the statistics distribution chart based on selected utility toggle */
+.energy-selected .chart-bar {
+    -fx-bar-fill: #FFBA4A;
+}
+
+.water-selected .chart-bar {
+    -fx-bar-fill: #5FB2F5;
+}
+
+.both-selected .chart-bar {
+    -fx-bar-fill: #263238;
+}
+.form-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.primary-button {
+    -fx-background-color: #263238;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+}
+
+.error-label {
+    -fx-text-fill: #d32f2f;
+}

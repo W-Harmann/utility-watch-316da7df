@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.utilitywatch.controller.GoalsController"
+      styleClass="reports-root"
+      VBox.vgrow="ALWAYS"
+      maxHeight="Infinity">
+    <padding>
+        <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+    </padding>
+
+    <!-- title and generate report button -->
+    <HBox alignment="CENTER_LEFT" spacing="10.0">
+        <Label text="Goals and Progress" styleClass="reports-title"/>
+        <Region/>
+        <HBox>
+            <TextField fx:id="titleField" prefWidth="100.0" promptText="Title"/>
+            <TextField fx:id="targetField" prefWidth="100.0" promptText="Target"/>
+            <TextField fx:id="periodField" prefWidth="100.0" promptText="Period"/>
+            <Button text="Create New Goal" styleClass="generate-report-button" onAction="#onCreateNewGoalClick"/>
+        </HBox>
+
+    </HBox>
+
+    <!-- report tab buttons - uses a toggle group so the active tab stays visually marked -->
+    <!-- outer HBox stops the tab row and its underline from stretching to the full width -->
+    <HBox>
+        <HBox spacing="15.0" styleClass="report-tabs-row">
+            <fx:define>
+                <ToggleGroup fx:id="GoalsToggleGroup"/>
+            </fx:define>
+
+            <ToggleButton text="Active" styleClass="report-tab-button" toggleGroup="$GoalsToggleGroup" selected="true" onAction="#onActiveGoalsClick"/>
+            <ToggleButton text="Completed" styleClass="report-tab-button" toggleGroup="$GoalsToggleGroup" onAction="#onCompletedGoalsClick"/>
+        </HBox>
+    </HBox>
+
+    <!-- ACTIVE GOAL CONTENT TAB content -->
+    <VBox fx:id="activeGoalContentBox" spacing="15.0" VBox.vgrow="ALWAYS">
+        <Label text="Active" styleClass="reports-title"/>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
+            <VBox fx:id="goalContainer" spacing="10.0" styleClass="report-info-box" />
+        </ScrollPane>
+    </VBox>
+
+    <!-- COMPLETED GOAL CONTENT TAB content -->
+    <VBox fx:id="completedGoalContentBox" spacing="15.0" VBox.vgrow="ALWAYS" visible="false" managed="false">
+        <Label text="Completed" styleClass="reports-title"/>
+    </VBox>
+
+
+    <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+        <Button fx:id="conservationMenu" text="Learn How to Begin Conserving!" styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity"/>
+    </VBox>
+
+</VBox>

@@ -13,10 +13,10 @@ import java.util.Set;
  */
 public abstract class ReadingEvaluator {
 
-    public static final String POWER = "power";
+    public static final String ENERGY  = "energy";
     public static final String WATER = "water";
     public static final String BOTH = "both";
-    protected static final Set<String> UTILITIES = Set.of(POWER, WATER);
+    protected static final Set<String> UTILITIES = Set.of(ENERGY, WATER);
 
     private List<Reading> readings = new ArrayList<>();
     private LocalDateTime fromDate;
@@ -56,9 +56,9 @@ public abstract class ReadingEvaluator {
         }
         BigDecimal total = BigDecimal.ZERO;
         for (Reading reading : readings) {
-            if (reading.utility().equals(utility) && isInRange(reading.timestamp())) {
+            if (utility.equals(reading.getResourceType()) && isInRange(reading.getDateTime())) {
                 // BigDecimal.valueOf(double) uses the shortest decimal form, so 2.7 becomes exactly 2.7
-                total = total.add(BigDecimal.valueOf(reading.amount()));
+                total = total.add(BigDecimal.valueOf(reading.getQuantity()));
             }
         }
         return total;
@@ -71,10 +71,10 @@ public abstract class ReadingEvaluator {
         return !time.isBefore(fromDate) && !time.isAfter(toDate);
     }
 
-    /** Turns "power", "water" or "both" into the list of utilities to include. */
+    /** Turns "energy", "water" or "both" into the list of utilities to include. */
     protected static List<String> resolveSelection(String selection) {
         if (BOTH.equals(selection)) {
-            return List.of(POWER, WATER);
+            return List.of(ENERGY, WATER);
         }
         requireKnownUtility(selection);
         return List.of(selection);

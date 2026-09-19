@@ -118,11 +118,11 @@ public class CostBudgetEvaluatorTest {
     void shouldStoreInputPositivePower() {
 
         // assuming 1 kWh = 2.5 dollars
-        evaluator.setUtilityCost("power", 2.5);
+        evaluator.setUtilityCost("energy", 2.5);
 
         assertEquals(
                 2.5,
-                evaluator.getUtilityCost("power")
+                evaluator.getUtilityCost("energy")
         );
     }
 
@@ -144,12 +144,12 @@ public class CostBudgetEvaluatorTest {
     @Test
     void shouldNotStoreInputNegativePower() {
 
-        evaluator.setUtilityCost("power", 1);
-        evaluator.setUtilityCost("power", -2.5);
+        evaluator.setUtilityCost("energy", 1);
+        evaluator.setUtilityCost("energy", -2.5);
 
         assertEquals(
                 1,
-                evaluator.getUtilityCost("power")
+                evaluator.getUtilityCost("energy")
         );
     }
 
@@ -174,10 +174,10 @@ public class CostBudgetEvaluatorTest {
         // init expected data
         List<Reading> readings = new ArrayList<>();
 
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 3, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 3, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 8, 10, 0, 0), 4, "water"));
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 5, "power"));
-        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 3, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 5, "energy"));
+        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 3, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 9, 3, 0, 0), 2, "water"));
 
         // store to class
@@ -203,10 +203,10 @@ public class CostBudgetEvaluatorTest {
 
         List<Reading> readings = new ArrayList<>();
 
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 3, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 3, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 8, 10, 0, 0), 4, "water"));
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 5, "power"));
-        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 3, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 5, "energy"));
+        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 3, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 9, 3, 0, 0), 2, "water"));
 
         // store to class
@@ -214,12 +214,12 @@ public class CostBudgetEvaluatorTest {
         evaluator.setTimeRange(fromDate, toDate);
 
         // assuming 1 kWh = 2.5 dollars
-        evaluator.setUtilityCost("power", 2.5);
+        evaluator.setUtilityCost("energy", 2.5);
 
         // Inclusive Power Reading (3 + 5 + 3) * Cost (2.5) = 27.5
         assertEquals(
                 27.5,
-                evaluator.calculateUtilityCost("power")
+                evaluator.calculateUtilityCost("energy")
         );
     }
 
@@ -231,10 +231,10 @@ public class CostBudgetEvaluatorTest {
 
         List<Reading> readings = new ArrayList<>();
 
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 3, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 3, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 8, 10, 0, 0), 4, "water"));
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 5, "power"));
-        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 3, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 5, "energy"));
+        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 3, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 9, 3, 0, 0), 2, "water"));
 
         // store to class
@@ -259,10 +259,10 @@ public class CostBudgetEvaluatorTest {
 
         List<Reading> readings = new ArrayList<>();
 
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 3, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 3, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 8, 10, 0, 0), 4, "water"));
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 5, "power"));
-        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 3, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 5, "energy"));
+        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 3, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 9, 3, 0, 0), 2, "water"));
 
         // store to class
@@ -270,7 +270,7 @@ public class CostBudgetEvaluatorTest {
         evaluator.setTimeRange(fromDate, toDate);
 
         // assuming costs
-        evaluator.setUtilityCost("power", 2.5);
+        evaluator.setUtilityCost("energy", 2.5);
         evaluator.setUtilityCost("water", 1.5);
 
         // Inclusive Power Reading (3 + 5 + 3) * Cost (2.5) = 27.5
@@ -290,10 +290,10 @@ public class CostBudgetEvaluatorTest {
 
         List<Reading> readings = new ArrayList<>();
 
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 1.01, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 1.01, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 8, 10, 0, 0), 4, "water"));
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 2.7, "power"));
-        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 9.17, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 2.7, "energy"));
+        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 9.17, "energy"));
         readings.add(new Reading(LocalDateTime.of(2026, 9, 3, 0, 0), 2, "water"));
 
         // store to class
@@ -301,13 +301,13 @@ public class CostBudgetEvaluatorTest {
         evaluator.setTimeRange(fromDate, toDate);
 
         // assuming costs
-        evaluator.setUtilityCost("power", 9.36);
+        evaluator.setUtilityCost("energy", 9.36);
 
         // Inclusive Power Reading (1.01 + 2.7 + 9.17) * Cost (9.36) = 120.5568
         // Rounded to 2 decimal places: 120.5568 -> 120.56
         assertEquals(
                 120.56,
-                evaluator.calculateUtilityCost("power")
+                evaluator.calculateUtilityCost("energy")
         );
     }
 

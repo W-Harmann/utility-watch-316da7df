@@ -281,19 +281,19 @@ public class ReportsController {
         switch (ViewSelected) {
             case "Annual" -> {
                 x_axis = list_months;
+                //fixme: November in Annual doesn't show in the x_axis key
             }
             case "Semester" -> {
                 if (PeriodSelected == null) { return; } //Ignore Spam Requests (from app)
-                //fixme: PeriodSelected is the start of the ListIDX, so set it to where the months start for that sem..mester
-                x_axis = new ArrayList<>(list_months.subList(Integer.parseInt(PeriodSelected), list_months.size()/2)); // Seperate Months into Semester
+                x_axis = new ArrayList<>(list_months.subList((list_months.size()/2) * (Integer.parseInt(PeriodSelected)-1), (list_months.size()/2) * (Integer.parseInt(PeriodSelected)))); // Seperate Months into Semester
             }
             case "Trimester" -> {
                 if (PeriodSelected == null) { return; }
-                x_axis = new ArrayList<>(list_months.subList(Integer.parseInt(PeriodSelected), list_months.size()/3));
+                x_axis = new ArrayList<>(list_months.subList((list_months.size()/3) * (Integer.parseInt(PeriodSelected)-1), (list_months.size()/3) * (Integer.parseInt(PeriodSelected))));
             }
             case "Quarter" -> {
                 if (PeriodSelected == null) { return; }
-                x_axis = new ArrayList<>(list_months.subList(Integer.parseInt(PeriodSelected), list_months.size()/4));
+                x_axis = new ArrayList<>(list_months.subList((list_months.size()/4) * (Integer.parseInt(PeriodSelected)-1), (list_months.size()/4) * (Integer.parseInt(PeriodSelected))));
             }
             case "Month" -> {
                 if (PeriodSelected == null) { return; }
@@ -318,7 +318,7 @@ public class ReportsController {
         }
 
         //fixme: debug, remove in final
-        System.out.println("View: " + ViewSelected + "\t\tYear: " + YearSelected + "\t\tPeriod: " + PeriodSelected);
+//        System.out.println("View: " + ViewSelected + "\t\tYear: " + YearSelected + "\t\tPeriod: " + PeriodSelected);
 
         //fixme: Insert values from Reading on-to graph
         // current values are placeholders

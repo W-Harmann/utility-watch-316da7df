@@ -148,7 +148,7 @@
 }
 
 .stat-value {
-    -fx-font-size: 20px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
 
@@ -185,6 +185,7 @@
 .both-selected .chart-bar {
     -fx-bar-fill: #263238;
 }
+
 .form-title {
     -fx-font-size: 20px;
     -fx-font-weight: bold;

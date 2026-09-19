@@ -78,9 +78,7 @@ public class MainController {
     }
 
     @FXML
-    protected void onGoalsClick() {
-        showLabel("Goals");
-    }
+    protected void onGoalsClick() { loadScreen("/com/utilitywatch/goals-view.fxml"); }
 
     @FXML
     protected void onCostsClick() {

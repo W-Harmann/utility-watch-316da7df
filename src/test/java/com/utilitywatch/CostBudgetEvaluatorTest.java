@@ -3,14 +3,12 @@ package com.utilitywatch;
 // US9.1 - As a homeowner I wish to track my utility usage so that I can understand consumption habits into actual dollars spent.
 //      [x] User can select either utility or both
 //      [x] The user can set a time range to measure cost in a range.
-//      [?] User can track there(their) estimated cost against there(their) set allocated budget for utilities.
-//      [?] User can see the estimated cost of period based off inputted rates.
+//      [x] User can track there(their) estimated cost against there(their) set allocated budget for utilities.
+//      [x] User can see the estimated cost of period based off inputted rates.
 //      [x] Rates can be inputted and changed.
 //      [x] Money is calculated and stored without floating-point rounding error, and figures always display to two decimal places.
 //      [x] Negative numbers aren’t accepted.
 //
-// Notes: Missing from push => Estimated Cost of Period (TimeRange) Test. Similarly to US 10 and 11 tests.
-//                             Unsure of how to express this calculation.
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -310,5 +308,113 @@ public class CostBudgetEvaluatorTest {
                 evaluator.calculateUtilityCost("energy")
         );
     }
+
+
+    //
+    // Criteria: User can track their estimated cost against their set allocated budget for utilities.
+    //
+
+    // Sample data: energy (3 + 5 + 3) * 2.5 = 27.50, water (4) * 1.5 = 6.00 -> 33.50 spent in August
+    private void setUpAugustSpending() {
+        List<Reading> readings = new ArrayList<>();
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 3, "energy"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 10, 0, 0), 4, "water"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 5, "energy"));
+        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 3, "energy"));
+        readings.add(new Reading(LocalDateTime.of(2026, 9, 3, 0, 0), 2, "water"));
+
+        evaluator.setReadings(readings);
+        evaluator.setTimeRange(LocalDateTime.of(2026, 8, 1, 0, 0), LocalDateTime.of(2026, 9, 1, 0, 0));
+        evaluator.setUtilityCost("energy", 2.5);
+        evaluator.setUtilityCost("water", 1.5);
+    }
+
+    // Percentage of budget used
+
+    @Test
+    void shouldCalculateBudgetPercentageWhenUnderBudget() {
+        setUpAugustSpending();
+        evaluator.setMonthlyBudget(50);
+
+        // 33.50 / 50.00 = 67%
+        assertEquals(67.0, evaluator.getBudgetUsedPercentage());
+    }
+
+    @Test
+    void shouldCalculateBudgetPercentageWhenExactlyOnBudget() {
+        setUpAugustSpending();
+        evaluator.setMonthlyBudget(33.5);
+
+        assertEquals(100.0, evaluator.getBudgetUsedPercentage());
+    }
+
+    @Test
+    void shouldCalculateBudgetPercentageAboveHundredWhenOverBudget() {
+        setUpAugustSpending();
+        evaluator.setMonthlyBudget(30);
+
+        // 33.50 / 30.00 = 111.666...% -> 111.67% (the UI caps the bar, the evaluator reports the true figure)
+        assertEquals(111.67, evaluator.getBudgetUsedPercentage());
+    }
+
+    // Amount remaining
+
+    @Test
+    void shouldCalculateBudgetRemainingWhenUnderBudget() {
+        setUpAugustSpending();
+        evaluator.setMonthlyBudget(50);
+
+        // 50.00 - 33.50 = 16.50
+        assertEquals(16.5, evaluator.getBudgetRemaining());
+    }
+
+    @Test
+    void shouldReturnZeroRemainingWhenOverBudget() {
+        setUpAugustSpending();
+        evaluator.setMonthlyBudget(30);
+
+        // never negative - isOverBudget() covers this case
+        assertEquals(0.0, evaluator.getBudgetRemaining());
+    }
+
+    // Over budget
+
+    @Test
+    void shouldNotBeOverBudgetWhenUnderBudget() {
+        setUpAugustSpending();
+        evaluator.setMonthlyBudget(50);
+
+        assertFalse(evaluator.isOverBudget());
+    }
+
+    @Test
+    void shouldNotBeOverBudgetWhenExactlyOnBudget() {
+        setUpAugustSpending();
+        evaluator.setMonthlyBudget(33.5);
+
+        // reaching the limit is not going over it
+        assertFalse(evaluator.isOverBudget());
+    }
+
+    @Test
+    void shouldBeOverBudgetWhenSpendingExceedsBudget() {
+        setUpAugustSpending();
+        evaluator.setMonthlyBudget(30);
+
+        assertTrue(evaluator.isOverBudget());
+    }
+
+    // No budget set
+
+    @Test
+    void shouldHandleNoBudgetSetWithoutDividingByZero() {
+        setUpAugustSpending();
+        evaluator.setMonthlyBudget(0);
+
+        assertEquals(0.0, evaluator.getBudgetUsedPercentage());
+        assertEquals(0.0, evaluator.getBudgetRemaining());
+        assertFalse(evaluator.isOverBudget());
+    }
+
 
 }

@@ -18,6 +18,11 @@ public class Reading {
         setQuantity(quantity);
     }
 
+    public Reading(LocalDateTime dateTime, double quantity, String resourceType) {
+        this(dateTime, quantity);
+        setResourceType(resourceType);
+    }
+
     public void setQuantity(Object value) {
         if (!(value instanceof Number)) {
             throw new IllegalArgumentException("Quantity must be a number");

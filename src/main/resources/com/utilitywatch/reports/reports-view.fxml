@@ -139,7 +139,7 @@
             </VBox>
 
             <!-- unusual patterns table (row 2 column 2) -->
-            <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1" >
                 <Label text="Unusual Patterns Detected" styleClass="report-info-box-title"/>
 
                 <GridPane hgap="15.0" vgap="12.0">

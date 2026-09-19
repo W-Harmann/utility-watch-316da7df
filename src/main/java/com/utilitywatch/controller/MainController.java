@@ -78,24 +78,16 @@ public class MainController {
     }
 
     @FXML
-    protected void onGoalsClick() {
-        showLabel("Goals");
-    }
+    protected void onGoalsClick() { loadScreen("/com/utilitywatch/goals-view.fxml"); }
 
     @FXML
-    protected void onCostsClick() {
-        showLabel("Costs");
-    }
+    protected void onCostsClick() { loadScreen("/com/utilitywatch/costs-view.fxml"); }
 
     @FXML
-    protected void onImpactClick() {
-        showLabel("Impact");
-    }
+    protected void onImpactClick() { loadScreen("/com/utilitywatch/impact-view.fxml"); }
 
     @FXML
-    protected void onAlertsClick() {
-        showLabel("Alerts");
-    }
+    protected void onAlertsClick() { loadScreen("/com/utilitywatch/alerts-view.fxml"); }
 
     @FXML
     protected void onSettingsClick() {

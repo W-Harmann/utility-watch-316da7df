@@ -1,5 +1,13 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.Reading;
+import com.utilitywatch.consumptionDetector.ActiveHoursDetector;
+import com.utilitywatch.consumptionDetector.LongDurationDetector;
+import com.utilitywatch.consumptionDetector.SpikeDetector;
+import com.utilitywatch.consumptionDetector.UnusualConsumptionDetector;
+import com.utilitywatch.database.ReadingDAO;
+import com.utilitywatch.login.Session;
+import com.utilitywatch.login.User;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
@@ -8,8 +16,12 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
 
@@ -47,10 +59,12 @@ public class ReportsController {
         this.mainController = mainController;
     }
 
+    private final ReadingDAO readingDAO = SharedReadingDAO.getDAO();
+
     @FXML
     public void initialize() {
         loadMockChartData();
-        loadMockUnusualConsumptionData();
+        loadUnusualConsumptionData();
         loadMockDistributionData();
 
         // updates the chart style whenever the utility toggle changes
@@ -85,34 +99,55 @@ public class ReportsController {
     }
 
     // loads sample unusual consumption data
-    private void loadMockUnusualConsumptionData() {
+    private void loadUnusualConsumptionData() {
         // prevents duplicate data from being added to the chart
         if (!unusualConsumptionChart.getData().isEmpty()) {
             return;
         }
+        User currentUser = Session.getInstance().getCurrentUser();
+        int currentUserId = currentUser.getId();
 
-        List<String> days = new ArrayList<>();
-        for(int count = 1; count <= 31; count++){
-            days.add("Aug " + count);
-        }
+        List<Reading> readings = readingDAO.getReadingsForUser(currentUserId);
 
-        days.add("Sep 1");
+        // For the dates to be in ascending order
+        Collections.reverse(readings);
 
-        List<Double> values = List.of(15.0, 16.0, 18.0, 15.3, 16.2, 19.4, 15.6, 20.0, 19.5, 18.6, 18.3, 16.0, 17.4, 16.7, 18.2, 18.4, 18.4, 17.0, 19.2, 17.4, 13.5, 11.2, 12.3, 16.3, 17.4, 15.7, 16.6, 18.0, 18.6, 16.0, 17.4, 17.0);
-
-        List<String> flaggedDays = List.of("Aug 21", "Aug 22", "Aug 23");
-        List<Double> flaggedValues = List.of(13.5, 11.2, 12.3);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
 
         // creates the energy consumption data series and adds each energy value to its date
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        for (int day = 0; day < days.size(); day++) {
-            series.getData().add(new XYChart.Data<>(days.get(day), values.get(day)));
-        }
 
-        // creates the water consumption data series and adds each water value to its date
         XYChart.Series<String, Number> flaggedSeries = new XYChart.Series<>();
-        for (int day = 0; day < flaggedValues.size(); day++) {
-            flaggedSeries.getData().add(new XYChart.Data<>(flaggedDays.get(day), flaggedValues.get(day)));
+
+        //TODO remove magic numbers
+
+        ///ActiveHoursDetector activeHoursDetector = new ActiveHoursDetector(LocalTime.of(6,0), LocalTime.of(23, 0));
+        //LongDurationDetector longDurationDetector = new LongDurationDetector(18.0, 72);
+        ///SpikeDetector spikeDetector = new SpikeDetector(3.0, 3);
+        UnusualConsumptionDetector unusualConsumptionDetector = new UnusualConsumptionDetector();
+
+        //A week of data assuming each entry is seperated by a day
+        int limit = 7;
+        int count = 0;
+        List<Double> weeklyReadings;
+
+        for (Reading reading : readings) {
+            // TODO make section consider different value based on toggled utility
+            if (Objects.equals(reading.getUnit(), "kWh")) {
+                weeklyReadings = new ArrayList<>();
+                if (count != 0) {
+                    for (int i = count - 1; i >= Math.max(0, count - limit); i--) {
+                        weeklyReadings.add(readings.get(i).getQuantity());
+                    }
+                    if (unusualConsumptionDetector.isUnusual(reading.getQuantity(), weeklyReadings)) {
+                        flaggedSeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+                    }
+                }
+
+                series.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+                count++;
+            }
+
         }
 
         // adds both data series to the consumption chart
@@ -171,7 +206,7 @@ public class ReportsController {
         hideAllTabContent();
         unusualPatternsContentBox.setVisible(true);
         unusualPatternsContentBox.setManaged(true);
-        loadMockUnusualConsumptionData();
+        loadUnusualConsumptionData();
 
         // refreshes the unusual consumption chart layout after the content becomes visible
         Platform.runLater(unusualConsumptionChart::requestLayout);

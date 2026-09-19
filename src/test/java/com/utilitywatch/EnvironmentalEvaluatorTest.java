@@ -14,6 +14,7 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class EnvironmentalEvaluatorTest {
 
@@ -44,7 +45,7 @@ public class EnvironmentalEvaluatorTest {
 
         evaluator.setReadings(readings);
 
-        assertArrayEquals(
+        assertEquals(
                 readings,
                 evaluator.getReadings()
         );
@@ -65,7 +66,7 @@ public class EnvironmentalEvaluatorTest {
 
         List<LocalDateTime> ActualTimeRange = evaluator.getTimeRange();
 
-        assertArrayEquals(
+        assertEquals(
                 ExpectedTimeRange,
                 ActualTimeRange
         );

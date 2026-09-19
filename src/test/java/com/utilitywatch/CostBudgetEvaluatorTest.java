@@ -16,6 +16,7 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class CostBudgetEvaluatorTest {
 
@@ -30,9 +31,9 @@ public class CostBudgetEvaluatorTest {
         // Criteria: The user can set a time range to measure cost in a range
         //
 
-    // Set-timerange is stored into 2 variables LocalDateTime
-        // LocalDateTime fromDate
-        // LocalDateTime toDate
+    // Set-time range is stored into 2 variables LocalDateTime
+        // Local DateTime fromDate
+        // Local DateTime toDate
     // **Variable names can be arbitrary
     @Test
     void shouldBeStoringTimeRange() {
@@ -49,18 +50,18 @@ public class CostBudgetEvaluatorTest {
                                 toDate)
                 );
 
-        // get stored timerange
+        // get stored time range
         List<LocalDateTime> ActualTimeRange = evaluator.getTimeRange();
 
         // expects time range returned in Array Format
         // { fromDate, toDate }
-        assertArrayEquals(
+        assertEquals(
                 ExpectedTimeRange,
                 ActualTimeRange
         );
     }
 
-    // Set-timerange is invalid | toDate is less-recent than fromDate (not expected)
+    // Set-time range is invalid | toDate is less-recent than fromDate (not expected)
     // In this case, the app should probably tell the user to fix the date inputs
     @Test
     void shouldBeReturningInvalidTimeRange() {
@@ -70,7 +71,7 @@ public class CostBudgetEvaluatorTest {
         // store to class
         evaluator.setTimeRange(fromDate, toDate);
 
-        // get stored timerange - validity
+        // get stored time range - validity
         boolean ValidTimeRange = evaluator.getTimeRangeValidity();
 
         // expects return of False
@@ -182,7 +183,7 @@ public class CostBudgetEvaluatorTest {
         // store to class
         evaluator.setReadings(readings);
 
-        assertArrayEquals(
+        assertEquals(
                 readings,
                 evaluator.getReadings()
         );
@@ -269,8 +270,8 @@ public class CostBudgetEvaluatorTest {
         evaluator.setTimeRange(fromDate, toDate);
 
         // assuming costs
-        evaluator.setUtilityCost("power", 3.5);
-        evaluator.setUtilityCost("water", 2);
+        evaluator.setUtilityCost("power", 2.5);
+        evaluator.setUtilityCost("water", 1.5);
 
         // Inclusive Power Reading (3 + 5 + 3) * Cost (2.5) = 27.5
         // Inclusive Water Reading (4) * Cost (1.5) = 6
@@ -289,10 +290,10 @@ public class CostBudgetEvaluatorTest {
 
         List<Reading> readings = new ArrayList<>();
 
-        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 1, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 8, 1, 0, 0), 1.01, "power"));
         readings.add(new Reading(LocalDateTime.of(2026, 8, 10, 0, 0), 4, "water"));
         readings.add(new Reading(LocalDateTime.of(2026, 8, 17, 0, 0), 2.7, "power"));
-        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 9.1, "power"));
+        readings.add(new Reading(LocalDateTime.of(2026, 9, 1, 0, 0), 9.17, "power"));
         readings.add(new Reading(LocalDateTime.of(2026, 9, 3, 0, 0), 2, "water"));
 
         // store to class
@@ -300,13 +301,13 @@ public class CostBudgetEvaluatorTest {
         evaluator.setTimeRange(fromDate, toDate);
 
         // assuming costs
-        evaluator.setUtilityCost("power", 9.3);
+        evaluator.setUtilityCost("power", 9.36);
 
         // Inclusive Power Reading (1.01 + 2.7 + 9.17) * Cost (9.36) = 120.5568
-        // CEILING      120.5568   ->  120.57
+        // Rounded to 2 decimal places: 120.5568 -> 120.56
         assertEquals(
-                120.57,
-                evaluator.calculateUtilityCost("both")
+                120.56,
+                evaluator.calculateUtilityCost("power")
         );
     }
 

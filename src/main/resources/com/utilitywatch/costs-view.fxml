@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- US9.1 / US11.1 - Costs page -->
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.utilitywatch.controller.CostsController"
+            fitToWidth="true" hbarPolicy="NEVER"
+            styleClass="page-scroll">
+    <content>
+        <VBox spacing="14">
+
+            <fx:define>
+                <ToggleGroup fx:id="utilityGroup"/>
+            </fx:define>
+
+            <!-- Title and export -->
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Costs" styleClass="form-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Export Report" styleClass="generate-report-button" onAction="#onExportClick"/>
+            </HBox>
+
+            <!-- Utility and period -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Utility:"/>
+                <HBox>
+                    <ToggleButton text="Energy" userData="energy" toggleGroup="$utilityGroup" styleClass="utility-toggle, energy-toggle"/>
+                    <ToggleButton text="Water" userData="water" toggleGroup="$utilityGroup" styleClass="utility-toggle, water-toggle"/>
+                    <ToggleButton fx:id="bothToggle" text="Both" userData="both" toggleGroup="$utilityGroup" styleClass="utility-toggle, both-toggle"/>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="Period:"/>
+                <DatePicker fx:id="fromDatePicker" prefWidth="130"/>
+                <Label text="–"/>
+                <DatePicker fx:id="toDatePicker" prefWidth="130"/>
+            </HBox>
+
+            <Label fx:id="errorLabel" styleClass="error-label"/>
+            <Label fx:id="exportResultLabel" wrapText="true"/>
+
+            <!-- Estimated cost and by-utility cards -->
+            <HBox spacing="14">
+                <VBox styleClass="report-info-box" spacing="8" HBox.hgrow="ALWAYS" prefWidth="300" maxWidth="Infinity">
+                    <Label text="Estimated Cost this Period" styleClass="report-info-box-title"/>
+                    <Label fx:id="totalCostLabel" styleClass="stat-value"/>
+                    <Label fx:id="periodSummaryLabel" styleClass="report-note"/>
+                </VBox>
+
+                <VBox styleClass="report-info-box" spacing="10" HBox.hgrow="ALWAYS" prefWidth="300" maxWidth="Infinity">
+                    <Label text="By Utility" styleClass="report-info-box-title"/>
+                    <VBox fx:id="energyRow" spacing="4">
+                        <HBox>
+                            <Label text="Electricity"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="energyCostLabel" styleClass="energy-column-header"/>
+                        </HBox>
+                        <ProgressBar fx:id="energyBar" progress="0" maxWidth="Infinity" styleClass="energy-bar"/>
+                    </VBox>
+                    <VBox fx:id="waterRow" spacing="4">
+                        <HBox>
+                            <Label text="Water"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="waterCostLabel" styleClass="water-column-header"/>
+                        </HBox>
+                        <ProgressBar fx:id="waterBar" progress="0" maxWidth="Infinity" styleClass="water-bar"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+
+            <!-- Monthly budget card -->
+            <VBox styleClass="report-info-box" spacing="8">
+                <HBox alignment="CENTER_LEFT">
+                    <VBox spacing="2">
+                        <Label text="Monthly Budget" styleClass="report-info-box-title"/>
+                        <Label fx:id="budgetSubtitleLabel" styleClass="report-note"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="budgetSpentLabel" styleClass="report-info-box-title"/>
+                </HBox>
+                <ProgressBar fx:id="budgetBar" progress="0" maxWidth="Infinity" styleClass="budget-bar"/>
+                <Label fx:id="budgetStatusLabel" styleClass="report-note"/>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <TextField fx:id="budgetField" promptText="Monthly budget ($)" prefWidth="160"/>
+                    <Button text="Set Budget" onAction="#onSetBudgetClick"/>
+                </HBox>
+            </VBox>
+
+            <!-- Current rates bar -->
+            <VBox styleClass="report-info-box" spacing="8">
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <Label text="Current Rates" styleClass="report-info-box-title"/>
+                    <Label fx:id="energyRateLabel" styleClass="energy-column-header"/>
+                    <Label fx:id="waterRateLabel" styleClass="water-column-header"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="editRatesButton" text="Edit Rates" onAction="#onEditRatesClick"/>
+                </HBox>
+                <HBox fx:id="ratesEditBox" spacing="8" alignment="CENTER_LEFT">
+                    <TextField fx:id="energyRateField" promptText="Electricity ($ per kWh)" prefWidth="170"/>
+                    <TextField fx:id="waterRateField" promptText="Water ($ per litre)" prefWidth="170"/>
+                    <Button text="Save" onAction="#onSaveRatesClick"/>
+                    <Button text="Cancel" styleClass="cancel-button" onAction="#onCancelRatesClick"/>
+                </HBox>
+            </VBox>
+
+        </VBox>
+    </content>
+</ScrollPane>

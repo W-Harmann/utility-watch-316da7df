@@ -65,4 +65,27 @@ public class CostBudgetEvaluator extends ReadingEvaluator {
     public String formatUtilityCost(String selection) {
         return "$" + calculateUtilityCostExact(selection).toPlainString();
     }
+    /** Percentage of the budget spent in the time range (both utilities), to 2 d.p. 0 if no budget is set. */
+    public double getBudgetUsedPercentage() {
+        if (monthlyBudget.signum() == 0) {
+            return 0;
+        }
+        return calculateUtilityCostExact(BOTH)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(monthlyBudget, 2, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
+    /** Budget left in the time range. Never negative; see isOverBudget(). */
+    public double getBudgetRemaining() {
+        BigDecimal remaining = monthlyBudget.subtract(calculateUtilityCostExact(BOTH));
+        return remaining.max(BigDecimal.ZERO).setScale(2, MONEY_ROUNDING).doubleValue();
+    }
+
+    /** True only when spending is strictly more than a set budget. */
+    public boolean isOverBudget() {
+        return monthlyBudget.signum() > 0
+                && calculateUtilityCostExact(BOTH).compareTo(monthlyBudget) > 0;
+    }
+
 }

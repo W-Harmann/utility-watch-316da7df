@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public abstract class ReadingEvaluator {
 
-    public static final String ENERGY  = "energy";
+    public static final String ENERGY = "energy";
     public static final String WATER = "water";
     public static final String BOTH = "both";
     protected static final Set<String> UTILITIES = Set.of(ENERGY, WATER);
@@ -58,6 +58,18 @@ public abstract class ReadingEvaluator {
         for (Reading reading : readings) {
             if (utility.equals(reading.getResourceType()) && isInRange(reading.getDateTime())) {
                 // BigDecimal.valueOf(double) uses the shortest decimal form, so 2.7 becomes exactly 2.7
+                total = total.add(BigDecimal.valueOf(reading.getQuantity()));
+            }
+        }
+        return total;
+    }
+
+    /** Sums the usage for one utility between two dates (both inclusive), ignoring the selected range. */
+    protected BigDecimal totalUsageBetween(String utility, LocalDateTime from, LocalDateTime to) {
+        BigDecimal total = BigDecimal.ZERO;
+        for (Reading reading : readings) {
+            LocalDateTime time = reading.getDateTime();
+            if (utility.equals(reading.getResourceType()) && !time.isBefore(from) && !time.isAfter(to)) {
                 total = total.add(BigDecimal.valueOf(reading.getQuantity()));
             }
         }

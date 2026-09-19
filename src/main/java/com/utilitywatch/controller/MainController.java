@@ -98,7 +98,7 @@ public class MainController {
     protected void onLogOutClick() {
         authService.logOut(Session.getInstance().getCurrentUser());
         try {
-            Stage stage = (Stage) contentLabel.getScene().getWindow();
+            Stage stage = (Stage) contentArea.getScene().getWindow();
             Parent root = FXMLLoader.load(getClass().getResource("/com/utilitywatch/login-view.fxml"));
             stage.setScene(new Scene(root, 400, 400));
         } catch (IOException e) {

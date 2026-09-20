@@ -1,6 +1,7 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.reports.DistributionCalculator;
+import com.utilitywatch.reports.ReportsDataService;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
@@ -9,7 +10,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 
-import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
@@ -17,9 +17,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 import com.utilitywatch.Reading;
-import com.utilitywatch.login.Session;
 import com.utilitywatch.reports.ConsumptionSummaryCalculator;
-import com.utilitywatch.reports.ReadingFilter;
 
 public class ReportsController {
     private LocalDate periodStart;
@@ -82,28 +80,10 @@ public class ReportsController {
 
     private final ConsumptionSummaryCalculator calculator = new ConsumptionSummaryCalculator();
     private final DistributionCalculator distributionCalculator = new DistributionCalculator();
+    private final ReportsDataService dataService = new ReportsDataService();
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
-    }
-
-    // gets the id of the user who is currently logged in and finds only that user's readings
-    private int getCurrentUserId() {
-        return Session.getInstance().getCurrentUser().getId();
-    }
-
-    // gets all readings for the current user then filters them by resource type and the selected date period
-    // only the reading quantities are returned as numbers and these values are used by the consumption summary and report generator
-    private List<Double> getReadingQuantities(String resourceType) {
-        List<Reading> allUserReadings = SharedReadingDAO.getDAO().getReadingsForUser(getCurrentUserId());
-        List<Reading> filtered = ReadingFilter.byTypeAndPeriod(allUserReadings, resourceType, periodStart, periodEnd);
-        return filtered.stream().map(Reading::getQuantity).toList();
-    }
-
-    // gets the user's full readings for a resource type within the selected period
-    private List<Reading> getReadings(String resourceType) {
-        List<Reading> allUserReadings = SharedReadingDAO.getDAO().getReadingsForUser(getCurrentUserId());
-        return ReadingFilter.byTypeAndPeriod(allUserReadings, resourceType, periodStart, periodEnd);
     }
 
     // rounds a value to one decimal place for display
@@ -141,8 +121,8 @@ public class ReportsController {
 
     // loads the user's energy and water readings for the selected period and then updates the chart and summary statistics
     private void updateOverviewData() {
-        List<Double> energyReadings = getReadingQuantities("energy");
-        List<Double> waterReadings = getReadingQuantities("water");
+        List<Double> energyReadings = dataService.getReadingQuantities("energy", periodStart, periodEnd);
+        List<Double> waterReadings = dataService.getReadingQuantities("water", periodStart, periodEnd);
 
         updateChart(energyReadings, waterReadings);
         updateStatLabels(energyReadings, waterReadings);
@@ -288,7 +268,7 @@ public class ReportsController {
         }
 
         // retrieve readings for the selected utility and convert them to quantity values
-        List<Reading> readings = getReadings(resourceType);
+        List<Reading> readings = dataService.getReadings(resourceType, periodStart, periodEnd);
         List<Double> values = readings.stream().map(Reading::getQuantity).toList();
 
         // calculate the total number of days in the selected period, including both start and end dates
@@ -335,8 +315,8 @@ public class ReportsController {
     // calculates and displays statistics for both energy and water when 'both' is selected
     private void updateStatisticsForBothUtilities() {
         // retrieve energy and water readings separately so their statistics can be calculated using their own units
-        List<Reading> energyReadingsList = getReadings("energy");
-        List<Reading> waterReadingsList = getReadings("water");
+        List<Reading> energyReadingsList = dataService.getReadings("energy", periodStart, periodEnd);
+        List<Reading> waterReadingsList = dataService.getReadings("water", periodStart, periodEnd);
 
         // extract the quantities from each utility's readings
         List<Double> energyValues = energyReadingsList.stream().map(Reading::getQuantity).toList();

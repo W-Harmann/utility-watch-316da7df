@@ -4,6 +4,7 @@ import com.utilitywatch.Reading;
 
 import java.util.List;
 
+// keeps consumers independent of how readings are actually stored
 public interface IReadingDAO {
     void insert(Reading reading);
     Reading getLastReading();

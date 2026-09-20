@@ -36,7 +36,7 @@ public class ReadingsController {
     private final ReadingDAO readingDAO = SharedReadingDAO.getDAO();
     private final CsvReadingImportService csvImportService = new CsvReadingImportService(readingDAO);
     private int currentUserId;
-    private Reading readingBeingEdited = null;
+    private Reading readingBeingEdited = null; // null means the form is adding a new reading, not editing one
 
     @FXML
     public void initialize() {
@@ -53,6 +53,7 @@ public class ReadingsController {
         refreshTable();
     }
 
+    // builds the Edit/Delete buttons shown in each row of the table
     private void setUpActionsColumn() {
         actionsColumn.setCellFactory(col -> new TableCell<Reading, Void>() {
             private final Button editButton = new Button("Edit");
@@ -61,6 +62,7 @@ public class ReadingsController {
 
             {
                 editButton.setOnAction(e -> {
+                    // load this row's values into the form and switch it into edit mode
                     Reading reading = getTableView().getItems().get(getIndex());
                     readingBeingEdited = reading;
                     datePicker.setValue(reading.getDateTime().toLocalDate());
@@ -75,6 +77,7 @@ public class ReadingsController {
                 });
             }
 
+            // JavaFX calls this for every row - only show the buttons on real rows, not empty ones
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
@@ -95,11 +98,13 @@ public class ReadingsController {
             double quantity = Double.parseDouble(quantityField.getText());
 
             if (readingBeingEdited == null) {
+                // adding a brand new reading
                 Reading reading = new Reading(datePicker.getValue().atStartOfDay(), quantity);
                 reading.setResourceType(resourceTypeBox.getValue());
                 reading.setUserId(currentUserId);
                 readingDAO.insert(reading);
             } else {
+                // updating the reading the user clicked Edit on
                 readingBeingEdited.setDate(datePicker.getValue().atStartOfDay());
                 readingBeingEdited.setResourceType(resourceTypeBox.getValue());
                 readingBeingEdited.setQuantity(quantity);

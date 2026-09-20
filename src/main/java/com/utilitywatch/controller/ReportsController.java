@@ -247,124 +247,71 @@ public class ReportsController {
         Platform.runLater(distributionChart::requestLayout);
     }
 
-    // loads readings for the selected utility and period and then updates the statistics and chart
-    private void updateStatisticsData() {
-        distributionChart.getData().clear();
+    // stores the calculated statistics for one utility type, used for both single utility and combined utility reports
+    private record UtilityStats(String medianText, String stdDevText, String daysRecordedText, String variabilityText, String mostCommonRangeText) {}
 
-        String resourceType;
-        String unit;
-
-        // determine which utility the user selected and set its measurement unit
-        if (energyToggle.isSelected()) {
-            resourceType = "energy";
-            unit = "kWh";
-        } else if (waterToggle.isSelected()) {
-            resourceType = "water";
-            unit = "L";
-        } else {
-            // if both utilities are selected, handle them separately as energy and water use different units
-            updateStatisticsForBothUtilities();
-            return;
-        }
-
-        // retrieve readings for the selected utility and convert them to quantity values
+    // calculates all statistics for one utility type
+    private UtilityStats computeStatsFor(String resourceType, String unit, long totalDaysInPeriod) {
         List<Reading> readings = dataService.getReadings(resourceType, periodStart, periodEnd);
         List<Double> values = readings.stream().map(Reading::getQuantity).toList();
 
-        // calculate the total number of days in the selected period, including both start and end dates
-        long totalDaysInPeriod = ChronoUnit.DAYS.between(periodStart, periodEnd) + 1;
-
+        // returns default values when no readings are available
         if (values.isEmpty()) {
-            medianValueLabel.setText("No data");
-            stdDevValueLabel.setText("-");
-            mostCommonRangeValueLabel.setText("-");
-            variabilityValueLabel.setText("-");
-            daysRecordedValueLabel.setText("0 of " + totalDaysInPeriod);
-            distributionChart.getData().clear();
-            return;
+            return new UtilityStats("No data", "-", "0 of " + totalDaysInPeriod, "-", "-");
         }
 
-        // calculate the main statistics using the values from the selected utility
-        double median = calculator.calculateMedian(values);
-        double stdDev = calculator.calculateStandardDeviation(values);
-        double average = calculator.calculateAverage(values);
+        // calculates the median and standard deviation
+        String median = round(calculator.calculateMedian(values)) + " " + unit;
+        String stdDev = round(calculator.calculateStandardDeviation(values)) + " " + unit;
 
-        medianValueLabel.setText(round(median) + " " + unit);
-        stdDevValueLabel.setText(round(stdDev) + " " + unit);
+        // counts the number of days with recorded readings
+        long daysRecorded = readings.stream().map(r -> r.getDateTime().toLocalDate()).distinct().count();
 
-        // count the number of unique days on which readings were recorded
-        long daysRecorded = readings.stream().map(reading -> reading.getDateTime().toLocalDate()).distinct().count();
-        daysRecordedValueLabel.setText(daysRecorded + " of " + totalDaysInPeriod);
+        // describes the reading variability and most common range
+        String variability = calculator.describeVariability(values);
+        String mostCommonRange = updateDistributionChart(values, unit);
 
-        // calculate the coefficient of variation to give a simple low/moderate/high variability rating
-        double coefficientOfVariation = average == 0 ? 0 : (stdDev / average) * 100;
-        String variability;
-        if (coefficientOfVariation < 15) {
-            variability = "Low";
-        } else if (coefficientOfVariation < 35) {
-            variability = "Moderate";
-        } else {
-            variability = "High";
-        }
-        variabilityValueLabel.setText(variability);
-
-        // group the readings into ranges and display the most common range
-        mostCommonRangeValueLabel.setText(updateDistributionChart(values, unit));
+        return new UtilityStats(median, stdDev, daysRecorded + " of " + totalDaysInPeriod, variability, mostCommonRange);
     }
 
-    // calculates and displays statistics for both energy and water when 'both' is selected
-    private void updateStatisticsForBothUtilities() {
-        // retrieve energy and water readings separately so their statistics can be calculated using their own units
-        List<Reading> energyReadingsList = dataService.getReadings("energy", periodStart, periodEnd);
-        List<Reading> waterReadingsList = dataService.getReadings("water", periodStart, periodEnd);
-
-        // extract the quantities from each utility's readings
-        List<Double> energyValues = energyReadingsList.stream().map(Reading::getQuantity).toList();
-        List<Double> waterValues = waterReadingsList.stream().map(Reading::getQuantity).toList();
-
-        // calculate the total number of days in the selected period
+    // loads readings for the selected utility and period and then updates the statistics and chart
+    private void updateStatisticsData() {
         long totalDaysInPeriod = ChronoUnit.DAYS.between(periodStart, periodEnd) + 1;
 
-        distributionChart.getData().clear();
-
-        boolean hasEnergyData = !energyValues.isEmpty();
-        boolean hasWaterData = !waterValues.isEmpty();
-
-        // show on labels that there is no data if neither utility has readings
-        if (!hasEnergyData && !hasWaterData) {
-            medianValueLabel.setText("No data");
-            stdDevValueLabel.setText("-");
-            mostCommonRangeValueLabel.setText("-");
-            variabilityValueLabel.setText("-");
-            daysRecordedValueLabel.setText("0 of " + totalDaysInPeriod);
-            return;
+        // shows separate statistics when both utilities are selected
+        if (bothToggle.isSelected()) {
+            showBothUtilityStats(totalDaysInPeriod);
+        } else {
+            // uses the selected utility and its matching unit
+            String resourceType = energyToggle.isSelected() ? "energy" : "water";
+            String unit = energyToggle.isSelected() ? "kWh" : "L";
+            showSingleUtilityStats(resourceType, unit, totalDaysInPeriod);
         }
+    }
 
-        // calculate the median separately for each utility
-        String energyMedianText = hasEnergyData ? "Energy: " + round(calculator.calculateMedian(energyValues)) + " kWh" : "Energy: no data";
-        String waterMedianText = hasWaterData ? "Water: " + round(calculator.calculateMedian(waterValues)) + " L" : "Water: no data";
-        medianValueLabel.setText(energyMedianText + ", " + waterMedianText);
+    // calculates and displays statistics for one utility
+    private void showSingleUtilityStats(String resourceType, String unit, long totalDaysInPeriod) {
+        UtilityStats stats = computeStatsFor(resourceType, unit, totalDaysInPeriod);
 
-        // calculate standard deviation separately for energy and water
-        String energyStdDevText = hasEnergyData ? "Energy: " + round(calculator.calculateStandardDeviation(energyValues)) + " kWh" : "Energy: no data";
-        String waterStdDevText = hasWaterData ? "Water: " + round(calculator.calculateStandardDeviation(waterValues)) + " L" : "Water: no data";
-        stdDevValueLabel.setText(energyStdDevText + ", " + waterStdDevText);
+        // updates each statistics label with the calculated values
+        medianValueLabel.setText(stats.medianText());
+        stdDevValueLabel.setText(stats.stdDevText());
+        daysRecordedValueLabel.setText(stats.daysRecordedText());
+        variabilityValueLabel.setText(stats.variabilityText());
+        mostCommonRangeValueLabel.setText(stats.mostCommonRangeText());
+    }
 
-        // count the unique days with readings for each utility
-        long energyDaysRecorded = energyReadingsList.stream().map(r -> r.getDateTime().toLocalDate()).distinct().count();
-        long waterDaysRecorded = waterReadingsList.stream().map(r -> r.getDateTime().toLocalDate()).distinct().count();
-        daysRecordedValueLabel.setText("Energy: " + energyDaysRecorded + "/" + totalDaysInPeriod
-                + ", Water: " + waterDaysRecorded + "/" + totalDaysInPeriod);
+    // calculates statistics for energy and water and then displays both
+    private void showBothUtilityStats(long totalDaysInPeriod) {
+        UtilityStats energyStats = computeStatsFor("energy", "kWh", totalDaysInPeriod);
+        UtilityStats waterStats = computeStatsFor("water", "L", totalDaysInPeriod);
 
-        // describe the variability of each utility's readings independently
-        String energyVariabilityText = hasEnergyData ? "Energy: " + calculator.describeVariability(energyValues) : "Energy: no data";
-        String waterVariabilityText = hasWaterData ? "Water: " + calculator.describeVariability(waterValues) : "Water: no data";
-        variabilityValueLabel.setText(energyVariabilityText + ", " + waterVariabilityText);
-
-        // display both utilities as separate series in the distribution chart so their readings show the correct measurement unit
-        String energyMostCommonText = hasEnergyData ? "Energy: " + updateDistributionChart(energyValues, "kWh") : "Energy: no data";
-        String waterMostCommonText = hasWaterData ? "Water: " + updateDistributionChart(waterValues, "L") : "Water: no data";
-        mostCommonRangeValueLabel.setText(energyMostCommonText + ", " + waterMostCommonText);
+        // displays each statistic for both utility types
+        medianValueLabel.setText("Energy: " + energyStats.medianText() + ", Water: " + waterStats.medianText());
+        stdDevValueLabel.setText("Energy: " + energyStats.stdDevText() + ", Water: " + waterStats.stdDevText());
+        daysRecordedValueLabel.setText("Energy: " + energyStats.daysRecordedText() + ", Water: " + waterStats.daysRecordedText());
+        variabilityValueLabel.setText("Energy: " + energyStats.variabilityText() + ", Water: " + waterStats.variabilityText());
+        mostCommonRangeValueLabel.setText("Energy: " + energyStats.mostCommonRangeText() + ", Water: " + waterStats.mostCommonRangeText());
     }
 
     // builds the consumption distribution chart from readings and returns the most common range

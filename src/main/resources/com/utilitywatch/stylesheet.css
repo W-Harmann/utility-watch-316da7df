@@ -175,6 +175,14 @@
 
 .trends-tab-utility-display .chart-series-line {}
 
+.comparisons-tab-widget {
+    -fx-background-color: #556671;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.comparisons-tab-display .chart-bar {}
+
 .cancel-button {
     -fx-background-color: #CB0E11;
     -fx-text-fill: white;

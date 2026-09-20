@@ -283,114 +283,88 @@
     </VBox>
 
     <!-- COMPARISONS TAB content -->
-    <!--todo: add button for SUM, AVERAGE and Data-Point-->
-    <!--todo: add other visuals-->
     <!--todo: clean up-->
     <VBox fx:id="comparisonsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS" maxHeight="Infinity">
+
+        <HBox spacing="15.0">
+            <Label text="Period 1: " prefWidth="50"/>
+            <Button fx:id="comparisonPeriodDate1" text="Aug 1 - Sep 1, 2026" styleClass="period-button" prefWidth="250"/>
+
+<!--            <Pane HBox.hgrow="ALWAYS"/>-->
+
+            <Label text="Period 2: " prefWidth="50"/>
+            <Button fx:id="comparisonPeriodDate2" text="Oct 1 - Nov 1, 2026" styleClass="period-button" prefWidth="250"/>
+        </HBox>
+
         <GridPane hgap="15.0" vgap="15.0" VBox.vgrow="ALWAYS">
             <columnConstraints>
-                <ColumnConstraints percentWidth="40.0"/>
-                <ColumnConstraints percentWidth="60.0"/>
+                <ColumnConstraints percentWidth="70.0"/>
+                <ColumnConstraints percentWidth="30.0"/>
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints percentHeight="55.0"/>
-                <RowConstraints percentHeight="45.0"/>
+                <RowConstraints percentHeight="50.0"/>
+                <RowConstraints percentHeight="50.0"/>
             </rowConstraints>
 
             <!-- comparisons widget (row 1 column 1) -->
-<!--            <VBox spacing="14.0" styleClass="report-info-box">-->
-<!--                <Label text="Comparisons" styleClass="report-info-box-title"/>-->
-<!--                <Label fx:id="totalEnergyLabel" text="Total Energy: 326 kWh"/>-->
-<!--                <Label fx:id="totalWaterLabel" text="Total Water: 12,340 L"/>-->
-<!--                <Label text="Compared to Jul 1 - Jul 31:" styleClass="report-info-box-subtitle"/>-->
-<!--                <Label fx:id="energyChangeLabel" text="Energy usage increased by 8%"/>-->
-<!--                <Label fx:id="waterChangeLabel" text="Water usage decreased by 5%"/>-->
-<!--            </VBox>-->
+            <HBox styleClass="report-info-box" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                <BarChart fx:id="comparisonTotalGraph" style="-" title="Total Usage Between Periods" prefWidth="900" animated="false">
+                    <xAxis>
+                        <CategoryAxis tickLabelFill="#FFFFFF"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis tickLabelFill="#FFFFFF"/>
+                    </yAxis>
+                </BarChart>
+            </HBox>
 
             <!-- consumption chart (row 1 column 2) -->
-<!--            <LineChart fx:id="consumptionChart" title="Consumption over time" GridPane.columnIndex="1" GridPane.rowIndex="0">-->
-<!--                <xAxis>-->
-<!--                    <CategoryAxis/>-->
-<!--                </xAxis>-->
-<!--                <yAxis>-->
-<!--                    <NumberAxis/>-->
-<!--                </yAxis>-->
-<!--            </LineChart>-->
+            <VBox spacing="14.0" styleClass="report-info-box" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                <Label text="Total" styleClass="report-info-box-title"/>
 
-            <!-- key statistics widget (row 2 column 1) -->
-<!--            <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="0" GridPane.rowIndex="1">-->
-<!--                <Label text="Key Statistics" styleClass="report-info-box-title"/>-->
+                <HBox>
+                    <VBox styleClass="comparisons-tab-widget">
+                        <Label text="Change" styleClass="report-info-box-subtitle"/>
+                        <Label fx:id="comparisonTotalChangeEnergyLabel" text="Energy: 326 kWh"/>
+                        <Label fx:id="comparisonTotalChangeWaterLabel" text="Water: 326 kLh"/>
+                    </VBox>
+                    <VBox styleClass="comparisons-tab-widget">
+                        <Label text="\%" styleClass="report-info-box-subtitle"/>
+                        <Label fx:id="comparisonTotalPercentChangeEnergyLabel" text="+100%"/>
+                        <Label fx:id="comparisonTotalPercentChangeWaterLabel" text="+100%"/>
+                    </VBox>
+                </HBox>
+            </VBox>
 
-<!--                &lt;!&ndash; nested grid for statistics table &ndash;&gt;-->
-<!--                <GridPane hgap="15.0" vgap="12.0">-->
-<!--                    <columnConstraints>-->
-<!--                        <ColumnConstraints minWidth="60.0"/>-->
-<!--                        <ColumnConstraints minWidth="80.0"/>-->
-<!--                        <ColumnConstraints minWidth="70.0"/>-->
-<!--                    </columnConstraints>-->
+            <!-- comparisons widget (row 2 column 1) -->
+            <HBox styleClass="report-info-box" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                <BarChart fx:id="comparisonAverageGraph" title="Average Usage Between Periods" prefWidth="900" animated="false">
+                    <xAxis>
+                        <CategoryAxis tickLabelFill="#FFFFFF"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis tickLabelFill="#FFFFFF"/>
+                    </yAxis>
+                </BarChart>
+            </HBox>
 
-<!--                    &lt;!&ndash; row 1 column 2 for energy header &ndash;&gt;-->
-<!--                    <Label text="Energy (kWh)" styleClass="energy-column-header" GridPane.columnIndex="1" GridPane.rowIndex="0"/>-->
-<!--                    &lt;!&ndash; row 1 column 3 for water header &ndash;&gt;-->
-<!--                    <Label text="Water (L)" styleClass="water-column-header" GridPane.columnIndex="2" GridPane.rowIndex="0"/>-->
+            <!-- consumption chart (row 2 column 2) -->
+            <VBox spacing="14.0" styleClass="report-info-box" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                <Label text="Average" styleClass="report-info-box-title"/>
 
-<!--                    &lt;!&ndash; row 2 column 1 for average header &ndash;&gt;-->
-<!--                    <Label text="Average" GridPane.columnIndex="0" GridPane.rowIndex="1"/>-->
-<!--                    &lt;!&ndash; row 2 column 2 for average energy consumption &ndash;&gt;-->
-<!--                    <Label fx:id="avgEnergyLabel" text="10.2" GridPane.columnIndex="1" GridPane.rowIndex="1"/>-->
-<!--                    &lt;!&ndash; row 2 column 3 for average water consumption &ndash;&gt;-->
-<!--                    <Label fx:id="avgWaterLabel" text="354" GridPane.columnIndex="2" GridPane.rowIndex="1"/>-->
-
-<!--                    &lt;!&ndash; row 3 column 1 for minimum header &ndash;&gt;-->
-<!--                    <Label text="Minimum" GridPane.columnIndex="0" GridPane.rowIndex="2"/>-->
-<!--                    &lt;!&ndash; row 3 column 2 for min energy consumption &ndash;&gt;-->
-<!--                    <Label fx:id="minEnergyLabel" text="18.6" GridPane.columnIndex="1" GridPane.rowIndex="2"/>-->
-<!--                    &lt;!&ndash; row 3 column 3 for min water consumption &ndash;&gt;-->
-<!--                    <Label fx:id="minWaterLabel" text="679" GridPane.columnIndex="2" GridPane.rowIndex="2"/>-->
-
-<!--                    &lt;!&ndash; row 4 column 1 for maximum header &ndash;&gt;-->
-<!--                    <Label text="Maximum" GridPane.columnIndex="0" GridPane.rowIndex="3"/>-->
-<!--                    &lt;!&ndash; row 4 column 2 for max energy consumption &ndash;&gt;-->
-<!--                    <Label fx:id="maxEnergyLabel" text="5.1" GridPane.columnIndex="1" GridPane.rowIndex="3"/>-->
-<!--                    &lt;!&ndash; row 4 column 3 for max water consumption &ndash;&gt;-->
-<!--                    <Label fx:id="maxWaterLabel" text="210" GridPane.columnIndex="2" GridPane.rowIndex="3"/>-->
-<!--                </GridPane>-->
-<!--            </VBox>-->
-
-            <!-- unusual patterns table (row 2 column 2) -->
-<!--            <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1">-->
-<!--                <Label text="Unusual Patterns Detected" styleClass="report-info-box-title"/>-->
-
-<!--                <GridPane hgap="15.0" vgap="12.0">-->
-<!--                    <columnConstraints>-->
-<!--                        <ColumnConstraints minWidth="70.0"/>-->
-<!--                        <ColumnConstraints minWidth="75.0"/>-->
-<!--                        <ColumnConstraints minWidth="70.0"/>-->
-<!--                        <ColumnConstraints minWidth="110.0"/>-->
-<!--                    </columnConstraints>-->
-
-<!--                    &lt;!&ndash; table headings &ndash;&gt;-->
-<!--                    <Label text="Date/Period" styleClass="report-info-box-subtitle" GridPane.columnIndex="0" GridPane.rowIndex="0"/>-->
-<!--                    <Label text="Type" styleClass="report-info-box-subtitle" GridPane.columnIndex="1" GridPane.rowIndex="0"/>-->
-<!--                    <Label text="Severity" styleClass="report-info-box-subtitle" GridPane.columnIndex="2" GridPane.rowIndex="0"/>-->
-<!--                    <Label text="Details" styleClass="report-info-box-subtitle" GridPane.columnIndex="3" GridPane.rowIndex="0"/>-->
-
-<!--                    <Label text="Aug 22 (2h)" GridPane.columnIndex="0" GridPane.rowIndex="1"/>-->
-<!--                    <Label text="High Usage" GridPane.columnIndex="1" GridPane.rowIndex="1"/>-->
-<!--                    <Label text="Severe" GridPane.columnIndex="2" GridPane.rowIndex="1"/>-->
-<!--                    <Label text="+32% above usual" GridPane.columnIndex="3" GridPane.rowIndex="1"/>-->
-
-<!--                    <Label text="Aug 24 (1h)" GridPane.columnIndex="0" GridPane.rowIndex="2"/>-->
-<!--                    <Label text="Spike" GridPane.columnIndex="1" GridPane.rowIndex="2"/>-->
-<!--                    <Label text="Moderate" GridPane.columnIndex="2" GridPane.rowIndex="2"/>-->
-<!--                    <Label text="Short spike detected" GridPane.columnIndex="3" GridPane.rowIndex="2"/>-->
-
-<!--                    <Label text="Aug 26 (6h)" GridPane.columnIndex="0" GridPane.rowIndex="3"/>-->
-<!--                    <Label text="Long duration" GridPane.columnIndex="1" GridPane.rowIndex="3"/>-->
-<!--                    <Label text="Moderate" GridPane.columnIndex="2" GridPane.rowIndex="3"/>-->
-<!--                    <Label text="Usage for 6+ hours" GridPane.columnIndex="3" GridPane.rowIndex="3"/>-->
-<!--                </GridPane>-->
-<!--            </VBox>-->
+                <HBox>
+                    <VBox styleClass="comparisons-tab-widget">
+                        <Label text="Change" styleClass="report-info-box-subtitle"/>
+                        <Label fx:id="comparisonAvgChangeEnergyLabel" text="Energy: 326 kWh"/>
+                        <Label fx:id="comparisonAvgChangeWaterLabel" text="Water: 326 kLh"/>
+                    </VBox>
+                    <VBox styleClass="comparisons-tab-widget">
+                        <Label text="\%" styleClass="report-info-box-subtitle"/>
+                        <Label fx:id="comparisonAvgPercentChangeEnergyLabel" text="+100%"/>
+                        <Label fx:id="comparisonAvgPercentChangeWaterLabel" text="+100%"/>
+                    </VBox>
+                </HBox>
+            </VBox>
 
         </GridPane>
     </VBox>

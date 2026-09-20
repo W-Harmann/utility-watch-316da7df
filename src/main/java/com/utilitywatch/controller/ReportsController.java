@@ -73,6 +73,22 @@ public class ReportsController {
     @FXML private CheckBox trendShowEnergyTrendButton;
     @FXML private CheckBox trendShowWaterTrendButton;
 
+    // comparisons tab elements
+    @FXML private Button comparisonPeriodDate1;
+    @FXML private Button comparisonPeriodDate2;
+
+    @FXML private BarChart<String, Number> comparisonTotalGraph;
+    @FXML private BarChart<String, Number> comparisonAverageGraph;
+
+    @FXML private Label comparisonTotalChangeEnergyLabel;
+    @FXML private Label comparisonTotalChangeWaterLabel;
+    @FXML private Label comparisonTotalPercentChangeEnergyLabel;
+    @FXML private Label comparisonTotalPercentChangeWaterLabel;
+    @FXML private Label comparisonAvgChangeEnergyLabel;
+    @FXML private Label comparisonAvgChangeWaterLabel;
+    @FXML private Label comparisonAvgPercentChangeEnergyLabel;
+    @FXML private Label comparisonAvgPercentChangeWaterLabel;
+
     // reference to MainController for screen navigation
     private MainController mainController;
 
@@ -372,7 +388,109 @@ public class ReportsController {
         hideAllTabContent();
         comparisonsContentBox.setVisible(true);
         comparisonsContentBox.setManaged(true);
-        energyToggle.setSelected(true);
+        bothToggle.setSelected(true);
+
+        //fixme: replace with updateComparisons(); after DB integration
+        loadMockComparisonCharts();
+    }
+
+    //fixme: update comparison charts on period change
+    //fixme: remove the top-right "periodButton" visual (irrelevant to tab)
+    private void updateComparisons() {
+
+        // Optional: Hide the legend if individual colors make it irrelevant
+//        comparisonTotalGraph.setLegendVisible(false);
+    }
+
+    private void stylizeComparisonBar(XYChart.Data<String, Number> Bar, String Style) {
+        Bar.nodeProperty().addListener((Observable, Old, New) -> {
+            if (New != null) {
+                New.setStyle(Style);
+            }
+        });
+    }
+
+    private void loadMockComparisonCharts() {
+        //fixme: Test method for updateComparisons
+        // for now it makes the mock graphs
+
+        // Clear Both Graphs of Data
+        comparisonTotalGraph.getData().clear();
+        comparisonAverageGraph.getData().clear();
+
+        // Make Mock Data for Total Graph
+            // Energy Data
+        XYChart.Series<String, Number> EnergyTotalSeries = new XYChart.Series<>();
+        EnergyTotalSeries.setName("Energy");
+
+        XYChart.Data<String, Number> energyTotalP1 = new XYChart.Data<>("Aug 1 - Sep 1, 2026", 2.5);
+        XYChart.Data<String, Number> energyTotalDiff = new XYChart.Data<>("Difference", 1.5);
+        XYChart.Data<String, Number> energyTotalP2 = new XYChart.Data<>("Oct 1 - Nov 1, 2026", 4);
+
+        EnergyTotalSeries.getData().add(energyTotalP1);
+        EnergyTotalSeries.getData().add(energyTotalDiff);
+        EnergyTotalSeries.getData().add(energyTotalP2);
+
+            // Water Data
+        XYChart.Series<String, Number> WaterTotalSeries = new XYChart.Series<>();
+        WaterTotalSeries.setName("Water");
+
+        XYChart.Data<String, Number> waterTotalP1 = new XYChart.Data<>("Aug 1 - Sep 1, 2026", 2.5);
+        XYChart.Data<String, Number> waterTotalDiff = new XYChart.Data<>("Difference", 1.5);
+        XYChart.Data<String, Number> waterTotalP2 = new XYChart.Data<>("Oct 1 - Nov 1, 2026", 4);
+
+        WaterTotalSeries.getData().add(waterTotalP1);
+        WaterTotalSeries.getData().add(waterTotalDiff);
+        WaterTotalSeries.getData().add(waterTotalP2);
+
+            // Color Bars, Before Adding Data so Listener can Query (Except Null)
+        stylizeComparisonBar(energyTotalP1,"-fx-bar-fill: #FFBA4A;");
+        stylizeComparisonBar(energyTotalDiff,"-fx-bar-fill: #FFBA4A;");
+        stylizeComparisonBar(energyTotalP2,"-fx-bar-fill: #FFBA4A;");
+
+        stylizeComparisonBar(waterTotalP1,"-fx-bar-fill: #5FB2F5;");
+        stylizeComparisonBar(waterTotalDiff,"-fx-bar-fill: #5FB2F5;");
+        stylizeComparisonBar(waterTotalP2,"-fx-bar-fill: #5FB2F5;");
+
+            // Add Both Datas to Graph
+        comparisonTotalGraph.getData().addAll(EnergyTotalSeries, WaterTotalSeries);
+
+        // Make Mock Data for Average Graph
+            // Energy Data
+        XYChart.Series<String, Number> EnergyAverageSeries = new XYChart.Series<>();
+        EnergyAverageSeries.setName("Energy");
+
+        XYChart.Data<String, Number> energyAverageP1 = new XYChart.Data<>("Aug 1 - Sep 1, 2026", 2.5);
+        XYChart.Data<String, Number> energyAverageDiff = new XYChart.Data<>("Difference", 1.5);
+        XYChart.Data<String, Number> energyAverageP2 = new XYChart.Data<>("Oct 1 - Nov 1, 2026", 4);
+
+        EnergyAverageSeries.getData().add(energyAverageP1);
+        EnergyAverageSeries.getData().add(energyAverageDiff);
+        EnergyAverageSeries.getData().add(energyAverageP2);
+
+            // Water Data
+        XYChart.Series<String, Number> WaterAverageSeries = new XYChart.Series<>();
+        WaterAverageSeries.setName("Water");
+
+        XYChart.Data<String, Number> waterAverageP1 = new XYChart.Data<>("Aug 1 - Sep 1, 2026", 2.5);
+        XYChart.Data<String, Number> waterAverageDiff = new XYChart.Data<>("Difference", 1.5);
+        XYChart.Data<String, Number> waterAverageP2 = new XYChart.Data<>("Oct 1 - Nov 1, 2026", 4);
+
+        WaterAverageSeries.getData().add(waterAverageP1);
+        WaterAverageSeries.getData().add(waterAverageDiff);
+        WaterAverageSeries.getData().add(waterAverageP2);
+
+            // Color Bars, Before Adding Data so Listener can Query (Except Null)
+        stylizeComparisonBar(energyAverageP1,"-fx-bar-fill: #FFBA4A;");
+        stylizeComparisonBar(energyAverageDiff,"-fx-bar-fill: #FFBA4A;");
+        stylizeComparisonBar(energyAverageP2,"-fx-bar-fill: #FFBA4A;");
+
+        stylizeComparisonBar(waterAverageP1,"-fx-bar-fill: #5FB2F5;");
+        stylizeComparisonBar(waterAverageDiff,"-fx-bar-fill: #5FB2F5;");
+        stylizeComparisonBar(waterAverageP2,"-fx-bar-fill: #5FB2F5;");
+
+            // Add Both Datas to Graph
+        comparisonAverageGraph.getData().addAll(EnergyAverageSeries, WaterAverageSeries);
     }
 
     // shows the statistics tab content and hides everything else

@@ -1,5 +1,6 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.reports.DistributionCalculator;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
@@ -7,6 +8,8 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
+
+import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
@@ -78,6 +81,7 @@ public class ReportsController {
     private MainController mainController;
 
     private final ConsumptionSummaryCalculator calculator = new ConsumptionSummaryCalculator();
+    private final DistributionCalculator distributionCalculator = new DistributionCalculator();
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
@@ -89,7 +93,7 @@ public class ReportsController {
     }
 
     // gets all readings for the current user then filters them by resource type and the selected date period
-    // only the reading qunatities are returned as numbers and these values are used by the consumption summary and report generator
+    // only the reading quantities are returned as numbers and these values are used by the consumption summary and report generator
     private List<Double> getReadingQuantities(String resourceType) {
         List<Reading> allUserReadings = SharedReadingDAO.getDAO().getReadingsForUser(getCurrentUserId());
         List<Reading> filtered = ReadingFilter.byTypeAndPeriod(allUserReadings, resourceType, periodStart, periodEnd);
@@ -389,7 +393,7 @@ public class ReportsController {
         double average = calculator.calculateAverage(values);
         double stdDev = calculator.calculateStandardDeviation(values);
 
-        // expres the standard deviation as a percentage of the average
+        // express the standard deviation as a percentage of the average
         double coefficientOfVariation = average == 0 ? 0 : (stdDev / average) * 100;
 
         // convert the percentage into a simple variability category
@@ -398,53 +402,26 @@ public class ReportsController {
         return "High";
     }
 
-    // groups the readings into six ranges and displays them as a distribution chart
+    // builds the consumption distribution chart from readings and returns the most common range
     private String updateDistributionChart(List<Double> readings, String unit) {
         distributionChart.getData().clear();
 
         // find the lowest and highest readings to determine the overall range
         double min = calculator.calculateMinimum(readings);
         double max = calculator.calculateMaximum(readings);
-
-        // divide the reading range into six buckets for the distribution chart
-        int bucketCount = 6;
-
-        // ensure the range is at least 1 to prevent division by zero when all readings have the same value
-        double range = Math.max(max - min, 1);
-        double bucketSize = range / bucketCount;
-
-        // store how many readings fall within each range
-        int[] counts = new int[bucketCount];
-        // assign each reading to the appropriate range
-        for (double reading : readings) {
-            int bucketIndex = (int) ((reading - min) / bucketSize);
-            // puts the maximum value into the final bucket
-            if (bucketIndex >= bucketCount) {
-                bucketIndex = bucketCount - 1;
-            }
-            counts[bucketIndex]++;
-        }
+        List<DistributionCalculator.Range> ranges = distributionCalculator.computeRanges(readings, min, max);
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        int mostCommonBucketIndex = 0;
 
-        // create a chart data point for each reading range
-        for (int bucketIndex = 0; bucketIndex < bucketCount; bucketIndex++) {
-            double bucketStart = min + bucketIndex * bucketSize;
-            double bucketEnd = bucketStart + bucketSize;
-            series.getData().add(new XYChart.Data<>(
-                    String.format("%.0f-%.0f", bucketStart, bucketEnd), counts[bucketIndex]));
-            // track the range containing the greatest number of readings
-            if (counts[bucketIndex] > counts[mostCommonBucketIndex]) {
-                mostCommonBucketIndex = bucketIndex;
-            }
+        // create a chart data point for each reading range and its total count
+        for (DistributionCalculator.Range range : ranges) {
+            series.getData().add(new XYChart.Data<>(String.format("%.0f-%.0f", range.start, range.end), range.count));
         }
         distributionChart.getData().add(series);
 
-        // calculate and return the range with the most readings
-        double mostCommonStart = min + mostCommonBucketIndex * bucketSize;
-        double mostCommonEnd = mostCommonStart + bucketSize;
-        return String.format("%.0f-%.0f %s", mostCommonStart, mostCommonEnd, unit);
+        // finds the range containing the most readings
+        DistributionCalculator.Range mostCommonRange = distributionCalculator.findMostCommonRange(ranges);
+        return String.format("%.0f-%.0f %s", mostCommonRange.start, mostCommonRange.end, unit);
     }
 
     // shows coming soon placeholder and hides everything else

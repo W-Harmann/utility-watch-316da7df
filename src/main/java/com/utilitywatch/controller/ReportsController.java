@@ -377,29 +377,14 @@ public class ReportsController {
                 + ", Water: " + waterDaysRecorded + "/" + totalDaysInPeriod);
 
         // describe the variability of each utility's readings independently
-        String energyVariabilityText = hasEnergyData ? "Energy: " + describeVariability(energyValues) : "Energy: no data";
-        String waterVariabilityText = hasWaterData ? "Water: " + describeVariability(waterValues) : "Water: no data";
+        String energyVariabilityText = hasEnergyData ? "Energy: " + calculator.describeVariability(energyValues) : "Energy: no data";
+        String waterVariabilityText = hasWaterData ? "Water: " + calculator.describeVariability(waterValues) : "Water: no data";
         variabilityValueLabel.setText(energyVariabilityText + ", " + waterVariabilityText);
 
         // display both utilities as separate series in the distribution chart so their readings show the correct measurement unit
         String energyMostCommonText = hasEnergyData ? "Energy: " + updateDistributionChart(energyValues, "kWh") : "Energy: no data";
         String waterMostCommonText = hasWaterData ? "Water: " + updateDistributionChart(waterValues, "L") : "Water: no data";
         mostCommonRangeValueLabel.setText(energyMostCommonText + ", " + waterMostCommonText);
-    }
-
-    // calculates a variability level from the coefficient of variation
-    private String describeVariability(List<Double> values) {
-        // calculate the average and standard deviation needed for the coefficient of variation
-        double average = calculator.calculateAverage(values);
-        double stdDev = calculator.calculateStandardDeviation(values);
-
-        // express the standard deviation as a percentage of the average
-        double coefficientOfVariation = average == 0 ? 0 : (stdDev / average) * 100;
-
-        // convert the percentage into a simple variability category
-        if (coefficientOfVariation < 15) return "Low";
-        if (coefficientOfVariation < 35) return "Moderate";
-        return "High";
     }
 
     // builds the consumption distribution chart from readings and returns the most common range

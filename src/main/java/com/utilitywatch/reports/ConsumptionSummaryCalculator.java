@@ -5,6 +5,9 @@ import java.util.List;
 
 public class ConsumptionSummaryCalculator {
 
+    private static final double LOW_VARIABILITY_THRESHOLD = 15.0;
+    private static final double MODERATE_VARIABILITY_THRESHOLD = 35.0;
+
     // sum of all consumption readings for the period (US7.1)
     public double calculateTotal(List<Double> readings) {
         double total = 0.0;
@@ -46,5 +49,24 @@ public class ConsumptionSummaryCalculator {
         }
         double variance = sumOfSquaredDifferences / readings.size();
         return Math.sqrt(variance);
+    }
+
+    // calculates a variability level from the coefficient of variation
+    public String describeVariability(List<Double> readings) {
+        // calculate the average and standard deviation needed for the coefficient of variation
+        double average = calculateAverage(readings);
+        double stdDev = calculateStandardDeviation(readings);
+
+        // express the standard deviation as a percentage of the average
+        double coefficientOfVariation = average == 0 ? 0 : (stdDev / average) * 100;
+
+        // convert the percentage into a simple variability category
+        if (coefficientOfVariation < LOW_VARIABILITY_THRESHOLD) {
+            return "Low";
+        }
+        if (coefficientOfVariation < MODERATE_VARIABILITY_THRESHOLD) {
+            return "Moderate";
+        }
+        return "High";
     }
 }

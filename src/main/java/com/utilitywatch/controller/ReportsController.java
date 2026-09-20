@@ -466,4 +466,3 @@ public class ReportsController {
         comingSoonLabel.setManaged(false);
     }
 }
-

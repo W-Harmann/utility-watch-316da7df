@@ -52,8 +52,8 @@
 
         <Region HBox.hgrow="ALWAYS"/>
 
-        <Label text="Period:"/>
-        <Button fx:id="periodButton" text="Aug 1 - Sep 1, 2026" styleClass="period-button"/>
+        <!-- shows period picker -->
+        <fx:include source="period-picker.fxml" fx:id="periodPicker"/>
     </HBox>
 
     <!-- trend mode toggle, period view and period selector button -->
@@ -140,7 +140,7 @@
                 <Label text="Comparisons" styleClass="report-info-box-title"/>
                 <Label fx:id="totalEnergyLabel" text="Total Energy: 326 kWh"/>
                 <Label fx:id="totalWaterLabel" text="Total Water: 12,340 L"/>
-                <Label text="Compared to Jul 1 - Jul 31:" styleClass="report-info-box-subtitle"/>
+                <Label text="Compared to previous period:" styleClass="report-info-box-subtitle"/>
                 <Label fx:id="energyChangeLabel" text="Energy usage increased by 8%"/>
                 <Label fx:id="waterChangeLabel" text="Water usage decreased by 5%"/>
             </VBox>
@@ -196,7 +196,7 @@
             </VBox>
 
             <!-- unusual patterns table (row 2 column 2) -->
-            <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1" >
                 <Label text="Unusual Patterns Detected" styleClass="report-info-box-title"/>
 
                 <GridPane hgap="15.0" vgap="12.0">
@@ -376,20 +376,19 @@
             <!-- maxWidth and prefWidth makes both statistic boxes share the available space equally -->
             <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
                 <Label text="Median" styleClass="report-info-box-title"/>
-                <Label text="10.4 kWh" styleClass="stat-value"/>
+                <Label fx:id="medianValueLabel" styleClass="stat-value"/>
                 <Label text="Your typical day's usage"/>
             </VBox>
 
             <!-- standard deviation consumption widget -->
             <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
                 <Label text="Standard deviation" styleClass="report-info-box-title"/>
-                <Label text="3.2 kWh" styleClass="stat-value"/>
+                <Label fx:id="stdDevValueLabel" styleClass="stat-value"/>
                 <Label text="How much your usage varies day to day"/>
             </VBox>
         </HBox>
 
-        <!-- daily usage distribution chart -->
-        <BarChart fx:id="distributionChart" title="Daily usage distrubition" legendVisible="false" VBox.vgrow="ALWAYS">
+        <BarChart fx:id="distributionChart" title="Daily usage distribution" legendVisible="false" VBox.vgrow="ALWAYS">
             <xAxis>
                 <CategoryAxis/>
             </xAxis>
@@ -400,19 +399,22 @@
 
         <!-- bottom row for most common range, variability, and days recorded widgets -->
         <HBox spacing="15.0">
-            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0" minHeight="90.0">
                 <Label text="Most common range" styleClass="report-info-box-title"/>
-                <Label text="9-11 kWh" styleClass="stat-value"/>
+                <Label fx:id="mostCommonRangeValueLabel" styleClass="stat-value"
+                       wrapText="true" maxWidth="Infinity" textAlignment="CENTER" alignment="CENTER"/>
             </VBox>
 
-            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0" minHeight="90.0">
                 <Label text="Variability" styleClass="report-info-box-title"/>
-                <Label text="Moderate" styleClass="stat-value"/>
+                <Label fx:id="variabilityValueLabel" styleClass="stat-value"
+                       wrapText="true" maxWidth="Infinity" textAlignment="CENTER" alignment="CENTER"/>
             </VBox>
 
-            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0" minHeight="90.0">
                 <Label text="Days recorded" styleClass="report-info-box-title"/>
-                <Label text="30 of 30" styleClass="stat-value"/>
+                <Label fx:id="daysRecordedValueLabel" styleClass="stat-value"
+                       wrapText="true" maxWidth="Infinity" textAlignment="CENTER" alignment="CENTER"/>
             </VBox>
         </HBox>
 

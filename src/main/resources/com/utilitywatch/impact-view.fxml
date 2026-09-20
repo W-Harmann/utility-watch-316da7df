@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- US10.1 - Environmental Impacts page -->
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.utilitywatch.controller.ImpactController"
+            fitToWidth="true" hbarPolicy="NEVER"
+            styleClass="page-scroll">
+    <content>
+        <VBox spacing="14">
+
+            <fx:define>
+                <ToggleGroup fx:id="utilityGroup"/>
+            </fx:define>
+
+            <Label text="Environmental Impacts" styleClass="form-title"/>
+
+            <!-- Utility and period -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Utility:"/>
+                <HBox>
+                    <ToggleButton text="Energy" userData="energy" toggleGroup="$utilityGroup" styleClass="utility-toggle, energy-toggle"/>
+                    <ToggleButton text="Water" userData="water" toggleGroup="$utilityGroup" styleClass="utility-toggle, water-toggle"/>
+                    <ToggleButton fx:id="bothToggle" text="Both" userData="both" toggleGroup="$utilityGroup" styleClass="utility-toggle, both-toggle"/>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="Period:"/>
+                <DatePicker fx:id="fromDatePicker" prefWidth="130"/>
+                <Label text="–"/>
+                <DatePicker fx:id="toDatePicker" prefWidth="130"/>
+            </HBox>
+
+            <Label fx:id="errorLabel" styleClass="error-label"/>
+
+            <!-- Footprint and by-utility cards -->
+            <HBox spacing="14">
+                <VBox styleClass="report-info-box" spacing="8" HBox.hgrow="ALWAYS" prefWidth="300" maxWidth="Infinity">
+                    <Label text="Footprint this Period" styleClass="report-info-box-title"/>
+                    <HBox spacing="6" alignment="BASELINE_LEFT">
+                        <Label fx:id="footprintLabel" styleClass="stat-value"/>
+                        <Label text="kg CO₂e"/>
+                    </HBox>
+                    <Label fx:id="changeLabel" styleClass="report-note" wrapText="true"/>
+                </VBox>
+
+                <VBox styleClass="report-info-box" spacing="10" HBox.hgrow="ALWAYS" prefWidth="300" maxWidth="Infinity">
+                    <Label text="By Utility" styleClass="report-info-box-title"/>
+                    <VBox fx:id="energyRow" spacing="4">
+                        <HBox>
+                            <Label text="Electricity"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="energyImpactLabel" styleClass="energy-column-header"/>
+                        </HBox>
+                        <ProgressBar fx:id="energyBar" progress="0" maxWidth="Infinity" styleClass="energy-bar"/>
+                    </VBox>
+                    <VBox fx:id="waterRow" spacing="4">
+                        <HBox>
+                            <Label text="Water"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="waterImpactLabel" styleClass="water-column-header"/>
+                        </HBox>
+                        <ProgressBar fx:id="waterBar" progress="0" maxWidth="Infinity" styleClass="water-bar"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+
+            <!-- Comparison with the QLD average -->
+            <VBox styleClass="report-info-box" spacing="10">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Impacts in Comparison" styleClass="report-info-box-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="QLD average is mock data • total footprint (energy + water)" styleClass="report-note"/>
+                </HBox>
+                <VBox spacing="4">
+                    <HBox>
+                        <Label text="You"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="userTotalLabel" styleClass="user-column-header"/>
+                    </HBox>
+                    <ProgressBar fx:id="userBar" progress="0" maxWidth="Infinity" styleClass="user-bar"/>
+                </VBox>
+                <VBox spacing="4">
+                    <HBox>
+                        <Label text="QLD average"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="stateTotalLabel" styleClass="state-column-header"/>
+                    </HBox>
+                    <ProgressBar fx:id="stateBar" progress="0" maxWidth="Infinity" styleClass="state-bar"/>
+                </VBox>
+                <Label fx:id="stateComparisonLabel" styleClass="report-info-box-title"/>
+            </VBox>
+
+            <!-- Emission factors bar -->
+            <VBox styleClass="report-info-box" spacing="8">
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <Label text="Emission Factors" styleClass="report-info-box-title"/>
+                    <Label fx:id="energyFactorLabel" styleClass="energy-column-header"/>
+                    <Label fx:id="waterFactorLabel" styleClass="water-column-header"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="editFactorsButton" text="Edit Factors" onAction="#onEditFactorsClick"/>
+                </HBox>
+                <HBox fx:id="factorsEditBox" spacing="8" alignment="CENTER_LEFT">
+                    <TextField fx:id="energyFactorField" promptText="kg CO₂e per kWh" prefWidth="160"/>
+                    <TextField fx:id="waterFactorField" promptText="kg CO₂e per litre" prefWidth="160"/>
+                    <Button text="Save" onAction="#onSaveFactorsClick"/>
+                    <Button text="Cancel" styleClass="cancel-button" onAction="#onCancelFactorsClick"/>
+                </HBox>
+            </VBox>
+
+        </VBox>
+    </content>
+</ScrollPane>

@@ -7,6 +7,8 @@ import javafx.scene.layout.VBox;
 import javafx.event.ActionEvent;
 
 public class CustomiseReportController {
+    private java.time.LocalDate periodStart;
+    private java.time.LocalDate periodEnd;
 
     @FXML
     private VBox previewContainer;
@@ -26,12 +28,29 @@ public class CustomiseReportController {
     private CheckBox costSummaryCheckBox;
     @FXML
     private CheckBox environmentalImpactCheckBox;
+    @FXML
+    private PeriodPickerController periodPickerController;
 
     // reference back to MainController to navigate to other screens
     private MainController mainController;
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+    }
+
+    @FXML
+    public void initialize() {
+        periodStart = periodPickerController.getStart();
+        periodEnd = periodPickerController.getEnd();
+        periodPickerController.setOnPeriodChanged(this::handlePeriodChanged);
+    }
+
+    private void handlePeriodChanged() {
+        periodStart = periodPickerController.getStart();
+        periodEnd = periodPickerController.getEnd();
+
+        // TODO: once export/report generation is integrated, use periodStart/periodEnd for it
+        System.out.println("Customise report period changed: " + periodStart + " to " + periodEnd);
     }
 
     // all the customise report option checkboxes excluding select all

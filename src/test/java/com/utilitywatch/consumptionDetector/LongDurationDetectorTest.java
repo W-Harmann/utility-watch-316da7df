@@ -1,5 +1,6 @@
-package com.utilitywatch;
+package com.utilitywatch.consumptionDetector;
 
+import com.utilitywatch.Reading;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDateTime;

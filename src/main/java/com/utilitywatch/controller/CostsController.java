@@ -1,0 +1,338 @@
+package com.utilitywatch.controller;
+
+import com.utilitywatch.CostBudgetEvaluator;
+import com.utilitywatch.Exporter;
+import com.utilitywatch.Reading;
+import com.utilitywatch.database.ReadingDAO;
+import com.utilitywatch.login.Session;
+
+import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+
+import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import static com.utilitywatch.ReadingEvaluator.BOTH;
+import static com.utilitywatch.ReadingEvaluator.ENERGY;
+import static com.utilitywatch.ReadingEvaluator.WATER;
+
+// US9.1 (costs and budget) and US11.1 (export) - the Costs page
+public class CostsController {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMM d, yyyy");
+    private static final DateTimeFormatter MONTH_FORMAT = DateTimeFormatter.ofPattern("MMMM yyyy");
+
+    // Utility and period
+    @FXML private ToggleGroup utilityGroup;
+    @FXML private ToggleButton bothToggle;
+    @FXML private DatePicker fromDatePicker;
+    @FXML private DatePicker toDatePicker;
+    @FXML private Label errorLabel;
+    @FXML private Label exportResultLabel;
+
+    // Estimated cost card
+    @FXML private Label totalCostLabel;
+    @FXML private Label periodSummaryLabel;
+
+    // By utility card
+    @FXML private VBox energyRow;
+    @FXML private VBox waterRow;
+    @FXML private Label energyCostLabel;
+    @FXML private Label waterCostLabel;
+    @FXML private ProgressBar energyBar;
+    @FXML private ProgressBar waterBar;
+
+    // Monthly budget card
+    @FXML private Label budgetSubtitleLabel;
+    @FXML private Label budgetSpentLabel;
+    @FXML private ProgressBar budgetBar;
+    @FXML private Label budgetStatusLabel;
+    @FXML private TextField budgetField;
+
+    // Current rates bar
+    @FXML private Label energyRateLabel;
+    @FXML private Label waterRateLabel;
+    @FXML private Button editRatesButton;
+    @FXML private HBox ratesEditBox;
+    @FXML private TextField energyRateField;
+    @FXML private TextField waterRateField;
+
+    private final ReadingDAO readingDAO = SharedReadingDAO.getDAO();
+    private List<Reading> readings = List.of();
+
+    @FXML
+    public void initialize() {
+        int userId = Session.getInstance().getCurrentUser().getId();
+        readings = readingDAO.getReadingsForUser(userId);
+
+        utilityGroup.selectToggle(bothToggle);
+        // like the design's segmented control, one option is always selected
+        utilityGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+            if (newToggle == null) {
+                utilityGroup.selectToggle(oldToggle);
+            } else {
+                refresh();
+            }
+        });
+
+        // default period: this month so far
+        LocalDate today = LocalDate.now();
+        fromDatePicker.setValue(today.withDayOfMonth(1));
+        toDatePicker.setValue(today);
+        fromDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> refresh());
+        toDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> refresh());
+
+        if (SharedUtilitySettings.getMonthlyBudget() > 0) {
+            budgetField.setText(plain(SharedUtilitySettings.getMonthlyBudget()));
+        }
+        showRatesEditor(false);
+        refresh();
+    }
+
+    // ---- Refreshing the page ----
+
+    private void refresh() {
+        errorLabel.setText("");
+        showRates();
+        refreshPeriodCards();
+        refreshBudgetCard();
+    }
+
+    private void refreshPeriodCards() {
+        String selection = selectedUtility();
+        LocalDate from = fromDatePicker.getValue();
+        LocalDate to = toDatePicker.getValue();
+        if (from == null || to == null) {
+            showError("Choose both a start and end date");
+            clearPeriodCards();
+            return;
+        }
+        CostBudgetEvaluator evaluator = configure(new CostBudgetEvaluator(), from.atStartOfDay(), to.atTime(LocalTime.MAX));
+        if (!evaluator.getTimeRangeValidity()) {
+            showError("The end date must be on or after the start date");
+            clearPeriodCards();
+            return;
+        }
+
+        totalCostLabel.setText(evaluator.formatUtilityCost(selection));
+        periodSummaryLabel.setText(DATE_FORMAT.format(from) + " – " + DATE_FORMAT.format(to));
+
+        BigDecimal total = evaluator.calculateUtilityCostExact(selection);
+        BigDecimal energy = evaluator.calculateUtilityCostExact(ENERGY);
+        BigDecimal water = evaluator.calculateUtilityCostExact(WATER);
+
+        setShown(energyRow, includes(selection, ENERGY));
+        setShown(waterRow, includes(selection, WATER));
+        energyCostLabel.setText("$" + energy.toPlainString());
+        waterCostLabel.setText("$" + water.toPlainString());
+        energyBar.setProgress(share(energy, total));
+        waterBar.setProgress(share(water, total));
+    }
+
+    // The budget card always tracks the current calendar month (both utilities), whatever period is selected above.
+    private void refreshBudgetCard() {
+        YearMonth month = YearMonth.now();
+        CostBudgetEvaluator evaluator = configure(new CostBudgetEvaluator(),
+                month.atDay(1).atStartOfDay(), month.atEndOfMonth().atTime(LocalTime.MAX));
+        String spent = evaluator.formatUtilityCost(BOTH);
+        double budget = SharedUtilitySettings.getMonthlyBudget();
+
+        budgetBar.getStyleClass().remove("over-budget");
+        budgetStatusLabel.getStyleClass().remove("over-text");
+
+        if (budget <= 0) {
+            budgetSubtitleLabel.setText("No budget set • " + MONTH_FORMAT.format(month));
+            budgetSpentLabel.setText(spent + " spent this month");
+            budgetBar.setProgress(0);
+            budgetStatusLabel.setText("Enter a monthly budget below to track your spending");
+            return;
+        }
+
+        budgetSubtitleLabel.setText("Limit: " + money(budget) + " • " + MONTH_FORMAT.format(month));
+        budgetSpentLabel.setText(spent + " out of " + money(budget));
+        double percentage = evaluator.getBudgetUsedPercentage();
+        budgetBar.setProgress(Math.min(percentage / 100, 1.0)); // the bar stops at full; the text shows the true figure
+
+        if (evaluator.isOverBudget()) {
+            budgetBar.getStyleClass().add("over-budget");
+            budgetStatusLabel.getStyleClass().add("over-text");
+            budgetStatusLabel.setText("Over budget • " + percent(percentage) + " of your budget used");
+        } else {
+            budgetStatusLabel.setText(percent(percentage) + " used • " + money(evaluator.getBudgetRemaining()) + " remaining");
+        }
+    }
+
+    private void showRates() {
+        energyRateLabel.setText("■ Electricity: $" + plain(SharedUtilitySettings.getEnergyRate()) + "/kWh");
+        waterRateLabel.setText("■ Water: $" + plain(SharedUtilitySettings.getWaterRate()) + "/L");
+    }
+
+    private void clearPeriodCards() {
+        totalCostLabel.setText("–");
+        periodSummaryLabel.setText("");
+        energyCostLabel.setText("");
+        waterCostLabel.setText("");
+        energyBar.setProgress(0);
+        waterBar.setProgress(0);
+    }
+
+    // ---- Button handlers ----
+
+    @FXML
+    private void onSetBudgetClick() {
+        try {
+            SharedUtilitySettings.setMonthlyBudget(parseAmount(budgetField, "Budget"));
+            refresh();
+        } catch (IllegalArgumentException e) {
+            showError(e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onEditRatesClick() {
+        energyRateField.setText(plain(SharedUtilitySettings.getEnergyRate()));
+        waterRateField.setText(plain(SharedUtilitySettings.getWaterRate()));
+        showRatesEditor(true);
+    }
+
+    @FXML
+    private void onSaveRatesClick() {
+        try {
+            double energyRate = parseAmount(energyRateField, "Electricity rate");
+            double waterRate = parseAmount(waterRateField, "Water rate");
+            SharedUtilitySettings.setEnergyRate(energyRate);
+            SharedUtilitySettings.setWaterRate(waterRate);
+            showRatesEditor(false);
+            refresh();
+        } catch (IllegalArgumentException e) {
+            showError(e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onCancelRatesClick() {
+        showRatesEditor(false);
+        errorLabel.setText("");
+    }
+
+    @FXML
+    private void onExportClick() {
+        setExportMessage("", false);
+        String selection = selectedUtility();
+        LocalDate from = fromDatePicker.getValue();
+        LocalDate to = toDatePicker.getValue();
+        if (from == null || to == null || to.isBefore(from)) {
+            showError("Choose a valid period before exporting");
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Export usage report");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files", "*.csv"));
+        chooser.setInitialFileName("utilitywatch-" + selection + "-" + from + "-to-" + to + ".csv");
+        File file = chooser.showSaveDialog(totalCostLabel.getScene().getWindow());
+        if (file == null) {
+            return; // user cancelled
+        }
+
+        Exporter exporter = configure(new Exporter(), from.atStartOfDay(), to.atTime(LocalTime.MAX));
+        Exporter.ExportResult result = exporter.export(selection, file.toPath());
+        setExportMessage(result.message(), !result.success());
+    }
+
+    // ---- Helpers ----
+
+    /** Gives an evaluator (or the exporter) the readings, period, rates and budget. */
+    private <T extends CostBudgetEvaluator> T configure(T evaluator, LocalDateTime from, LocalDateTime to) {
+        evaluator.setReadings(readings);
+        evaluator.setTimeRange(from, to);
+        evaluator.setUtilityCost(ENERGY, SharedUtilitySettings.getEnergyRate());
+        evaluator.setUtilityCost(WATER, SharedUtilitySettings.getWaterRate());
+        evaluator.setMonthlyBudget(SharedUtilitySettings.getMonthlyBudget());
+        return evaluator;
+    }
+
+    private String selectedUtility() {
+        return (String) utilityGroup.getSelectedToggle().getUserData();
+    }
+
+    private static boolean includes(String selection, String utility) {
+        return BOTH.equals(selection) || utility.equals(selection);
+    }
+
+    /** Reads a non-negative number from a text field, with a clear message if it isn't one. */
+    private static double parseAmount(TextField field, String name) {
+        String text = field.getText() == null ? "" : field.getText().trim();
+        if (text.isEmpty()) {
+            throw new IllegalArgumentException(name + " is required");
+        }
+        double value;
+        try {
+            value = Double.parseDouble(text);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(name + " must be a number");
+        }
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException(name + " must be a number");
+        }
+        if (value < 0) {
+            throw new IllegalArgumentException(name + " cannot be negative");
+        }
+        return value;
+    }
+
+    private static double share(BigDecimal part, BigDecimal total) {
+        return total.signum() == 0 ? 0 : part.divide(total, 4, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    private static String money(double amount) {
+        return "$" + BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_UP).toPlainString();
+    }
+
+    private static String percent(double value) {
+        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString() + "%";
+    }
+
+    private static String plain(double value) {
+        return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
+    }
+
+    private void showRatesEditor(boolean editing) {
+        setShown(ratesEditBox, editing);
+        setShown(editRatesButton, !editing);
+    }
+
+    private static void setShown(Node node, boolean shown) {
+        node.setVisible(shown);
+        node.setManaged(shown);
+    }
+
+    private void showError(String message) {
+        errorLabel.setText(message);
+    }
+
+    private void setExportMessage(String message, boolean isError) {
+        exportResultLabel.setText(message);
+        exportResultLabel.getStyleClass().remove("error-label");
+        if (isError) {
+            exportResultLabel.getStyleClass().add("error-label");
+        }
+    }
+}

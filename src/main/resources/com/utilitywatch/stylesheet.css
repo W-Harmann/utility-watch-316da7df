@@ -198,7 +198,7 @@
 }
 
 .stat-value {
-    -fx-font-size: 20px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
 
@@ -234,4 +234,19 @@
 
 .both-selected .chart-bar {
     -fx-bar-fill: #263238;
+}
+
+.form-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.primary-button {
+    -fx-background-color: #263238;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+}
+
+.error-label {
+    -fx-text-fill: #d32f2f;
 }

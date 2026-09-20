@@ -1,5 +1,10 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.consumptionDetector.UnusualConsumptionDetector;
+import com.utilitywatch.reports.ConsumptionSummaryCalculator;
+import com.utilitywatch.Reading;
+import com.utilitywatch.login.Session;
+import com.utilitywatch.login.User;
 import com.utilitywatch.reports.DistributionCalculator;
 import com.utilitywatch.reports.ReportsDataService;
 import javafx.fxml.FXML;
@@ -10,14 +15,17 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
-import com.utilitywatch.Reading;
-import com.utilitywatch.reports.ConsumptionSummaryCalculator;
+
 
 public class ReportsController {
     private LocalDate periodStart;
@@ -30,6 +38,8 @@ public class ReportsController {
     private Label comingSoonLabel;
     @FXML
     private VBox statisticsContentBox;
+    @FXML
+    private VBox unusualPatternsContentBox;
     @FXML
     private PeriodPickerController periodPickerController;
     // utility toggle buttons
@@ -46,7 +56,8 @@ public class ReportsController {
     private LineChart<String, Number> consumptionChart;
     @FXML
     private BarChart<String, Number> distributionChart;
-
+    @FXML
+    private LineChart<String, Number> unusualConsumptionChart;
     // consumption stats labels
     @FXML
     private Label totalEnergyLabel;
@@ -96,10 +107,12 @@ public class ReportsController {
         // updates the chart style whenever the utility toggle changes
         utilityToggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
             updateOverviewData();
+            updateChartColour();
             if (statisticsContentBox.isVisible()) {
                 updateStatisticsData();
             }
         });
+        updateChartColour();
 
         // period start and end for period date picker
         periodStart = periodPickerController.getStart();
@@ -118,6 +131,8 @@ public class ReportsController {
             updateStatisticsData();
         }
     }
+
+    // ---------- OVERVIEW TAB ----------
 
     // loads the user's energy and water readings for the selected period and then updates the chart and summary statistics
     private void updateOverviewData() {
@@ -189,64 +204,65 @@ public class ReportsController {
         }
     }
 
-    @FXML
-    protected void onGenerateReportClick() {
-        if (mainController != null) {
-            mainController.showCustomiseReport();
+    // ---------- UNUSUAL PATTERNS TAB ----------
+
+    // loads sample unusual consumption data
+    private void loadUnusualConsumptionData() {
+        // prevents duplicate data from being added to the chart
+        if (!unusualConsumptionChart.getData().isEmpty()) {
+            return;
         }
+        User currentUser = Session.getInstance().getCurrentUser();
+        int currentUserId = currentUser.getId();
+
+        List<Reading> readings = new ArrayList<>(dataService.getReadings("energy", LocalDate.MIN, LocalDate.now()));
+
+        // For the dates to be in ascending order
+        Collections.reverse(readings);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+
+        // creates the energy consumption data series and adds each energy value to its date
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+
+        XYChart.Series<String, Number> flaggedSeries = new XYChart.Series<>();
+
+        //TODO remove magic numbers
+
+        ///ActiveHoursDetector activeHoursDetector = new ActiveHoursDetector(LocalTime.of(6,0), LocalTime.of(23, 0));
+        //LongDurationDetector longDurationDetector = new LongDurationDetector(18.0, 72);
+        ///SpikeDetector spikeDetector = new SpikeDetector(3.0, 3);
+        UnusualConsumptionDetector unusualConsumptionDetector = new UnusualConsumptionDetector();
+
+        //A week of data assuming each entry is separated by a day
+        int limit = 7;
+        int count = 0;
+        List<Double> weeklyReadings;
+
+        for (Reading reading : readings) {
+            // TODO make section consider different value based on toggled utility
+            if (Objects.equals(reading.getUnit(), "kWh")) {
+                weeklyReadings = new ArrayList<>();
+                if (count != 0) {
+                    for (int i = count - 1; i >= Math.max(0, count - limit); i--) {
+                        weeklyReadings.add(readings.get(i).getQuantity());
+                    }
+                    if (unusualConsumptionDetector.isUnusual(reading.getQuantity(), weeklyReadings)) {
+                        flaggedSeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+                    }
+                }
+
+                series.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+                count++;
+            }
+        }
+
+        // adds both data series to the consumption chart
+        unusualConsumptionChart.getData().addAll(series, flaggedSeries);
     }
 
-    @FXML
-    protected void onOverviewTabClick() {
-        showOverview();
-    }
 
-    @FXML
-    protected void onTrendsTabClick() {
-        showComingSoon();
-    }
-
-    @FXML
-    protected void onComparisonsTabClick() {
-        showComingSoon();
-    }
-
-    @FXML
-    protected void onUnusualTabClick() {
-        showComingSoon();
-    }
-
-    @FXML
-    protected void onStatisticsTabClick() {
-        showStatistics();
-    }
-
-    // shows the reports overview tab content and hides everything else
-    // defaults the utility toggle to 'both'
-    private void showOverview() {
-        hideAllTabContent();
-        overviewContentBox.setVisible(true);
-        overviewContentBox.setManaged(true);
-        bothToggle.setSelected(true);
-
-        // refreshes the consumption chart layout after the content becomes visible
-        Platform.runLater(consumptionChart::requestLayout);
-    }
-
-    // shows the statistics tab content and hides everything else
-    // currently defaults the utility toggle to 'energy'
-    private void showStatistics() {
-        hideAllTabContent();
-        statisticsContentBox.setVisible(true);
-        statisticsContentBox.setManaged(true);
-        energyToggle.setSelected(true);
-
-        updateStatisticsData();
-
-        // refreshes the distribution chart layout after the content becomes visible
-        Platform.runLater(distributionChart::requestLayout);
-    }
-
+    // ---------- STATISTICS TAB ----------
     // stores the calculated statistics for one utility type, used for both single utility and combined utility reports
     private record UtilityStats(String medianText, String stdDevText, String daysRecordedText, String variabilityText, String mostCommonRangeText) {}
 
@@ -336,6 +352,97 @@ public class ReportsController {
         return String.format("%.0f-%.0f %s", mostCommonRange.start, mostCommonRange.end, unit);
     }
 
+    // ---------- NAVIGATION ----------
+    @FXML
+    protected void onGenerateReportClick() {
+        if (mainController != null) {
+            mainController.showCustomiseReport();
+        }
+    }
+
+    @FXML
+    protected void onOverviewTabClick() {
+        showOverview();
+    }
+
+    @FXML
+    protected void onTrendsTabClick() {
+        showComingSoon();
+    }
+
+    @FXML
+    protected void onComparisonsTabClick() {
+        showComingSoon();
+    }
+
+    @FXML
+    protected void onUnusualTabClick() {
+        showUnusualPatterns();
+    }
+
+    @FXML
+    protected void onStatisticsTabClick() {
+        showStatistics();
+    }
+
+    // shows the reports overview tab content and hides everything else
+    // defaults the utility toggle to 'both'
+    private void showOverview() {
+        hideAllTabContent();
+        overviewContentBox.setVisible(true);
+        overviewContentBox.setManaged(true);
+        bothToggle.setSelected(true);
+
+        // refreshes the consumption chart layout after the content becomes visible
+        Platform.runLater(consumptionChart::requestLayout);
+    }
+
+    // shows the unusual patterns tab content and hides everything else
+    // currently defaults the utility toggle to 'energy'
+    private void showUnusualPatterns() {
+        hideAllTabContent();
+        unusualPatternsContentBox.setVisible(true);
+        unusualPatternsContentBox.setManaged(true);
+        loadUnusualConsumptionData();
+
+        // refreshes the unusual consumption chart layout after the content becomes visible
+        Platform.runLater(unusualConsumptionChart::requestLayout);
+    }
+
+    // shows the statistics tab content and hides everything else
+    // currently defaults the utility toggle to 'energy'
+    private void showStatistics() {
+        hideAllTabContent();
+        statisticsContentBox.setVisible(true);
+        statisticsContentBox.setManaged(true);
+        energyToggle.setSelected(true);
+
+        updateStatisticsData();
+
+        // refreshes the distribution chart layout after the content becomes visible
+        Platform.runLater(distributionChart::requestLayout);
+    }
+
+    // updates the chart colour based on the selected utility toggle
+    private void updateChartColour() {
+        List<XYChart<String, Number>> allCharts = List.of(distributionChart, unusualConsumptionChart);
+
+        for(XYChart<String, Number> chart: allCharts) {
+
+            // removes any previously applied utility toggle
+            chart.getStyleClass().removeAll("energy-selected", "water-selected", "both-selected");
+
+            // applies the specific chart style related to the selected utility type
+            if (energyToggle.isSelected()) {
+                chart.getStyleClass().add("energy-selected");
+            } else if (waterToggle.isSelected()) {
+                chart.getStyleClass().add("water-selected");
+            } else if (bothToggle.isSelected()) {
+                chart.getStyleClass().add("both-selected");
+            }
+        }
+    }
+
     // shows coming soon placeholder and hides everything else
     private void showComingSoon() {
         hideAllTabContent();
@@ -348,6 +455,9 @@ public class ReportsController {
     private void hideAllTabContent() {
         overviewContentBox.setVisible(false);
         overviewContentBox.setManaged(false);
+
+        unusualPatternsContentBox.setVisible(false);
+        unusualPatternsContentBox.setManaged(false);
 
         statisticsContentBox.setVisible(false);
         statisticsContentBox.setManaged(false);

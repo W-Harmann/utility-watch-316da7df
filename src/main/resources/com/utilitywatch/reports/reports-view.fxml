@@ -176,6 +176,44 @@
         </GridPane>
     </VBox>
 
+    <!-- UNUSUAL PATTERNS TAB content -->
+    <VBox fx:id="unusualPatternsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
+
+        <!-- unusual consumption chart -->
+        <LineChart fx:id="unusualConsumptionChart" title="Utility Consumption" legendVisible="false" VBox.vgrow="ALWAYS" >
+            <xAxis>
+                <CategoryAxis/>
+            </xAxis>
+            <yAxis>
+                <NumberAxis/>
+            </yAxis>
+        </LineChart>
+
+        <!-- bottom row for overview and button widgets -->
+        <HBox spacing="15.0">
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="100">
+                <Button fx:id="prevFlag" text="&lt;" styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity"/>
+            </VBox>
+            <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                <Label text="Selected: Aug 21 2:40PM - Aug 23 10:14PM" styleClass="stat-value"/>
+                <HBox>
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                        <Label maxWidth="150.0" text="Utility used: 8.32 kWh" styleClass="report-info-box-title"/>
+                        <Label maxWidth="150.0" text="Utility cost: $2.87" styleClass="report-info-box-title"/>
+                    </VBox>
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                        <Label text="Difference from Expected: -40%" styleClass="report-info-box-title"/>
+                        <Label text="Reason: Spike" styleClass="report-info-box-title"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="100">
+                <Button fx:id="nextFlag" text="&gt;" styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity"/>
+            </VBox>
+        </HBox>
+
+    </VBox>
+
     <!-- STATISTICS TAB content -->
     <VBox fx:id="statisticsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
         <HBox spacing="15.0">

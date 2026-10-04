@@ -10,14 +10,13 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.MonthDay;
+import java.time.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
-import java.time.LocalDate;
+
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -302,9 +301,23 @@ public class ReportsController {
         // Dropdown Initialization
         trendViewDropdown.setValue("Annual"); // Default Selection
 
-        //todo: Database integration
-        //fixme: Set year by years collected in DataBase readings
-        trendYearDropdown.getItems().setAll("2026","2025","2023","2022","2021","2020");
+        LocalDate periodStartLocal = LocalDate.of(1,1,1);
+        LocalDate periodEndLocal = LocalDate.of(LocalDate.now().getYear(),12,31);
+
+        // fixme: this is round about cause the there is no existing function in dataService to get all Readings for USER.
+        // Get both Readings
+        List<Reading> allEnergyReadings = dataService.getReadings("energy", periodStartLocal, periodEndLocal);
+        List<Reading> allWaterReadings = dataService.getReadings("energy", periodStartLocal, periodEndLocal);
+
+        // Merge List for both readings
+        List<Reading> allUtilityReadings = new ArrayList<>(List.of());
+        allUtilityReadings.addAll(allEnergyReadings);
+        allUtilityReadings.addAll(allWaterReadings);
+
+        // Get | Sort Years within and wrap unique for each year
+        List<String> allYearsListed = allUtilityReadings.stream().map(reading -> reading.getDateTime().getYear()).distinct().sorted(Comparator.reverseOrder()).map(String::valueOf).toList();
+
+        trendYearDropdown.getItems().setAll(allYearsListed);
 
         // Set to first option for Years
         trendYearDropdown.setValue(trendYearDropdown.getItems().getFirst());
@@ -393,9 +406,14 @@ public class ReportsController {
 
         // Which way to condense reading data to (Default Months)
         // Switches to Days (D) for Month ViewSelected
-        String condenseType = "M";
         String ViewSelected = trendViewDropdown.getValue();
-        if (ViewSelected.equals("Month") || ViewSelected.equals("This Week")) { condenseType = "D"; }
+
+        String condenseType;
+        switch (ViewSelected) {
+            case "Month" -> condenseType = "D";
+            case "This Week" -> condenseType = "TW";
+            default -> {condenseType = "M";}
+        }
 
         LocalDate periodStartLocal = LocalDate.of(YearSelected,1,1);
         LocalDate periodEndLocal = LocalDate.of(YearSelected,12,31);

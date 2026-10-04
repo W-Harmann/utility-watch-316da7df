@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.chart.BarChart;
@@ -385,6 +386,51 @@ public class ReportsController {
         updateTrendDisplays();
     }
 
+    // Given the argument types, get data
+    // it will return a TOTAL or AVERAGE output of all data readings within that DateTime (Period)
+    private Number condenseTrendDataToParam(Object x_component, String utility) {
+        int YearSelected = Integer.parseInt(trendYearDropdown.getValue());
+
+        // Which way to condense reading data to (Default Months)
+        // Switches to Days (D) for Month ViewSelected
+        String condenseType = "M";
+        String ViewSelected = trendViewDropdown.getValue();
+        if (ViewSelected.equals("Month") || ViewSelected.equals("This Week")) { condenseType = "D"; }
+
+        LocalDate periodStartLocal = LocalDate.of(YearSelected,1,1);
+        LocalDate periodEndLocal = LocalDate.of(YearSelected,12,31);
+
+        List<Reading> selectedYearReadings = dataService.getReadings(utility, periodStartLocal, periodEndLocal);
+        if (selectedYearReadings.isEmpty()) { return 0.0; }
+
+        // Default
+        List<Reading> condenseReadingsToDate = selectedYearReadings;
+
+        switch (condenseType) {
+            case "M" -> {
+                Month monthEnum = Month.valueOf(x_component.toString().toUpperCase());
+                condenseReadingsToDate = selectedYearReadings.stream().filter(reading -> reading.getDateTime().getMonth().equals(monthEnum)).toList();
+            }
+            case "D" -> {
+                String PeriodSelected = trendPeriodDropdown.getValue();
+                Month monthEnum = Month.valueOf(PeriodSelected.toUpperCase());
+                int day = Integer.parseInt(x_component.toString());
+
+                MonthDay monthDay = MonthDay.of(monthEnum, day);
+                condenseReadingsToDate = selectedYearReadings.stream().filter(reading -> MonthDay.from(reading.getDateTime()).equals(monthDay)).toList();
+            }
+            default -> {}
+        }
+        if (condenseReadingsToDate.isEmpty()) { return 0.0; }
+
+        double total = 0.0;
+        for (Reading reading : condenseReadingsToDate) {
+            total += reading.getQuantity();
+        }
+
+        return total; // Return condensed reading for param period
+    }
+
     @FXML
     private void updateTrendDisplays () {
         String ViewSelected = trendViewDropdown.getValue();
@@ -442,23 +488,32 @@ public class ReportsController {
         //fixme: debug, remove in final
 //        System.out.println("View: " + ViewSelected + "\t\tYear: " + YearSelected + "\t\tPeriod: " + PeriodSelected);
 
-        //fixme: Insert values from Reading on-to graph
-        // current values are placeholders
-        List<Double> EnergyReadingsByPeriod = IntStream.rangeClosed(1, x_axis.size()).boxed().map(Double::valueOf).toList();
-        List<Double> WaterReadingsByPeriod = IntStream.rangeClosed(1, x_axis.size()).boxed().map(Double::valueOf).toList();
+        boolean selectedEnergy = trendShowEnergyTrendButton.isSelected();
+        boolean selectedWater = trendShowWaterTrendButton.isSelected();
 
-        // creates the energy consumption data series and adds each energy value to its date
+        // todo: can simplify both Energy and Water loops to a single method.
+        // Add Energy Readings if Showing
         XYChart.Series<String, Number> EnergyGraph = new XYChart.Series<>();
-        EnergyGraph.setName("Energy Trend " + YearSelected);
-        for (int idx = 0; idx < x_axis.size(); idx++) {
-            EnergyGraph.getData().add(new XYChart.Data<>(x_axis.get(idx), EnergyReadingsByPeriod.get(idx)));
+        if (selectedEnergy) {
+            EnergyGraph.setName("Energy Trend " + YearSelected);
+
+            // Loop through x_axis (Date)
+            for (String x_component : x_axis) {
+                Number condensedReadingData = condenseTrendDataToParam(x_component, "energy");
+                EnergyGraph.getData().add(new XYChart.Data<>(x_component, condensedReadingData));
+            }
         }
 
-        // creates the water consumption data series and adds each water value to its date
+        // Add Water Readings if Showing
         XYChart.Series<String, Number> WaterGraph = new XYChart.Series<>();
-        WaterGraph.setName("Water Trend " + YearSelected);
-        for (int idx = 0; idx < x_axis.size(); idx++) {
-            WaterGraph.getData().add(new XYChart.Data<>(x_axis.get(idx), WaterReadingsByPeriod.get(idx)));
+        if (selectedWater) {
+            WaterGraph.setName("Water Trend " + YearSelected);
+
+            // Loop through x_axis (Date)
+            for (String x_component : x_axis) {
+                Number condensedReadingData = condenseTrendDataToParam(x_component, "water");
+                WaterGraph.getData().add(new XYChart.Data<>(x_component, condensedReadingData));
+            }
         }
 
         // clean graph
@@ -470,8 +525,6 @@ public class ReportsController {
         trendWaterGraph.getData().addAll(WaterGraph);
 
         //todo: add data for AVERAGE line
-        //todo: add datapoints for Graph
-        //todo: show legends/keys?
 
         Node EnergyLine = EnergyGraph.getNode().lookup(".trends-tab-utility-display .chart-series-line");
         EnergyLine.setStyle("-fx-stroke: #FFBA4A;");

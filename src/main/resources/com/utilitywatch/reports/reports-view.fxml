@@ -287,13 +287,14 @@
     <VBox fx:id="comparisonsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS" maxHeight="Infinity">
 
         <HBox spacing="15.0">
-            <Label text="Period 1: " prefWidth="50"/>
-            <Button fx:id="comparisonPeriodDate1" text="Aug 1 - Sep 1, 2026" styleClass="period-button" prefWidth="250"/>
+            <fx:include source="period-picker.fxml" fx:id="periodPicker2"/>
+<!--            <Label text="Period 1: " prefWidth="50"/>-->
+<!--            <Button fx:id="comparisonPeriodDate1" text="Aug 1 - Sep 1, 2026" styleClass="period-button" prefWidth="250"/>-->
 
-<!--            <Pane HBox.hgrow="ALWAYS"/>-->
+<!--&lt;!&ndash;            <Pane HBox.hgrow="ALWAYS"/>&ndash;&gt;-->
 
-            <Label text="Period 2: " prefWidth="50"/>
-            <Button fx:id="comparisonPeriodDate2" text="Oct 1 - Nov 1, 2026" styleClass="period-button" prefWidth="250"/>
+<!--            <Label text="Period 2: " prefWidth="50"/>-->
+<!--            <Button fx:id="comparisonPeriodDate2" text="Oct 1 - Nov 1, 2026" styleClass="period-button" prefWidth="250"/>-->
         </HBox>
 
         <GridPane hgap="15.0" vgap="15.0" VBox.vgrow="ALWAYS">

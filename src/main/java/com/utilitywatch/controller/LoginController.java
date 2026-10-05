@@ -44,6 +44,12 @@ public class LoginController {
         }
     }
 
+    // moves focus to the password field when enter key is pressed, allows keyboard only login
+    @FXML
+    private void onEmailFieldEnter() {
+        passwordField.requestFocus();
+    }
+
     private void switchToMainView() throws IOException {
         Stage stage = (Stage) emailField.getScene().getWindow();
         Parent root = FXMLLoader.load(getClass().getResource("/com/utilitywatch/main-view.fxml"));

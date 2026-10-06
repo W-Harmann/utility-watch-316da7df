@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -21,11 +22,21 @@ public class MainController {
     @FXML
     private VBox contentArea;
 
+    // links to the costs navigation button
+    @FXML
+    private ToggleButton costsNavButton;
+
     private final AuthenticationService authService = SharedAuth.getService();
+
+    // automatically loads the home dashboard screen after login
+    @FXML
+    public void initialize() {
+        onHomeClick();
+    }
 
     @FXML
     protected void onHomeClick() {
-        showLabel("Home");
+        loadScreen("/com/utilitywatch/home-view.fxml");
     }
 
     @FXML
@@ -54,6 +65,39 @@ public class MainController {
         loadScreen("/com/utilitywatch/reports/customise-report-view.fxml");
     }
 
+    @FXML
+    protected void onGoalsClick() {
+        loadScreen("/com/utilitywatch/goals-view.fxml");
+    }
+
+    @FXML
+    protected void onCostsClick() {
+        showCosts();
+    }
+
+    // public so home controller's cost tile can navigate here
+    @FXML
+    public void showCosts() {
+        // highlights its navbar button when navigation comes from the home screen's costs tile
+        costsNavButton.setSelected(true);
+        loadScreen("/com/utilitywatch/costs-view.fxml");
+    }
+
+    @FXML
+    protected void onImpactClick() {
+        loadScreen("/com/utilitywatch/impact-view.fxml");
+    }
+
+    @FXML
+    protected void onAlertsClick() {
+        loadScreen("/com/utilitywatch/alerts-view.fxml");
+    }
+
+    @FXML
+    protected void onSettingsClick() {
+        showLabel("Settings");
+    }
+
     // shared method for loading screens into the main content area
     private void loadScreen(String fxmlPath) {
         try {
@@ -71,27 +115,12 @@ public class MainController {
                 reportsController.setMainController(this);
             } else if (controller instanceof CustomiseReportController customiseController) {
                 customiseController.setMainController(this);
+            } else if (controller instanceof HomeController homeController) {
+                homeController.setMainController(this);
             }
         } catch (IOException e) {
             contentArea.getChildren().setAll(new Label("Failed to load screen"));
         }
-    }
-
-    @FXML
-    protected void onGoalsClick() { loadScreen("/com/utilitywatch/goals-view.fxml"); }
-
-    @FXML
-    protected void onCostsClick() { loadScreen("/com/utilitywatch/costs-view.fxml"); }
-
-    @FXML
-    protected void onImpactClick() { loadScreen("/com/utilitywatch/impact-view.fxml"); }
-
-    @FXML
-    protected void onAlertsClick() { loadScreen("/com/utilitywatch/alerts-view.fxml"); }
-
-    @FXML
-    protected void onSettingsClick() {
-        showLabel("Settings");
     }
 
     @FXML

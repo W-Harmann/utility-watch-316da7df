@@ -26,7 +26,7 @@
             <ToggleButton text="Readings" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onReadingsClick"/>
             <ToggleButton text="Reports" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onReportsClick"/>
             <ToggleButton text="Goals" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onGoalsClick"/>
-            <ToggleButton text="Costs" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onCostsClick"/>
+            <ToggleButton fx:id="costsNavButton" text="Costs" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onCostsClick"/>
             <ToggleButton text="Impact" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onImpactClick"/>
             <ToggleButton text="Alerts" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onAlertsClick"/>
             <ToggleButton text="Settings" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onSettingsClick"/>

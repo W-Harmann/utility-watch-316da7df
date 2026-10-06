@@ -152,6 +152,15 @@
     -fx-font-weight: bold;
 }
 
+/* dashboard tiles */
+.stat-tile-button {
+    -fx-cursor: hand;
+}
+
+.stat-tile-button:hover {
+    -fx-opacity: 0.85;
+}
+
 .chart-title {
     -fx-font-size: 13px;
     -fx-font-weight: bold;

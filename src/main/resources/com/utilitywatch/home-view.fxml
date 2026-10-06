@@ -6,6 +6,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.ProgressBar?>
+
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.HomeController"
       styleClass="reports-root">
@@ -19,25 +25,26 @@
         <Label text="Here is your utility monitoring summary for today."/>
     </VBox>
 
-    <!-- three stat tiles -->
+    <!-- three clickable stat tiles -->
     <HBox spacing="15.0">
-        <VBox spacing="6.0" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-            <Label text="ENERGY CONSUMED" styleClass="report-note"/>
-            <HBox alignment="BASELINE_LEFT" spacing="4.0">
-                <Label text="12.4" styleClass="stat-value"/>
-                <Label text="kWh"/>
-            </HBox>
-        </VBox>
+        <Button fx:id="energyTile" onAction="#onEnergyTileClick" styleClass="report-info-box, stat-tile-button" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <graphic>
+                <VBox spacing="6.0" alignment="CENTER_LEFT">
+                    <Label text="ENERGY CONSUMED" styleClass="report-note"/>
+                    <Label text="12.4 kWh" styleClass="stat-value"/>
+                </VBox>
+            </graphic>
+        </Button>
 
-        <VBox spacing="6.0" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-            <Label text="WATER CONSUMED" styleClass="report-note"/>
-            <HBox alignment="BASELINE_LEFT" spacing="4.0">
-                <Label text="340" styleClass="stat-value"/>
-                <Label text="Litres"/>
-            </HBox>
-        </VBox>
+        <Button fx:id="waterTile" onAction="#onWaterTileClick" styleClass="report-info-box, stat-tile-button" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <graphic>
+                <VBox spacing="6.0" alignment="CENTER_LEFT">
+                    <Label text="WATER CONSUMED" styleClass="report-note"/>
+                    <Label text="340 Litres" styleClass="stat-value"/>
+                </VBox>
+            </graphic>
+        </Button>
 
-        <!-- cost tile is a button so it can navigate to the costs screen when clicked -->
         <Button fx:id="costTile" onAction="#onCostTileClick" styleClass="report-info-box, stat-tile-button" HBox.hgrow="ALWAYS" maxWidth="Infinity">
             <graphic>
                 <VBox spacing="6.0" alignment="CENTER_LEFT">
@@ -46,6 +53,76 @@
                 </VBox>
             </graphic>
         </Button>
+    </HBox>
+
+    <!-- trend chart -->
+    <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+        <LineChart fx:id="trendChart" title="7 Day Consumption Trends" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <xAxis>
+                <CategoryAxis/>
+            </xAxis>
+            <yAxis>
+                <NumberAxis/>
+            </yAxis>
+        </LineChart>
+
+        <!-- clickable goals tile with coloured progress bars -->
+        <VBox fx:id="goalProgressBox" onMouseClicked="#onGoalProgressClick" spacing="12.0" styleClass="report-info-box, stat-tile-button"
+              HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <Label text="Active Goal Progress" styleClass="report-info-box-title"/>
+
+            <VBox spacing="4.0">
+                <HBox>
+                    <Label text="Reduce Energy Usage"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="67%" styleClass="energy-column-header"/>
+                </HBox>
+                <ProgressBar progress="0.67" styleClass="goal-progress-energy" maxWidth="Infinity"/>
+                <Label text="Target: 15% reduction" styleClass="report-note"/>
+            </VBox>
+
+            <VBox spacing="4.0">
+                <HBox>
+                    <Label text="Reduce Water Usage"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="34%" styleClass="water-column-header"/>
+                </HBox>
+                <ProgressBar progress="0.34" styleClass="goal-progress-water" maxWidth="Infinity"/>
+                <Label text="Target: 10% reduction" styleClass="report-note"/>
+            </VBox>
+
+            <Label text="You are currently on track to meet both!" wrapText="true"/>
+        </VBox>
+    </HBox>
+
+    <!-- recent alerts and quick tip tiles -->
+    <HBox spacing="15.0">
+        <!-- clickable view all button that navigates to alerts screen -->
+        <VBox spacing="10.0" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Recent System Alerts" styleClass="report-info-box-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button styleClass="stat-tile-button" text="View All" onAction="#onViewAllAlertsClick"/>
+            </HBox>
+
+            <VBox spacing="2.0">
+                <Label text="Unusual High Energy usage detected"/>
+                <Label text="Aug 22 (2h duration) - Severe Spike (+32% above usual)" styleClass="report-note"/>
+            </VBox>
+
+            <VBox spacing="2.0">
+                <Label text="Short Energy Spike detected"/>
+                <Label text="Aug 24 (1h duration) - Moderate anomaly registered" styleClass="report-note"/>
+            </VBox>
+        </VBox>
+
+        <!-- quick tip box for conservation ideas-->
+        <VBox spacing="10.0" alignment="CENTER" styleClass="quick-tip-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <Label text="Quick Tip!" styleClass="quick-tip-title"/>
+            <Label text="Turning down your hot water system by just 5 degrees can save up to 10% on your average weekly energy bill!"
+                   styleClass="quick-tip-text" wrapText="true" textAlignment="CENTER" maxWidth="250.0"/>
+            <Button text="Learn How to Conserve" styleClass="generate-report-button" onAction="#onLearnMoreClick"/>
+        </VBox>
     </HBox>
 
 </VBox>

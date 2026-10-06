@@ -22,9 +22,15 @@ public class MainController {
     @FXML
     private VBox contentArea;
 
-    // links to the costs navigation button
+    // links to the relevant navigation button
+    @FXML
+    private ToggleButton reportsNavButton;
+    @FXML
+    private ToggleButton goalsNavButton;
     @FXML
     private ToggleButton costsNavButton;
+    @FXML
+    private ToggleButton alertsNavButton;
 
     private final AuthenticationService authService = SharedAuth.getService();
 
@@ -57,6 +63,7 @@ public class MainController {
     // loads the reports screen into the main content area
     // public so other screens can call this to navigate back here
     public void showReportsOverview() {
+        reportsNavButton.setSelected(true);
         loadScreen("/com/utilitywatch/reports/reports-view.fxml");
     }
 
@@ -67,6 +74,12 @@ public class MainController {
 
     @FXML
     protected void onGoalsClick() {
+        showGoals();
+    }
+
+    // public so home controller's goals tile can navigate here
+    public void showGoals() {
+        goalsNavButton.setSelected(true);
         loadScreen("/com/utilitywatch/goals-view.fxml");
     }
 
@@ -75,8 +88,6 @@ public class MainController {
         showCosts();
     }
 
-    // public so home controller's cost tile can navigate here
-    @FXML
     public void showCosts() {
         // highlights its navbar button when navigation comes from the home screen's costs tile
         costsNavButton.setSelected(true);
@@ -90,6 +101,11 @@ public class MainController {
 
     @FXML
     protected void onAlertsClick() {
+        showAlerts();
+    }
+
+    public void showAlerts() {
+        alertsNavButton.setSelected(true);
         loadScreen("/com/utilitywatch/alerts-view.fxml");
     }
 

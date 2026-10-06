@@ -53,6 +53,12 @@
     -fx-text-fill: white;
 }
 
+.generate-report-button:hover {
+    -fx-background-color: #0E6407;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
 .utility-toggle {
     -fx-background-color: #eeeeee;
     -fx-text-fill: #333333;
@@ -234,4 +240,39 @@
 
 .error-label {
     -fx-text-fill: #d32f2f;
+}
+
+.quick-tip-box {
+    -fx-background-color: #CB943C;
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-padding: 5;
+
+}
+
+.quick-tip-text {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+}
+
+.quick-tip-title {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.goal-progress-energy .bar {
+    -fx-background-color: #FFBA4A;
+}
+
+.goal-progress-energy .track {
+    -fx-background-color: #556671;
+}
+
+.goal-progress-water .bar {
+    -fx-background-color: #5FB2F5;
+}
+
+.goal-progress-water .track {
+    -fx-background-color: #556671;
 }

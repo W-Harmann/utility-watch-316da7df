@@ -24,11 +24,11 @@
 
             <ToggleButton text="Home" styleClass="nav-button" toggleGroup="$navGroup" selected="true" maxWidth="Infinity" onAction="#onHomeClick"/>
             <ToggleButton text="Readings" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onReadingsClick"/>
-            <ToggleButton text="Reports" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onReportsClick"/>
-            <ToggleButton text="Goals" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onGoalsClick"/>
+            <ToggleButton fx:id="reportsNavButton" text="Reports" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onReportsClick"/>
+            <ToggleButton fx:id="goalsNavButton" text="Goals" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onGoalsClick"/>
             <ToggleButton fx:id="costsNavButton" text="Costs" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onCostsClick"/>
             <ToggleButton text="Impact" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onImpactClick"/>
-            <ToggleButton text="Alerts" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onAlertsClick"/>
+            <ToggleButton fx:id="alertsNavButton" text="Alerts" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onAlertsClick"/>
             <ToggleButton text="Settings" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onSettingsClick"/>
 
             <Button text="Log Out" styleClass="logout-button" maxWidth="Infinity" onAction="#onLogOutClick"/>

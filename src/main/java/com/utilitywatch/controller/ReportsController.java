@@ -1,5 +1,6 @@
 package com.utilitywatch.controller;
 
+import com.sun.javafx.charts.Legend;
 import com.utilitywatch.reports.DistributionCalculator;
 import com.utilitywatch.reports.ReportsDataService;
 import javafx.fxml.FXML;
@@ -12,14 +13,12 @@ import javafx.scene.layout.VBox;
 
 import java.time.*;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 import java.util.stream.IntStream;
 
 import com.utilitywatch.Reading;
@@ -80,7 +79,11 @@ public class ReportsController {
     @FXML private LineChart<String, Number> trendWaterGraph;
 
     @FXML private CheckBox trendShowEnergyTrendButton;
+    @FXML private CheckBox trendShowEnergyTrendSumButton;
+    @FXML private CheckBox trendShowEnergyTrendAvgButton;
     @FXML private CheckBox trendShowWaterTrendButton;
+    @FXML private CheckBox trendShowWaterTrendSumButton;
+    @FXML private CheckBox trendShowWaterTrendAvgButton;
 
     // comparisons tab elements
     @FXML private Button comparisonPeriodDate1;
@@ -343,12 +346,11 @@ public class ReportsController {
             UtilityMain.getStyleClass().remove("trends-tab-utility-inactive");
             UtilityMain.getStyleClass().add("trends-tab-utility-active");
 
+            updateTrendDisplays();
         } else {
             UtilityMain.getStyleClass().remove("trends-tab-utility-active");
             UtilityMain.getStyleClass().add("trends-tab-utility-inactive");
         };
-
-        updateTrendDisplays();
     }
 
     //todo: make a method for each: (SUM, AVERAGE, Data-Point)
@@ -402,7 +404,7 @@ public class ReportsController {
 
     // Given the argument types, get data
     // it will return a TOTAL or AVERAGE output of all data readings within that DateTime (Period)
-    private Number condenseTrendDataToParam(Object x_component, String utility) {
+    private Number condenseTrendDataToParam(Object x_component, String utility, String calculation_type) {
         int YearSelected = Integer.parseInt(trendYearDropdown.getValue());
 
         // Which way to condense reading data to (Default Months)
@@ -455,7 +457,15 @@ public class ReportsController {
             total += reading.getQuantity();
         }
 
-        return total; // Return condensed reading for param period
+        switch (calculation_type) {
+            case "sum" -> {
+                return total; // Return condensed reading for param period as Summation
+            }
+            case "avg" -> {
+                return total / condenseReadingsToDate.size(); // Return condensed reading for param period as Average
+            }
+            default -> {throw new IllegalStateException("Calculation Type for \"condenseTrendDataToParam()\" is invalid.");}
+        }
     }
 
     @FXML
@@ -518,55 +528,133 @@ public class ReportsController {
         boolean selectedEnergy = trendShowEnergyTrendButton.isSelected();
         boolean selectedWater = trendShowWaterTrendButton.isSelected();
 
+        boolean selectedAvgEnergy = trendShowEnergyTrendAvgButton.isSelected();
+        trendShowEnergyTrendSumButton.setSelected(!selectedAvgEnergy || trendShowEnergyTrendSumButton.isSelected()); // Always selected as default if nothing else.
+        boolean selectedSumEnergy = trendShowEnergyTrendSumButton.isSelected();
+
+        boolean selectedAvgWater = trendShowWaterTrendAvgButton.isSelected();
+        trendShowWaterTrendSumButton.setSelected(!selectedAvgWater || trendShowWaterTrendSumButton.isSelected());
+        boolean selectedSumWater = trendShowWaterTrendSumButton.isSelected();
+
         // todo: can simplify both Energy and Water loops to a single method.
+        // fixme: can simplify loops that calculate the condensed data using modular methods
         // Add Energy Readings if Showing
-        XYChart.Series<String, Number> EnergyGraph = new XYChart.Series<>();
+        XYChart.Series<String, Number> EnergyGraphSum = new XYChart.Series<>();
+        XYChart.Series<String, Number> EnergyGraphAvg = new XYChart.Series<>();
         if (selectedEnergy) {
-            EnergyGraph.setName("Energy Trend " + YearSelected);
+            EnergyGraphSum.setName("Sum");
+            EnergyGraphAvg.setName("Average");
 
             // Loop through x_axis (Date)
             for (String x_component : x_axis) {
-                Number condensedReadingData = condenseTrendDataToParam(x_component, "energy");
-                EnergyGraph.getData().add(new XYChart.Data<>(x_component, condensedReadingData));
+                String selectedUtility = "energy";
+                if (selectedSumEnergy) {
+                    Number condensedReadingData = condenseTrendDataToParam(x_component, selectedUtility, "sum");
+                    EnergyGraphSum.getData().add(new XYChart.Data<>(x_component, condensedReadingData));
+                }
+                if (selectedAvgEnergy) {
+                    Number condensedReadingData = condenseTrendDataToParam(x_component, selectedUtility, "avg");
+                    EnergyGraphAvg.getData().add(new XYChart.Data<>(x_component, condensedReadingData));
+                }
             }
         }
 
         // Add Water Readings if Showing
-        XYChart.Series<String, Number> WaterGraph = new XYChart.Series<>();
+        XYChart.Series<String, Number> WaterGraphSum = new XYChart.Series<>();
+        XYChart.Series<String, Number> WaterGraphAvg = new XYChart.Series<>();
         if (selectedWater) {
-            WaterGraph.setName("Water Trend " + YearSelected);
+            WaterGraphSum.setName("Sum");
+            WaterGraphAvg.setName("Average");
 
             // Loop through x_axis (Date)
             for (String x_component : x_axis) {
-                Number condensedReadingData = condenseTrendDataToParam(x_component, "water");
-                WaterGraph.getData().add(new XYChart.Data<>(x_component, condensedReadingData));
+                String selectedUtility = "water";
+                if (selectedSumWater) {
+                    Number condensedReadingData = condenseTrendDataToParam(x_component, selectedUtility, "sum");
+                    WaterGraphSum.getData().add(new XYChart.Data<>(x_component, condensedReadingData));
+                }
+                if (selectedAvgWater) {
+                    Number condensedReadingData = condenseTrendDataToParam(x_component, selectedUtility, "avg");
+                    WaterGraphAvg.getData().add(new XYChart.Data<>(x_component, condensedReadingData));
+                }
             }
         }
 
+        // fixme: Can compact all of these lines into modular functions
         // clean graph
         trendEnergyGraph.getData().clear();
         trendWaterGraph.getData().clear();
 
+        // show graph legends
+        trendEnergyGraph.setLegendVisible(true);
+        trendWaterGraph.setLegendVisible(true);
+
+        // name graphs accordingly
+
+        String graphName = Integer.toString(YearSelected);
+        switch (ViewSelected) {
+            case "Annual" -> {
+                graphName = Integer.toString(YearSelected);
+            }
+            case "Semester" -> {
+                graphName = "S" + PeriodSelected + " " + YearSelected;
+            }
+            case "Trimester" -> {
+                graphName = "T" + PeriodSelected + " " + YearSelected;
+            }
+            case "Quarter" -> {
+                graphName = "Q" + PeriodSelected + " " + YearSelected;
+            }
+            case "Month" -> {
+                graphName = PeriodSelected + ", " + YearSelected;
+            }
+            case "This Week" -> {
+                graphName = "This Week";
+            }
+            default -> {}
+        }
+
+        trendEnergyGraph.setTitle("Energy Trend of: " + graphName);
+        trendWaterGraph.setTitle("Water Trend of: " + graphName);
+
         // adds data series to the consumption chart
-        trendEnergyGraph.getData().addAll(EnergyGraph);
-        trendWaterGraph.getData().addAll(WaterGraph);
+        trendEnergyGraph.getData().addAll(EnergyGraphSum, EnergyGraphAvg);
+        trendWaterGraph.getData().addAll(WaterGraphSum, WaterGraphAvg);
 
-        //todo: add data for AVERAGE line
+        // fixme: tidy up code \/
+        //  The legends for the graph show the wrong color for Sum and Avg, between Energy and Water
+        // Graph Stylizing
 
-        Node EnergyLine = EnergyGraph.getNode().lookup(".trends-tab-utility-display .chart-series-line");
-        EnergyLine.setStyle("-fx-stroke: #FFBA4A;");
+        Node EnergyLineSum = EnergyGraphSum.getNode().lookup(".trends-tab-utility-display .chart-series-line");
+        EnergyLineSum.setStyle("-fx-stroke: #FFBA4A;");
 
-        for (XYChart.Data<String, Number> datapoint : EnergyGraph.getData()) {
+        for (XYChart.Data<String, Number> datapoint : EnergyGraphSum.getData()) {
             Node node = datapoint.getNode();
             node.setStyle("-fx-background-color: #FFBA4A;");
         }
 
-        Node WaterLine = WaterGraph.getNode().lookup(".trends-tab-utility-display .chart-series-line");
-        WaterLine.setStyle("-fx-stroke: #5FB2F5;");
+        Node EnergyLineAvg = EnergyGraphAvg.getNode().lookup(".trends-tab-utility-display .chart-series-line");
+        EnergyLineAvg.setStyle("-fx-stroke: #FF0000;");
 
-        for (XYChart.Data<String, Number> datapoint : WaterGraph.getData()) {
+        for (XYChart.Data<String, Number> datapoint : EnergyGraphAvg.getData()) {
+            Node node = datapoint.getNode();
+            node.setStyle("-fx-background-color: #FF0000;");
+        }
+
+        Node WaterLineSum = WaterGraphSum.getNode().lookup(".trends-tab-utility-display .chart-series-line");
+        WaterLineSum.setStyle("-fx-stroke: #5FB2F5;");
+
+        for (XYChart.Data<String, Number> datapoint : WaterGraphSum.getData()) {
             Node node = datapoint.getNode();
             node.setStyle("-fx-background-color: #5FB2F5;");
+        }
+
+        Node WaterLineAvg = WaterGraphAvg.getNode().lookup(".trends-tab-utility-display .chart-series-line");
+        WaterLineAvg.setStyle("-fx-stroke: #FF0000;");
+
+        for (XYChart.Data<String, Number> datapoint : WaterGraphAvg.getData()) {
+            Node node = datapoint.getNode();
+            node.setStyle("-fx-background-color: #FF0000;");
         }
     }
 

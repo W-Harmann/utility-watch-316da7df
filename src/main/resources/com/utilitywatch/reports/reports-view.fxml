@@ -245,6 +245,8 @@
                 <HBox spacing="15.0" fx:id="trendEnergyMain" styleClass="trends-tab-utility-unactive" alignment="CENTER"  maxHeight="80">
                     <Label text="Energy" styleClass="stat-value"/>
                     <Pane HBox.hgrow="ALWAYS" />
+                    <CheckBox fx:id="trendShowEnergyTrendSumButton" text="Sum" onAction="#onShowEnergyTrendClick"/>
+                    <CheckBox fx:id="trendShowEnergyTrendAvgButton" text="Average" onAction="#onShowEnergyTrendClick"/>
                     <CheckBox fx:id="trendShowEnergyTrendButton" text="Show" onAction="#onShowEnergyTrendClick"/>
                 </HBox>
                 <!-- Energy Display | Graph -->
@@ -264,6 +266,8 @@
                 <HBox spacing="15.0" fx:id="trendWaterMain" styleClass="trends-tab-utility-unactive" alignment="CENTER" maxHeight="80">
                     <Label text="Water" styleClass="stat-value"/>
                     <Pane HBox.hgrow="ALWAYS" />
+                    <CheckBox fx:id="trendShowWaterTrendSumButton" text="Sum" onAction="#onShowWaterTrendClick"/>
+                    <CheckBox fx:id="trendShowWaterTrendAvgButton" text="Average" onAction="#onShowWaterTrendClick"/>
                     <CheckBox fx:id="trendShowWaterTrendButton" text="Show" onAction="#onShowWaterTrendClick"/>
                 </HBox>
                 <!-- Water Display | Graph -->

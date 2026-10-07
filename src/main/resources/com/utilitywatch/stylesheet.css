@@ -175,6 +175,8 @@
 
 .trends-tab-utility-display .chart-series-line {}
 
+.trends-tab-utility-display .chart-legend-item {}
+
 .comparisons-tab-widget {
     -fx-background-color: #556671;
     -fx-padding: 12;

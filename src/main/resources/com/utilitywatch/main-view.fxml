@@ -22,7 +22,7 @@
                 <ToggleGroup fx:id="navGroup"/>
             </fx:define>
 
-            <ToggleButton text="Home" styleClass="nav-button" toggleGroup="$navGroup" selected="true" maxWidth="Infinity" onAction="#onHomeClick"/>
+            <ToggleButton fx:id="homeNavButton" text="Home" styleClass="nav-button" toggleGroup="$navGroup" selected="true" maxWidth="Infinity" onAction="#onHomeClick"/>
             <ToggleButton text="Readings" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onReadingsClick"/>
             <ToggleButton fx:id="reportsNavButton" text="Reports" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onReportsClick"/>
             <ToggleButton fx:id="goalsNavButton" text="Goals" styleClass="nav-button" toggleGroup="$navGroup" maxWidth="Infinity" onAction="#onGoalsClick"/>

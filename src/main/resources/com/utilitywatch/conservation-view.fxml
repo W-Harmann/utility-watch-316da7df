@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.utilitywatch.controller.ConservationController"
+      styleClass="reports-root">
+    <padding>
+        <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+    </padding>
+
+    <Label text="Conservations" styleClass="reports-title"/>
+
+    <HBox alignment="CENTER_LEFT" spacing="15.0">
+        <Button text="Cancel" styleClass="cancel-button" onAction="#onCancelClick"/>
+    </HBox>
+
+</VBox>

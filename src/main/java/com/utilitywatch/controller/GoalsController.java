@@ -1,5 +1,8 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.reports.ConsumptionSummaryCalculator;
+import com.utilitywatch.reports.DistributionCalculator;
+import com.utilitywatch.reports.ReportsDataService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
@@ -21,6 +24,13 @@ public class GoalsController {
     private TextField targetField;
     @FXML
     private TextField periodField;
+
+    // reference to MainController for screen navigation
+    private MainController mainController;
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
 
     @FXML
@@ -62,6 +72,13 @@ public class GoalsController {
     @FXML
     protected void onCompletedGoalsClick() {
         showCompletedGoals();
+    }
+
+    @FXML
+    protected void onConservationClick() {
+        if (mainController != null) {
+            mainController.showConservation();
+        }
     }
 
 

@@ -276,3 +276,15 @@
 .goal-progress-water .track {
     -fx-background-color: #556671;
 }
+
+.error-text {
+    -fx-text-fill: #CB0E11;
+    -fx-font-size: 12px;
+}
+
+.goal-entry {
+    -fx-padding: 12 15 12 15;
+    -fx-border-color: #CCCCCC;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}

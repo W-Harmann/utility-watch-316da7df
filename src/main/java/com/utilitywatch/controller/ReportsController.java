@@ -1,6 +1,5 @@
 package com.utilitywatch.controller;
 
-import com.sun.javafx.charts.Legend;
 import com.utilitywatch.reports.DistributionCalculator;
 import com.utilitywatch.reports.ReportsDataService;
 import javafx.fxml.FXML;
@@ -9,6 +8,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.time.*;
@@ -81,9 +81,11 @@ public class ReportsController {
     @FXML private CheckBox trendShowEnergyTrendButton;
     @FXML private CheckBox trendShowEnergyTrendSumButton;
     @FXML private CheckBox trendShowEnergyTrendAvgButton;
+    @FXML private CheckBox trendShowEnergyTrendDataPointButton;
     @FXML private CheckBox trendShowWaterTrendButton;
     @FXML private CheckBox trendShowWaterTrendSumButton;
     @FXML private CheckBox trendShowWaterTrendAvgButton;
+    @FXML private CheckBox trendShowWaterTrendDataPointButton;
 
     // comparisons tab elements
     @FXML private Button comparisonPeriodDate1;
@@ -623,38 +625,61 @@ public class ReportsController {
 
         // fixme: tidy up code \/
         //  The legends for the graph show the wrong color for Sum and Avg, between Energy and Water
+
         // Graph Stylizing
+            // Energy
+                // Sum
+        stylizedTrendGraphSeries(EnergyGraphSum, "-fx-stroke: #FFBA4A;", "-fx-background-color: #FFBA4A;", trendShowEnergyTrendDataPointButton.isSelected());
+                // Average
+        stylizedTrendGraphSeries(EnergyGraphAvg, "-fx-stroke: #FF0000;", "-fx-background-color: #FF0000;", trendShowEnergyTrendDataPointButton.isSelected());
+            // Water
+                // Sum
+        stylizedTrendGraphSeries(WaterGraphSum, "-fx-stroke: #5FB2F5;", "-fx-background-color: #5FB2F5;", trendShowWaterTrendDataPointButton.isSelected());
+                // Average
+        stylizedTrendGraphSeries(WaterGraphAvg, "-fx-stroke: #FF0000;", "-fx-background-color: #FF0000;", trendShowWaterTrendDataPointButton.isSelected());
+    }
 
-        Node EnergyLineSum = EnergyGraphSum.getNode().lookup(".trends-tab-utility-display .chart-series-line");
-        EnergyLineSum.setStyle("-fx-stroke: #FFBA4A;");
+    private void stylizedTrendGraphSeries(XYChart.Series<String, Number> Series, String StyleLine, String StyleNode, boolean showDataPoint) {
+        Node Line = Series.getNode().lookup(".trends-tab-utility-display .chart-series-line");
+        Line.setStyle(StyleLine);
 
-        for (XYChart.Data<String, Number> datapoint : EnergyGraphSum.getData()) {
+        for (XYChart.Data<String, Number> datapoint : Series.getData()) {
             Node node = datapoint.getNode();
-            node.setStyle("-fx-background-color: #FFBA4A;");
-        }
+            node.setStyle(StyleNode);
 
-        Node EnergyLineAvg = EnergyGraphAvg.getNode().lookup(".trends-tab-utility-display .chart-series-line");
-        EnergyLineAvg.setStyle("-fx-stroke: #FF0000;");
+            System.out.println(datapoint.getYValue().doubleValue() == 0.0);
+            if (datapoint.getYValue().doubleValue() == 0.0 || !showDataPoint) { continue; }
 
-        for (XYChart.Data<String, Number> datapoint : EnergyGraphAvg.getData()) {
-            Node node = datapoint.getNode();
-            node.setStyle("-fx-background-color: #FF0000;");
-        }
+            Runnable customizeNode = () -> {
+                if (node instanceof StackPane) {
+                    StackPane pane = (StackPane) node;
 
-        Node WaterLineSum = WaterGraphSum.getNode().lookup(".trends-tab-utility-display .chart-series-line");
-        WaterLineSum.setStyle("-fx-stroke: #5FB2F5;");
+                    // Remove the node visually if it's in the way
+                    pane.setStyle("-fx-background-color: WHITE; -fx-background-radius: 90px;");
 
-        for (XYChart.Data<String, Number> datapoint : WaterGraphSum.getData()) {
-            Node node = datapoint.getNode();
-            node.setStyle("-fx-background-color: #5FB2F5;");
-        }
+                    Label label = new Label(String.valueOf(datapoint.getYValue()));
+                    label.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #333333;");
+                    // fixme: remove if obsolete
+                    label.setTranslateY(0);
 
-        Node WaterLineAvg = WaterGraphAvg.getNode().lookup(".trends-tab-utility-display .chart-series-line");
-        WaterLineAvg.setStyle("-fx-stroke: #FF0000;");
+                    // Add the label
+                    if (!pane.getChildren().contains(label)) {
+                        pane.getChildren().add(label);
+                    }
+                }
+            };
 
-        for (XYChart.Data<String, Number> datapoint : WaterGraphAvg.getData()) {
-            Node node = datapoint.getNode();
-            node.setStyle("-fx-background-color: #FF0000;");
+            // Draw the node if it exists
+            if (datapoint.getNode() != null) {
+                customizeNode.run();
+            } else {
+                // or wait for it to be drawn
+                datapoint.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        customizeNode.run();
+                    }
+                });
+            }
         }
     }
 

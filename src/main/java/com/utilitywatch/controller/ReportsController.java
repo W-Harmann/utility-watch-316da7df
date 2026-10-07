@@ -10,21 +10,20 @@ import com.utilitywatch.reports.ReportsDataService;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
-
 
 
 public class ReportsController {
@@ -85,6 +84,8 @@ public class ReportsController {
     private Label variabilityValueLabel;
     @FXML
     private Label daysRecordedValueLabel;
+    @FXML
+    private Label selectedDateRange;
 
     // reference to MainController for screen navigation
     private MainController mainController;
@@ -92,6 +93,9 @@ public class ReportsController {
     private final ConsumptionSummaryCalculator calculator = new ConsumptionSummaryCalculator();
     private final DistributionCalculator distributionCalculator = new DistributionCalculator();
     private final ReportsDataService dataService = new ReportsDataService();
+
+    private List<List<Reading>> flaggedReadingsList = new ArrayList<>();
+    private int selectedIndex = 0;
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
@@ -218,7 +222,7 @@ public class ReportsController {
         List<Reading> readings = new ArrayList<>(dataService.getReadings("energy", LocalDate.MIN, LocalDate.now()));
 
         // For the dates to be in ascending order
-        Collections.reverse(readings);
+        readings.sort(Comparator.comparing(Reading::getDateTime));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
 
@@ -234,31 +238,96 @@ public class ReportsController {
         ///SpikeDetector spikeDetector = new SpikeDetector(3.0, 3);
         UnusualConsumptionDetector unusualConsumptionDetector = new UnusualConsumptionDetector();
 
-        //A week of data assuming each entry is separated by a day
-        int limit = 7;
-        int count = 0;
-        List<Double> weeklyReadings;
+        boolean previousValueFlagged = false;
+        LocalDateTime startOfWeekReading = null;
+
+
+        List<Double> weeklyReadings = new ArrayList<>();
+        List<Double> recordedWeeklyReadings = new ArrayList<>();
+
+
+        List<Reading> flaggedReading;
+        List<List<Reading>> flaggedReadingsList = new ArrayList<>();
+
 
         for (Reading reading : readings) {
-            // TODO make section consider different value based on toggled utility
-            if (Objects.equals(reading.getUnit(), "kWh")) {
-                weeklyReadings = new ArrayList<>();
-                if (count != 0) {
-                    for (int i = count - 1; i >= Math.max(0, count - limit); i--) {
-                        weeklyReadings.add(readings.get(i).getQuantity());
+            if (startOfWeekReading == null) {
+                startOfWeekReading = reading.getDateTime();
+            }
+
+
+
+            if (!recordedWeeklyReadings.isEmpty()) {
+                if (unusualConsumptionDetector.isUnusual(reading.getQuantity(), recordedWeeklyReadings)) {
+                    System.out.println("Flag triggered");
+                    if (previousValueFlagged) {
+                        System.out.println("Yes previous" + reading.getQuantity());
+                        flaggedReadingsList.getLast().add(reading);
                     }
-                    if (unusualConsumptionDetector.isUnusual(reading.getQuantity(), weeklyReadings)) {
-                        flaggedSeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+                    else {
+                        flaggedReading = new ArrayList<>(List.of(reading));
+                        flaggedReadingsList.add(flaggedReading);
+                        previousValueFlagged = true;
+
+                        System.out.println("Not previous" + reading.getQuantity());
                     }
                 }
-
-                series.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
-                count++;
+                else {
+                    previousValueFlagged = false;
+                }
             }
+
+            if (reading.getDateTime().isAfter(startOfWeekReading.plusWeeks(1))) {
+
+                startOfWeekReading = reading.getDateTime();
+
+                recordedWeeklyReadings = weeklyReadings;
+
+                double max = Collections.max(recordedWeeklyReadings);
+                double min = Collections.min(recordedWeeklyReadings);
+
+                System.out.println("MAX AND MIN:");
+                System.out.println(max);
+                System.out.println(min);
+
+                weeklyReadings = new ArrayList<>();
+            }
+
+            System.out.println(reading.getQuantity());
+
+            weeklyReadings.add(reading.getQuantity());
+
         }
+
+        System.out.println("TOTAL FLAGGED READINGS:");
+
+        this.flaggedReadingsList = flaggedReadingsList;
+
+        for (List<Reading> flaggedReadings : flaggedReadingsList) {
+            System.out.println(flaggedReadings);
+        }
+
+        System.out.println("meow");
+
+        showSelectedUnusualStats();
+
 
         // adds both data series to the consumption chart
         unusualConsumptionChart.getData().addAll(series, flaggedSeries);
+    }
+
+    // calculates and displays statistics for flagged reading
+    private void showSelectedUnusualStats() {
+
+        List<Reading> flaggedReadings = flaggedReadingsList.get(selectedIndex);
+
+        if (flaggedReadings.size() > 1) {
+            selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime() + " - " + flaggedReadings.getLast().getDateTime());
+        }
+        else {
+            selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime());
+        }
+
     }
 
 
@@ -378,6 +447,22 @@ public class ReportsController {
     @FXML
     protected void onUnusualTabClick() {
         showUnusualPatterns();
+    }
+
+    @FXML
+    protected void onPreviousUnusualStatClick() {
+        if (selectedIndex > 0) {
+            selectedIndex--;
+            showSelectedUnusualStats();
+        }
+    }
+
+    @FXML
+    protected void onNextUnusualStatClick() {
+        if (selectedIndex < flaggedReadingsList.size() - 1) {
+            selectedIndex++;
+            showSelectedUnusualStats();
+        }
     }
 
     @FXML

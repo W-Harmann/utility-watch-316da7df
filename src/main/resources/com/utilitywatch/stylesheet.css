@@ -195,7 +195,7 @@
     -fx-stroke: #CB0E11
 }
 #unusualConsumptionChart .default-color1.chart-line-symbol {
-    -fx-background-color: #CB0E11, white;
+    -fx-background-color: #CB0E11, #CB0E11;
 }
 
 /* energy series line and data point for graph */

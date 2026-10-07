@@ -1,6 +1,7 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.consumptionDetector.LongDurationDetector;
+import com.utilitywatch.consumptionDetector.SpikeDetector;
 import com.utilitywatch.consumptionDetector.UnusualConsumptionDetector;
 import com.utilitywatch.reports.ConsumptionSummaryCalculator;
 import com.utilitywatch.Reading;
@@ -246,7 +247,7 @@ public class ReportsController {
 
         ///ActiveHoursDetector activeHoursDetector = new ActiveHoursDetector(LocalTime.of(6,0), LocalTime.of(23, 0));
         LongDurationDetector longDurationDetector = new LongDurationDetector(15.0, 72);
-        ///SpikeDetector spikeDetector = new SpikeDetector(3.0, 3);
+        SpikeDetector spikeDetector = new SpikeDetector(1.3);
         UnusualConsumptionDetector unusualConsumptionDetector = new UnusualConsumptionDetector();
 
         boolean previousValueFlagged = false;
@@ -306,17 +307,19 @@ public class ReportsController {
         }
 
 
+        List<Reading> spikes;
 
-        System.out.println("TOTAL FLAGGED READINGS:");
+        spikes = spikeDetector.hasSpikes(readings);
+
+
+        System.out.println("Start: " + spikes);
+
+        for (Reading reading : spikes) {
+            List<Reading> spikedReading = new ArrayList<>(List.of(reading));
+            flaggedReadingsMap.put(spikedReading, "Spike");
+        }
 
         this.flaggedReadingsMap = flaggedReadingsMap;
-
-        if (!flaggedReadingsMap.isEmpty()) {
-
-            for (List<Reading> flaggedReadings : flaggedReadingsMap.sequencedKeySet()) {
-                System.out.println(flaggedReadings);
-            }
-        }
 
 
         showSelectedUnusualStats();

@@ -36,16 +36,12 @@ public class LongDurationDetector {
 
                 hoursPassed = (int) secondsPassed / 60 / 60;
 
-                System.out.println(reading.getQuantity() + " + " + hoursPassed);
-
                 consecutiveReadingsAboveBaseline.add(reading);
             }
             else {
 
 
                 hoursPassed = (int) secondsPassed / 60 / 60;
-
-                System.out.println(reading.getQuantity() + " + " + hoursPassed);
 
                 if (hoursPassed >= consecutiveHours && ChronoUnit.HOURS.between(lastDateTime, reading.getDateTime()) < consecutiveHours) {
                     allFlaggedReadingGroups.add(consecutiveReadingsAboveBaseline);

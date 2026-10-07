@@ -198,7 +198,7 @@
                 <Label fx:id="selectedDateRange" text="Selected: " styleClass="stat-value"/>
                 <HBox>
                     <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                        <Label fx:id="selectedUtilityUsed" maxWidth="150.0" text="Utility used: 8.32 kWh" styleClass="report-info-box-title"/>
+                        <Label fx:id="selectedUtilityUsed" maxWidth="150.0" text="Utility used: " styleClass="report-info-box-title"/>
                     </VBox>
                     <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
                         <Label fx:id="selectedUnusualReason" text="Reason: " styleClass="report-info-box-title"/>

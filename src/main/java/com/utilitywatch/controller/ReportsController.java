@@ -1,5 +1,6 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.consumptionDetector.LongDurationDetector;
 import com.utilitywatch.consumptionDetector.UnusualConsumptionDetector;
 import com.utilitywatch.reports.ConsumptionSummaryCalculator;
 import com.utilitywatch.Reading;
@@ -98,9 +99,6 @@ public class ReportsController {
     private final DistributionCalculator distributionCalculator = new DistributionCalculator();
     private final ReportsDataService dataService = new ReportsDataService();
 
-    private LinkedHashMap<List<Reading>, String> flaggedReadingsMap = new LinkedHashMap<>();
-    private int selectedIndex = 0;
-
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
@@ -118,6 +116,9 @@ public class ReportsController {
             updateChartColour();
             if (statisticsContentBox.isVisible()) {
                 updateStatisticsData();
+            }
+            if (unusualPatternsContentBox.isVisible()) {
+                loadUnusualConsumptionData();
             }
         });
         updateChartColour();
@@ -137,6 +138,9 @@ public class ReportsController {
         updateOverviewData();
         if (statisticsContentBox.isVisible()) {
             updateStatisticsData();
+        }
+        if (unusualPatternsContentBox.isVisible()) {
+            loadUnusualConsumptionData();
         }
     }
 
@@ -214,16 +218,19 @@ public class ReportsController {
 
     // ---------- UNUSUAL PATTERNS TAB ----------
 
+    private LinkedHashMap<List<Reading>, String> flaggedReadingsMap = new LinkedHashMap<>();
+    private int selectedIndex = 0;
+
     // loads sample unusual consumption data
     private void loadUnusualConsumptionData() {
         // prevents duplicate data from being added to the chart
-        if (!unusualConsumptionChart.getData().isEmpty()) {
-            return;
-        }
+        consumptionChart.getData().clear();
+
+
         User currentUser = Session.getInstance().getCurrentUser();
         int currentUserId = currentUser.getId();
 
-        List<Reading> readings = new ArrayList<>(dataService.getReadings("energy", LocalDate.MIN, LocalDate.now()));
+        List<Reading> readings = new ArrayList<>(dataService.getReadings("energy", periodStart, periodEnd));
 
         // For the dates to be in ascending order
         readings.sort(Comparator.comparing(Reading::getDateTime));
@@ -238,7 +245,7 @@ public class ReportsController {
         //TODO remove magic numbers
 
         ///ActiveHoursDetector activeHoursDetector = new ActiveHoursDetector(LocalTime.of(6,0), LocalTime.of(23, 0));
-        //LongDurationDetector longDurationDetector = new LongDurationDetector(18.0, 72);
+        LongDurationDetector longDurationDetector = new LongDurationDetector(15.0, 72);
         ///SpikeDetector spikeDetector = new SpikeDetector(3.0, 3);
         UnusualConsumptionDetector unusualConsumptionDetector = new UnusualConsumptionDetector();
 
@@ -263,17 +270,13 @@ public class ReportsController {
 
             if (!recordedWeeklyReadings.isEmpty()) {
                 if (unusualConsumptionDetector.isUnusual(reading.getQuantity(), recordedWeeklyReadings)) {
-                    System.out.println("Flag triggered");
                     if (previousValueFlagged) {
-                        System.out.println("Yes previous" + reading.getQuantity());
                         flaggedReadingsMap.sequencedKeySet().getLast().add(reading);
                     }
                     else {
                         flaggedReading = new ArrayList<>(List.of(reading));
                         flaggedReadingsMap.put(flaggedReading, "Differs from previous week");
                         previousValueFlagged = true;
-
-                        System.out.println("Not previous" + reading.getQuantity());
                     }
                 }
                 else {
@@ -287,31 +290,34 @@ public class ReportsController {
 
                 recordedWeeklyReadings = weeklyReadings;
 
-                double max = Collections.max(recordedWeeklyReadings);
-                double min = Collections.min(recordedWeeklyReadings);
-
-                System.out.println("MAX AND MIN:");
-                System.out.println(max);
-                System.out.println(min);
-
                 weeklyReadings = new ArrayList<>();
             }
-
-            System.out.println(reading.getQuantity());
 
             weeklyReadings.add(reading.getQuantity());
 
         }
 
+        List<List<Reading>> flaggedLongDuration;
+
+        flaggedLongDuration = longDurationDetector.hasLongDurationUsage(readings);
+
+        for (List<Reading> reading : flaggedLongDuration) {
+            flaggedReadingsMap.put(reading, "Consistently high activity");
+        }
+
+
+
         System.out.println("TOTAL FLAGGED READINGS:");
 
         this.flaggedReadingsMap = flaggedReadingsMap;
 
-        for (List<Reading> flaggedReadings : flaggedReadingsMap.sequencedKeySet()) {
-            System.out.println(flaggedReadings);
+        if (!flaggedReadingsMap.isEmpty()) {
+
+            for (List<Reading> flaggedReadings : flaggedReadingsMap.sequencedKeySet()) {
+                System.out.println(flaggedReadings);
+            }
         }
 
-        System.out.println("meow");
 
         showSelectedUnusualStats();
 
@@ -323,30 +329,39 @@ public class ReportsController {
     // calculates and displays statistics for flagged reading
     private void showSelectedUnusualStats() {
 
+        if (!flaggedReadingsMap.isEmpty()) {
+            List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
+            List<String> flaggedReadingsReasons = new ArrayList<>(flaggedReadingsMap.sequencedValues());
 
-        List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
-        List<String> flaggedReadingsReasons = new ArrayList<>(flaggedReadingsMap.sequencedValues());
+            System.out.println(flaggedReadingsList + " + " + flaggedReadingsReasons);
 
-        List<Reading> flaggedReadings = flaggedReadingsList.get(selectedIndex);
+            List<Reading> flaggedReadings = flaggedReadingsList.get(selectedIndex);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd hh:mma");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd hh:mma");
 
-        double totalUsage = 0;
+            double totalUsage = 0;
 
-        if (flaggedReadings.size() > 1) {
-            selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime().format(formatter) + " - " + flaggedReadings.getLast().getDateTime().format(formatter));
+            if (flaggedReadings.size() > 1) {
+                selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime().format(formatter) + " - " + flaggedReadings.getLast().getDateTime().format(formatter));
+            } else {
+                selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime().format(formatter));
+            }
+
+            for (Reading reading : flaggedReadings) {
+                totalUsage += reading.getQuantity();
+            }
+
+            selectedUtilityUsed.setText("Utility used: " + totalUsage + flaggedReadings.getFirst().getUnit());
+
+            selectedUnusualReason.setText("Reason: " + flaggedReadingsReasons.get(selectedIndex));
         }
         else {
-            selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime().format(formatter));
+            selectedDateRange.setText("No unusual data found");
+
+            selectedUtilityUsed.setText("");
+
+            selectedUnusualReason.setText("");
         }
-
-        for (Reading reading : flaggedReadings) {
-            totalUsage += reading.getQuantity();
-        }
-
-        selectedUtilityUsed.setText("Utility used: " + totalUsage + flaggedReadings.getFirst().getUnit());
-
-        selectedUnusualReason.setText("Reason: " + flaggedReadingsReasons.get(selectedIndex));
 
     }
 
@@ -508,6 +523,7 @@ public class ReportsController {
         hideAllTabContent();
         unusualPatternsContentBox.setVisible(true);
         unusualPatternsContentBox.setManaged(true);
+
         loadUnusualConsumptionData();
 
         // refreshes the unusual consumption chart layout after the content becomes visible

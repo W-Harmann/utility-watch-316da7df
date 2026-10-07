@@ -616,8 +616,8 @@ public class ReportsController {
             default -> {}
         }
 
-        trendEnergyGraph.setTitle("Energy Trend of: " + graphName);
-        trendWaterGraph.setTitle("Water Trend of: " + graphName);
+        trendEnergyGraph.setTitle("(kWh) Energy Trend of: " + graphName);
+        trendWaterGraph.setTitle("(kL) Water Trend of: " + graphName);
 
         // adds data series to the consumption chart
         trendEnergyGraph.getData().addAll(EnergyGraphSum, EnergyGraphAvg);

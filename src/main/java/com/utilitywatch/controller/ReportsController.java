@@ -1,5 +1,6 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.consumptionDetector.ActiveHoursDetector;
 import com.utilitywatch.consumptionDetector.LongDurationDetector;
 import com.utilitywatch.consumptionDetector.SpikeDetector;
 import com.utilitywatch.consumptionDetector.UnusualConsumptionDetector;
@@ -19,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -245,7 +247,7 @@ public class ReportsController {
 
         //TODO remove magic numbers
 
-        ///ActiveHoursDetector activeHoursDetector = new ActiveHoursDetector(LocalTime.of(6,0), LocalTime.of(23, 0));
+        ActiveHoursDetector activeHoursDetector = new ActiveHoursDetector(LocalTime.of(6,0), LocalTime.of(0, 0));
         LongDurationDetector longDurationDetector = new LongDurationDetector(15.0, 72);
         SpikeDetector spikeDetector = new SpikeDetector(1.3);
         UnusualConsumptionDetector unusualConsumptionDetector = new UnusualConsumptionDetector();
@@ -266,8 +268,6 @@ public class ReportsController {
             if (startOfWeekReading == null) {
                 startOfWeekReading = reading.getDateTime();
             }
-
-
 
             if (!recordedWeeklyReadings.isEmpty()) {
                 if (unusualConsumptionDetector.isUnusual(reading.getQuantity(), recordedWeeklyReadings)) {
@@ -311,16 +311,33 @@ public class ReportsController {
 
         spikes = spikeDetector.hasSpikes(readings);
 
-
-        System.out.println("Start: " + spikes);
-
         for (Reading reading : spikes) {
             List<Reading> spikedReading = new ArrayList<>(List.of(reading));
             flaggedReadingsMap.put(spikedReading, "Spike");
         }
 
-        this.flaggedReadingsMap = flaggedReadingsMap;
 
+
+        previousValueFlagged = false;
+
+        for (Reading reading : readings) {
+
+            if (activeHoursDetector.isUnusual(reading, 1)) {
+                if (previousValueFlagged) {
+                    flaggedReadingsMap.sequencedKeySet().getLast().add(reading);
+                }
+                else {
+                    flaggedReading = new ArrayList<>(List.of(reading));
+                    flaggedReadingsMap.put(flaggedReading, "Activity outside of active hours");
+                    previousValueFlagged = true;
+                }
+            }
+            else {
+                previousValueFlagged = false;
+            }
+        }
+
+        this.flaggedReadingsMap = flaggedReadingsMap;
 
         showSelectedUnusualStats();
 
@@ -335,8 +352,6 @@ public class ReportsController {
         if (!flaggedReadingsMap.isEmpty()) {
             List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
             List<String> flaggedReadingsReasons = new ArrayList<>(flaggedReadingsMap.sequencedValues());
-
-            System.out.println(flaggedReadingsList + " + " + flaggedReadingsReasons);
 
             List<Reading> flaggedReadings = flaggedReadingsList.get(selectedIndex);
 

@@ -146,7 +146,6 @@ class GoalManagerTest {
     // --------------------------------- //
     // us8.5 - edit / delete goals
 
-/*
     @Test
     void shouldUpdateTargetAndPeriodWhenEditingGoal() {
         Goal original = goalManager.createGoal("energy", 15.0, "3 Months");
@@ -196,5 +195,4 @@ class GoalManagerTest {
         assertTrue(result.contains(goalToKeep));
         assertFalse(result.contains(goalToDelete));
     }
-*/
 }

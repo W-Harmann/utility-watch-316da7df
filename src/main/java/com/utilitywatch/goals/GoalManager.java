@@ -60,4 +60,32 @@ public class GoalManager {
                 .filter(Goal::isCompleted)
                 .toList();
     }
+
+    /**
+     * edits an existing goal with a new target and period
+     * validates the new values and updates completion based on current progress (us8.5)
+     */
+    public Goal editGoal(Goal goal, double newTargetReduction, String newTargetPeriod) {
+        if (newTargetReduction < 0) {
+            throw new IllegalArgumentException("Target reduction must not be negative");
+        }
+
+        if (newTargetPeriod == null || newTargetPeriod.isBlank()) {
+            throw new IllegalArgumentException("Target period must not be empty");
+        }
+
+        // rechecks completion using the goal's existing progress (raising target reopens already completed goal)
+        boolean completed = goal.getCurrentProgress() >= newTargetReduction;
+
+        return new Goal(goal.getResourceType(), newTargetReduction, newTargetPeriod, completed, goal.getCurrentProgress());
+    }
+
+    /**
+     * removes the selected goal and returns the updated list of goals (us8.5)
+     */
+    public List<Goal> deleteGoal(List<Goal> goals, Goal goalToDelete) {
+        List<Goal> updatedGoals = new java.util.ArrayList<>(goals);
+        updatedGoals.remove(goalToDelete);
+        return updatedGoals;
+    }
 }

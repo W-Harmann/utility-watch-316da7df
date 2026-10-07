@@ -86,6 +86,10 @@ public class ReportsController {
     private Label daysRecordedValueLabel;
     @FXML
     private Label selectedDateRange;
+    @FXML
+    private Label selectedUtilityUsed;
+    @FXML
+    private Label selectedUnusualReason;
 
     // reference to MainController for screen navigation
     private MainController mainController;
@@ -94,7 +98,7 @@ public class ReportsController {
     private final DistributionCalculator distributionCalculator = new DistributionCalculator();
     private final ReportsDataService dataService = new ReportsDataService();
 
-    private List<List<Reading>> flaggedReadingsList = new ArrayList<>();
+    private LinkedHashMap<List<Reading>, String> flaggedReadingsMap = new LinkedHashMap<>();
     private int selectedIndex = 0;
 
     public void setMainController(MainController mainController) {
@@ -247,7 +251,7 @@ public class ReportsController {
 
 
         List<Reading> flaggedReading;
-        List<List<Reading>> flaggedReadingsList = new ArrayList<>();
+        LinkedHashMap<List<Reading>, String> flaggedReadingsMap = new LinkedHashMap<>();
 
 
         for (Reading reading : readings) {
@@ -262,11 +266,11 @@ public class ReportsController {
                     System.out.println("Flag triggered");
                     if (previousValueFlagged) {
                         System.out.println("Yes previous" + reading.getQuantity());
-                        flaggedReadingsList.getLast().add(reading);
+                        flaggedReadingsMap.sequencedKeySet().getLast().add(reading);
                     }
                     else {
                         flaggedReading = new ArrayList<>(List.of(reading));
-                        flaggedReadingsList.add(flaggedReading);
+                        flaggedReadingsMap.put(flaggedReading, "Differs from previous week");
                         previousValueFlagged = true;
 
                         System.out.println("Not previous" + reading.getQuantity());
@@ -301,9 +305,9 @@ public class ReportsController {
 
         System.out.println("TOTAL FLAGGED READINGS:");
 
-        this.flaggedReadingsList = flaggedReadingsList;
+        this.flaggedReadingsMap = flaggedReadingsMap;
 
-        for (List<Reading> flaggedReadings : flaggedReadingsList) {
+        for (List<Reading> flaggedReadings : flaggedReadingsMap.sequencedKeySet()) {
             System.out.println(flaggedReadings);
         }
 
@@ -319,14 +323,30 @@ public class ReportsController {
     // calculates and displays statistics for flagged reading
     private void showSelectedUnusualStats() {
 
+
+        List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
+        List<String> flaggedReadingsReasons = new ArrayList<>(flaggedReadingsMap.sequencedValues());
+
         List<Reading> flaggedReadings = flaggedReadingsList.get(selectedIndex);
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd hh:mma");
+
+        double totalUsage = 0;
+
         if (flaggedReadings.size() > 1) {
-            selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime() + " - " + flaggedReadings.getLast().getDateTime());
+            selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime().format(formatter) + " - " + flaggedReadings.getLast().getDateTime().format(formatter));
         }
         else {
-            selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime());
+            selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime().format(formatter));
         }
+
+        for (Reading reading : flaggedReadings) {
+            totalUsage += reading.getQuantity();
+        }
+
+        selectedUtilityUsed.setText("Utility used: " + totalUsage + flaggedReadings.getFirst().getUnit());
+
+        selectedUnusualReason.setText("Reason: " + flaggedReadingsReasons.get(selectedIndex));
 
     }
 
@@ -459,7 +479,7 @@ public class ReportsController {
 
     @FXML
     protected void onNextUnusualStatClick() {
-        if (selectedIndex < flaggedReadingsList.size() - 1) {
+        if (selectedIndex < flaggedReadingsMap.size() - 1) {
             selectedIndex++;
             showSelectedUnusualStats();
         }

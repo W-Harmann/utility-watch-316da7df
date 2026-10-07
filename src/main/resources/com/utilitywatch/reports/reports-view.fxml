@@ -195,15 +195,13 @@
                 <Button fx:id="prevFlag" text="&lt;" styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onPreviousUnusualStatClick"/>
             </VBox>
             <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                <Label fx:id="selectedDateRange" text="Selected: Aug 21 2:40PM - Aug 23 10:14PM" styleClass="stat-value"/>
+                <Label fx:id="selectedDateRange" text="Selected: " styleClass="stat-value"/>
                 <HBox>
                     <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                        <Label maxWidth="150.0" text="Utility used: 8.32 kWh" styleClass="report-info-box-title"/>
-                        <Label maxWidth="150.0" text="Utility cost: $2.87" styleClass="report-info-box-title"/>
+                        <Label fx:id="selectedUtilityUsed" maxWidth="150.0" text="Utility used: 8.32 kWh" styleClass="report-info-box-title"/>
                     </VBox>
                     <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                        <Label text="Difference from Expected: -40%" styleClass="report-info-box-title"/>
-                        <Label text="Reason: Spike" styleClass="report-info-box-title"/>
+                        <Label fx:id="selectedUnusualReason" text="Reason: " styleClass="report-info-box-title"/>
                     </VBox>
                 </HBox>
             </VBox>

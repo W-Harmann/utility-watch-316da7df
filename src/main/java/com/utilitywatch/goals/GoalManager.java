@@ -36,4 +36,28 @@ public class GoalManager {
                 .filter(goal -> !goal.isCompleted())
                 .toList();
     }
+
+    /**
+     * updates the goal's progress and marks it completed when the target is reached (us8.4)
+     */
+    public Goal updateProgress(Goal goal, double achievedReduction) {
+        boolean completed = goal.isCompleted() || achievedReduction >= goal.getTargetReduction();
+        return new Goal(goal.getResourceType(), goal.getTargetReduction(), goal.getTargetPeriod(), completed, achievedReduction);
+    }
+
+    /**
+     * checks if the goal has just reached its target for the first time, allows a one time notification (us8.4)
+     */
+    public boolean justCompleted(Goal goal, double achievedReduction) {
+        return !goal.isCompleted() && achievedReduction >= goal.getTargetReduction();
+    }
+
+    /**
+     * returns only completed goals so the user can view them (us8.4)
+     */
+    public List<Goal> filterCompletedGoals(List<Goal> goals) {
+        return goals.stream()
+                .filter(Goal::isCompleted)
+                .toList();
+    }
 }

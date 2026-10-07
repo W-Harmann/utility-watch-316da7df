@@ -11,6 +11,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.time.*;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -408,15 +409,19 @@ public class ReportsController {
         // Switches to Days (D) for Month ViewSelected
         String ViewSelected = trendViewDropdown.getValue();
 
+        LocalDate periodStartLocal = LocalDate.of(YearSelected,1,1);
+        LocalDate periodEndLocal = LocalDate.of(YearSelected,12,31);
+
         String condenseType;
         switch (ViewSelected) {
             case "Month" -> condenseType = "D";
-            case "This Week" -> condenseType = "TW";
+            case "This Week" -> {
+                condenseType = "TW";
+                periodStartLocal = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                periodEndLocal = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+            }
             default -> {condenseType = "M";}
         }
-
-        LocalDate periodStartLocal = LocalDate.of(YearSelected,1,1);
-        LocalDate periodEndLocal = LocalDate.of(YearSelected,12,31);
 
         List<Reading> selectedYearReadings = dataService.getReadings(utility, periodStartLocal, periodEndLocal);
         if (selectedYearReadings.isEmpty()) { return 0.0; }
@@ -428,6 +433,10 @@ public class ReportsController {
             case "M" -> {
                 Month monthEnum = Month.valueOf(x_component.toString().toUpperCase());
                 condenseReadingsToDate = selectedYearReadings.stream().filter(reading -> reading.getDateTime().getMonth().equals(monthEnum)).toList();
+            }
+            case "TW" -> {
+                DayOfWeek dayofweekEnum = DayOfWeek.valueOf(x_component.toString().toUpperCase());
+                condenseReadingsToDate = selectedYearReadings.stream().filter(reading -> reading.getDateTime().getDayOfWeek().equals(dayofweekEnum)).toList();
             }
             case "D" -> {
                 String PeriodSelected = trendPeriodDropdown.getValue();

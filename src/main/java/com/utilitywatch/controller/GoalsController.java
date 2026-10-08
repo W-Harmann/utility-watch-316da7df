@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class GoalsController {
     @FXML
@@ -204,12 +206,64 @@ public class GoalsController {
             VBox goalEntry = loader.load();
 
             GoalEntryController controller = loader.getController();
-            controller.setData(goal);
+            controller.setData(goal, () -> onEditGoal(goal), () -> onDeleteGoal(goal));
 
             container.getChildren().add(goalEntry);
 
         } catch (IOException e) {
             container.getChildren().add(new Label("Failed to load goal"));
+        }
+    }
+
+    // opens an edit window so the user can change the goal target and period
+    private void onEditGoal(Goal goal) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit Goal");
+        dialog.setHeaderText("Edit your " + goal.getResourceType() + " goal");
+
+        TextField targetInput = new TextField(String.valueOf((int) goal.getTargetReduction()));
+        ComboBox<String> periodInput = new ComboBox<>();
+        periodInput.getItems().addAll(PERIODS);
+        periodInput.setValue(goal.getTargetPeriod());
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.addRow(0, new Label("Target reduction (%):"), targetInput);
+        grid.addRow(1, new Label("Period:"), periodInput);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        try {
+            double newTarget = Double.parseDouble(targetInput.getText().trim());
+            Goal edited = goalManager.editGoal(goal, newTarget, periodInput.getValue());
+            goals.set(goals.indexOf(goal), edited);
+            errorLabel.setText("");
+            refreshGoalLists(); // updates progress using the new goal target and period
+        } catch (NumberFormatException e) {
+            errorLabel.setText("Target reduction must be a number, e.g. 15");
+        } catch (IllegalArgumentException e) {
+            errorLabel.setText(e.getMessage());
+        }
+    }
+
+    // asks for confirmation before removing the goal
+    private void onDeleteGoal(Goal goal) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Delete Goal");
+        confirm.setHeaderText("Delete this goal?");
+        confirm.setContentText("This " + goal.getResourceType() + " goal will be permanently removed.");
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            goals = goalManager.deleteGoal(goals, goal);
+            refreshGoalLists();
         }
     }
 

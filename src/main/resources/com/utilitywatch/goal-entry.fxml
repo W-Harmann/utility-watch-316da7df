@@ -17,7 +17,6 @@
                 <Label fx:id="goalContainerProgress" text="Progress: 62%"/>
             </VBox>
             <VBox alignment="CENTER">
-                <Button fx:id="viewGoalDetails" text="View Details"/>
                 <Button fx:id="editGoalDetails" text="Edit"/>
                 <Button fx:id="deleteGoal" text="Delete"/>
             </VBox>

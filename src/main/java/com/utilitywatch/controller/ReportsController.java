@@ -122,7 +122,7 @@ public class ReportsController {
                 updateStatisticsData();
             }
             if (unusualPatternsContentBox.isVisible()) {
-                loadUnusualConsumptionData();
+                updateUnusualConsumptionData();
             }
         });
         updateChartColour();
@@ -144,7 +144,7 @@ public class ReportsController {
             updateStatisticsData();
         }
         if (unusualPatternsContentBox.isVisible()) {
-            loadUnusualConsumptionData();
+            updateUnusualConsumptionData();
         }
     }
 
@@ -226,25 +226,61 @@ public class ReportsController {
     private int selectedIndex = 0;
 
     // loads sample unusual consumption data
-    private void loadUnusualConsumptionData() {
+    private void updateUnusualConsumptionData() {
         // prevents duplicate data from being added to the chart
         consumptionChart.getData().clear();
 
+        // check which resource toggles are currently selected
+        boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
+        boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
 
-        User currentUser = Session.getInstance().getCurrentUser();
-        int currentUserId = currentUser.getId();
 
-        List<Reading> readings = new ArrayList<>(dataService.getReadings("energy", periodStart, periodEnd));
+
+        List<Reading> energyReadings = new ArrayList<>(dataService.getReadings("energy", periodStart, periodEnd));
+        List<Reading> waterReadings = new ArrayList<>(dataService.getReadings("water", periodStart, periodEnd));
+
+        LinkedHashMap<List<Reading>, String> utilityFlags = new LinkedHashMap<>();
+
+        if (showEnergy && !energyReadings.isEmpty()) {
+            // For the dates to be in ascending order
+            energyReadings.sort(Comparator.comparing(Reading::getDateTime));
+
+            LinkedHashMap<List<Reading>, String> energyFlags = loadUnusualConsumptionData(energyReadings);
+            utilityFlags.putAll(energyFlags);
+        }
+
+
+
+        if (showWater && !waterReadings.isEmpty()) {
+            waterReadings.sort(Comparator.comparing(Reading::getDateTime));
+
+            LinkedHashMap<List<Reading>, String> waterFlags = loadUnusualConsumptionData(waterReadings);
+            utilityFlags.putAll(waterFlags);
+        }
+
+
+
+        this.flaggedReadingsMap = sortFlaggedReadings(utilityFlags);
+
+
+        selectedIndex = 0;
+        showSelectedUnusualStats();
+
+        // adds both data series to the consumption chart
+        ///unusualConsumptionChart.getData().addAll(series, flaggedSeries);
+    }
+
+    private LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
 
         // For the dates to be in ascending order
         readings.sort(Comparator.comparing(Reading::getDateTime));
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+        ///DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
 
         // creates the energy consumption data series and adds each energy value to its date
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        ///XYChart.Series<String, Number> series = new XYChart.Series<>();
 
-        XYChart.Series<String, Number> flaggedSeries = new XYChart.Series<>();
+        ///XYChart.Series<String, Number> flaggedSeries = new XYChart.Series<>();
 
         //TODO remove magic numbers
 
@@ -338,10 +374,15 @@ public class ReportsController {
             }
         }
 
+        return flaggedReadingsMap;
+    }
+
+    private LinkedHashMap<List<Reading>, String> sortFlaggedReadings(LinkedHashMap<List<Reading>, String> utilityFlags) {
+
         // orders flagged reading map
         LinkedHashMap<List<Reading>, String> sortedFlaggedReadings = new LinkedHashMap<>();
 
-        flaggedReadingsMap.entrySet().stream()
+        utilityFlags.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(list ->
                         list.stream()
                                 .map(Reading::getDateTime)
@@ -350,15 +391,7 @@ public class ReportsController {
                 )))
                 .forEachOrdered(entry -> sortedFlaggedReadings.put(entry.getKey(), entry.getValue()));
 
-        this.flaggedReadingsMap = sortedFlaggedReadings;
-
-
-                selectedIndex = 0;
-                showSelectedUnusualStats();
-
-
-        // adds both data series to the consumption chart
-        unusualConsumptionChart.getData().addAll(series, flaggedSeries);
+        return sortedFlaggedReadings;
     }
 
     // calculates and displays statistics for flagged reading
@@ -557,7 +590,7 @@ public class ReportsController {
         unusualPatternsContentBox.setVisible(true);
         unusualPatternsContentBox.setManaged(true);
 
-        loadUnusualConsumptionData();
+        updateUnusualConsumptionData();
 
         // refreshes the unusual consumption chart layout after the content becomes visible
         Platform.runLater(unusualConsumptionChart::requestLayout);

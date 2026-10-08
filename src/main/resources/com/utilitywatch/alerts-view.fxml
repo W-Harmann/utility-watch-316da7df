@@ -48,18 +48,6 @@
                     <Button text="Non-Issue"/>
                 </VBox>
             </HBox>
-
-            <HBox alignment="CENTER" spacing="10.0" styleClass="report-info-box">
-                <VBox>
-                    <Label text="Aug 19 2026 Reduced Water Usage" styleClass="reports-title"/>
-                    <Label text="Completed"/>
-                    <Label text="Water Successfully Reduced by 5%"/>
-                </VBox>
-                <VBox alignment="CENTER">
-                    <Button text="View Details"/>
-                    <Button text="Non-Issue"/>
-                </VBox>
-            </HBox>
         </VBox>
     </ScrollPane>
 

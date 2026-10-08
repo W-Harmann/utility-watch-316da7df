@@ -1,6 +1,7 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.goals.Goal;
+import com.utilitywatch.goals.GoalAlertStore;
 import com.utilitywatch.goals.GoalManager;
 import com.utilitywatch.reports.ConsumptionSummaryCalculator;
 import com.utilitywatch.reports.ReportsDataService;
@@ -12,6 +13,7 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -150,6 +152,14 @@ public class GoalsController {
 
             if (goalManager.justCompleted(goal, achievedReduction)) {
                 newlyCompletedGoals.add(goal);
+
+                // also saved as an alert so it appears on the alerts screen (us8.4)
+                String resource = "energy".equals(goal.getResourceType()) ? "Energy" : "Water";
+                GoalAlertStore.add(new GoalAlertStore.GoalAlert(
+                        LocalDateTime.now(),
+                        "Goal Completed: Reduced " + resource + " Usage",
+                        resource + " successfully reduced by " + (int) goal.getTargetReduction()
+                                + "% (" + goal.getTargetPeriod() + ")"));
             }
             goals.set(goalIndex, goalManager.updateProgress(goal, achievedReduction));
         }

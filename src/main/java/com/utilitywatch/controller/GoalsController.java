@@ -2,12 +2,18 @@ package com.utilitywatch.controller;
 
 import com.utilitywatch.goals.Goal;
 import com.utilitywatch.goals.GoalManager;
+import com.utilitywatch.reports.ConsumptionSummaryCalculator;
+import com.utilitywatch.reports.ReportsDataService;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GoalsController {
     @FXML
@@ -16,6 +22,8 @@ public class GoalsController {
     private VBox completedGoalContentBox;
     @FXML
     private VBox goalContainer;
+    @FXML
+    private VBox completedGoalContainer;
     @FXML
     private ToggleGroup resourceToggleGroup;
     @FXML
@@ -29,12 +37,21 @@ public class GoalsController {
     @FXML
     private Label errorLabel;
 
+    // provides set period options so users select a valid format instead of entering the period as free text
+    private static final List<String> PERIODS = List.of("1 Month", "3 Months", "6 Months", "1 Year");
+
     private final GoalManager goalManager = new GoalManager();
+    private final ReportsDataService dataService = new ReportsDataService();
+    private final ConsumptionSummaryCalculator calculator = new ConsumptionSummaryCalculator();
+
+    // static so goals are kept when the user leaves and returns to this screen
+    // TODO: replace with database persistence
+    private static List<Goal> goals = new ArrayList<>();
 
     @FXML
     public void initialize() {
-        // provides set period options so users select a valid format instead of entering the period as free text
-        periodComboBox.getItems().addAll("1 Month", "3 Months", "6 Months", "1 Year");
+        periodComboBox.getItems().addAll(PERIODS);
+        refreshGoalLists();
     }
 
 
@@ -66,20 +83,19 @@ public class GoalsController {
         }
 
         // us8.1 goalManager validates resource type, target, and period and returns a goal only when all checks pass
-        Goal newGoal;
         try {
-            newGoal = goalManager.createGoal(resourceType, targetReduction, targetPeriod);
+            goals.add(goalManager.createGoal(resourceType, targetReduction, targetPeriod));
         } catch (IllegalArgumentException e) {
             errorLabel.setText(e.getMessage());
             return;
         }
 
-        addGoalToContainer(newGoal);
-
         // reset the goal entry area for the next entry
         resourceToggleGroup.selectToggle(null);
         targetField.clear();
         periodComboBox.setValue(null);
+        // refreshes both lists so the new goal appears instantly
+        refreshGoalLists();
     }
 
     // reads which resource toggle is selected, or null if neither are
@@ -89,20 +105,101 @@ public class GoalsController {
         return null;
     }
 
+    // us8.4 calculates the percentage reduction between the two most recent periods
+    // returns 0 if either period has no readings
+    private double calculateAchievedReduction(Goal goal) {
+        int days = periodToDays(goal.getTargetPeriod());
+        LocalDate today = LocalDate.now();
+        LocalDate currentStart = today.minusDays(days - 1);
+        LocalDate previousEnd = currentStart.minusDays(1);
+        LocalDate previousStart = previousEnd.minusDays(days - 1);
+
+        List<Double> current = dataService.getReadingQuantities(goal.getResourceType(), currentStart, today);
+        List<Double> previous = dataService.getReadingQuantities(goal.getResourceType(), previousStart, previousEnd);
+
+        if (current.isEmpty() || previous.isEmpty()) {
+            return 0.0;
+        }
+
+        double previousTotal = calculator.calculateTotal(previous);
+        if (previousTotal <= 0) {
+            return 0.0;
+        }
+
+        double currentTotal = calculator.calculateTotal(current);
+        return Math.max(0.0, (previousTotal - currentTotal) / previousTotal * 100);
+    }
+
+    private int periodToDays(String period) {
+        return switch (period) {
+            case "1 Month" -> 30;
+            case "3 Months" -> 90;
+            case "6 Months" -> 180;
+            case "1 Year" -> 365;
+            default -> 30;
+        };
+    }
+
+    // us8.4 updates goal progress from readings, sends alerts for newly completed goals, and refreshes both lists
+    private void refreshGoalLists() {
+        List<Goal> newlyCompletedGoals = new ArrayList<>();
+
+        for (int goalIndex = 0; goalIndex < goals.size(); goalIndex++) {
+            Goal goal = goals.get(goalIndex);
+            double achievedReduction = calculateAchievedReduction(goal);
+
+            if (goalManager.justCompleted(goal, achievedReduction)) {
+                newlyCompletedGoals.add(goal);
+            }
+            goals.set(goalIndex, goalManager.updateProgress(goal, achievedReduction));
+        }
+
+        goalContainer.getChildren().clear();
+        completedGoalContainer.getChildren().clear();
+
+        for (Goal activeGoal : goalManager.filterActiveGoals(goals)) {
+            addGoalEntry(activeGoal, goalContainer);
+        }
+
+        for (Goal completedGoal : goalManager.filterCompletedGoals(goals)) {
+            addGoalEntry(completedGoal, completedGoalContainer);
+        }
+
+        // run later so the alert appears after the screen finishes loading
+        if (!newlyCompletedGoals.isEmpty()) {
+            Platform.runLater(() -> showCompletionAlert(newlyCompletedGoals));
+        }
+    }
+
+    // displays a message showing the details of each goal that has been compelted
+    private void showCompletionAlert(List<Goal> completedGoals) {
+        StringBuilder message = new StringBuilder();
+        for (Goal goal : completedGoals) {
+            message.append("You reached your ").append(goal.getResourceType())
+                    .append(" reduction goal of ").append((int) goal.getTargetReduction())
+                    .append("% (").append(goal.getTargetPeriod()).append(").\n");
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Goal Completed");
+        alert.setHeaderText("Congratulations!");
+        alert.setContentText(message.toString());
+        alert.show();
+    }
+
     // loads a goal entry view for the given goal and adds it to the active goals container
-    private void addGoalToContainer(Goal goal) {
+    private void addGoalEntry(Goal goal, VBox container) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/utilitywatch/goal-entry.fxml"));
-
             VBox goalEntry = loader.load();
 
             GoalEntryController controller = loader.getController();
             controller.setData(goal);
 
-            goalContainer.getChildren().add(goalEntry);
+            container.getChildren().add(goalEntry);
 
         } catch (IOException e) {
-            activeGoalContentBox.getChildren().setAll(new Label("Failed to load goal"));
+            container.getChildren().add(new Label("Failed to load goal"));
         }
     }
 

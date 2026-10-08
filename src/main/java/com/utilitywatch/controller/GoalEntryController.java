@@ -20,7 +20,8 @@ public class GoalEntryController {
         goalContainerTarget.setText("Target: " + (int) goal.getTargetReduction() + "% reduction");
         goalContainerPeriod.setText("Period: " + goal.getTargetPeriod());
 
-        // TODO: connect real progress tracking once consumption data is linked to gaols
-        goalContainerProgress.setText("Progress: 0%");
+        // us8.4 shows the real reduction achieved and marks completed goals
+        String progress = String.format("Progress: %.0f%% reduction achieved", goal.getCurrentProgress());
+        goalContainerProgress.setText(goal.isCompleted() ? progress + " (Completed)" : progress);
     }
 }

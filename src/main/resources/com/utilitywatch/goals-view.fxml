@@ -66,6 +66,9 @@
     <!-- COMPLETED GOAL CONTENT TAB content -->
     <VBox fx:id="completedGoalContentBox" spacing="15.0" VBox.vgrow="ALWAYS" visible="false" managed="false">
         <Label text="Completed" styleClass="reports-title"/>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0">
+            <VBox fx:id="completedGoalContainer" spacing="15.0" styleClass="report-info-box"/>
+        </ScrollPane>
     </VBox>
 
 

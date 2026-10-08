@@ -417,7 +417,9 @@ public class ReportsController {
                 totalUsage += reading.getQuantity();
             }
 
-            selectedUtilityUsed.setText("Utility used: " + totalUsage + flaggedReadings.getFirst().getUnit());
+            String formattedTotal = String.format("%.1f", totalUsage);
+
+            selectedUtilityUsed.setText("Utility used: " + formattedTotal + flaggedReadings.getFirst().getUnit());
 
             selectedUnusualReason.setText("Reason: " + flaggedReadingsReasons.get(selectedIndex));
         }

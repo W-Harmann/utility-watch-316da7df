@@ -37,8 +37,6 @@ public class GoalsController {
     @FXML
     private TextField targetField;
     @FXML
-    private TextField periodField;
-    @FXML
     private ComboBox<String> periodComboBox;
     @FXML
     private Label errorLabel;

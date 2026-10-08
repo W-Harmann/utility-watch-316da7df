@@ -28,6 +28,7 @@ import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.stream.Collectors;
 
 
 public class ReportsController {
@@ -337,9 +338,23 @@ public class ReportsController {
             }
         }
 
-        this.flaggedReadingsMap = flaggedReadingsMap;
+        // orders flagged reading map
+        LinkedHashMap<List<Reading>, String> sortedFlaggedReadings = new LinkedHashMap<>();
 
-        showSelectedUnusualStats();
+        flaggedReadingsMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing(list ->
+                        list.stream()
+                                .map(Reading::getDateTime)
+                                .min(LocalDateTime::compareTo)
+                                .orElse(LocalDateTime.MAX)
+                )))
+                .forEachOrdered(entry -> sortedFlaggedReadings.put(entry.getKey(), entry.getValue()));
+
+        this.flaggedReadingsMap = sortedFlaggedReadings;
+
+
+                selectedIndex = 0;
+                showSelectedUnusualStats();
 
 
         // adds both data series to the consumption chart

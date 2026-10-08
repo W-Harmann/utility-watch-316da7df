@@ -739,7 +739,6 @@ public class ReportsController {
         comparisonTotalGraph.getData().clear();
         comparisonAverageGraph.getData().clear();
 
-        // fixme: Start
         XYChart.Series<String, Number> EnergyTotalSeries = new XYChart.Series<>();
         EnergyTotalSeries.setName("Energy");
 
@@ -781,7 +780,6 @@ public class ReportsController {
                 double percentChangeData = percentChange(2);
 
                 // If Infinity is detected, set N/a instead.
-                // fixme: Not working, still showing infinity
                 if (Double.isInfinite(percentChangeData)) {
                     AssociatedLabelPercent.setText("N/a");
                 } else {
@@ -869,7 +867,7 @@ public class ReportsController {
         );
 
         // Add Both Datas to Graph
-        comparisonAverageGraph.getData().addAll(EnergyAverageSeries, WaterAverageSeries);
+        comparisonAverageGraph.getData().addAll(EnergyAvg.Series, WaterAvg.Series);
 
         // Optional: Hide the legend if individual colors make it irrelevant
 //        comparisonTotalGraph.setLegendVisible(false);

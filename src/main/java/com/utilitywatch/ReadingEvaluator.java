@@ -1,7 +1,9 @@
 package com.utilitywatch;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +36,11 @@ public abstract class ReadingEvaluator {
     public void setTimeRange(LocalDateTime fromDate, LocalDateTime toDate) {
         this.fromDate = fromDate;
         this.toDate = toDate;
+    }
+
+    /** Selects whole days: from the start of 'from' to the end of 'to'. */
+    public void setTimeRange(LocalDate from, LocalDate to) {
+        setTimeRange(from.atStartOfDay(), to.atTime(LocalTime.MAX));
     }
 
     /** Returns [fromDate, toDate], or an empty list if no range has been set. */

@@ -12,6 +12,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
@@ -88,8 +89,8 @@ public class ReportsController {
     @FXML private CheckBox trendShowWaterTrendDataPointButton;
 
     // comparisons tab elements
-    @FXML private Button comparisonPeriodDate1;
-    @FXML private Button comparisonPeriodDate2;
+    @FXML private DatePicker fromDatePickerComparison;
+    @FXML private DatePicker toDatePickerComparison;
 
     @FXML private BarChart<String, Number> comparisonTotalGraph;
     @FXML private BarChart<String, Number> comparisonAverageGraph;
@@ -162,6 +163,8 @@ public class ReportsController {
         periodEnd = periodPickerController.getEnd();
         periodPickerController.setOnPeriodChanged(this::handlePeriodChanged);
 
+        fromDatePickerComparison.setValue(periodStart.minusMonths(1));
+        toDatePickerComparison.setValue(periodEnd.minusMonths(1));
         updateOverviewData();
     }
 
@@ -170,6 +173,10 @@ public class ReportsController {
         periodStart = periodPickerController.getStart();
         periodEnd = periodPickerController.getEnd();
         updateOverviewData();
+        // todo: separate if statement incase if shown with another tab at the same time (can be elseif if never)
+        if (comparisonsContentBox.isVisible()) {
+            updateComparisons();
+        }
         if (statisticsContentBox.isVisible()) {
             updateStatisticsData();
         }
@@ -689,13 +696,163 @@ public class ReportsController {
         comparisonsContentBox.setManaged(true);
         bothToggle.setSelected(true);
 
-        //fixme: replace with updateComparisons(); after DB integration
-        loadMockComparisonCharts();
+        updateComparisons();
     }
 
-    //fixme: update comparison charts on period change
+    // todo: Trends page has a similar function, maybe these two can be modulated.
+    // Given the argument types, get data
+    // it will return a TOTAL or AVERAGE output of all data readings within that DateTime (Period)
+    private Number condenseComparisonDataToParam(LocalDate fromDate, LocalDate toDate, String utility, String calculation_type) {
+        // Get readings from the specified date
+        List<Reading> selectedPeriodReadings = dataService.getReadings(utility, fromDate, toDate);
+
+        // Return if empty
+        if (selectedPeriodReadings.isEmpty()) { return 0.0; }
+
+        double total = 0.0;
+        for (Reading reading : selectedPeriodReadings) {
+            total += reading.getQuantity();
+        }
+
+        switch (calculation_type) {
+            case "sum" -> {
+                return total; // Return condensed reading for param period as Summation
+            }
+            case "avg" -> {
+                return total / selectedPeriodReadings.size(); // Return condensed reading for param period as Average
+            }
+            default -> {throw new IllegalStateException("Calculation Type for \"condenseTrendDataToParam()\" is invalid.");}
+        }
+    }
+
     //fixme: remove the top-right "periodButton" visual (irrelevant to tab)
+    // fixme: kinda hard to navigate
+    //  legend is also styled bad (text should not be white on white)
+    @FXML
     private void updateComparisons() {
+        LocalDate fromDate1 = periodStart;
+        LocalDate toDate1 = periodEnd;
+        LocalDate fromDate2 = fromDatePickerComparison.getValue();
+        LocalDate toDate2 = toDatePickerComparison.getValue();
+
+        // Clear Both Graphs of Data
+        comparisonTotalGraph.getData().clear();
+        comparisonAverageGraph.getData().clear();
+
+        // fixme: Start
+        XYChart.Series<String, Number> EnergyTotalSeries = new XYChart.Series<>();
+        EnergyTotalSeries.setName("Energy");
+
+        XYChart.Series<String, Number> WaterTotalSeries = new XYChart.Series<>();
+        WaterTotalSeries.setName("Water");
+
+        XYChart.Series<String, Number> EnergyAverageSeries = new XYChart.Series<>();
+        EnergyAverageSeries.setName("Energy");
+
+        XYChart.Series<String, Number> WaterAverageSeries = new XYChart.Series<>();
+        WaterAverageSeries.setName("Water");
+
+        // Formatting the Date to desired format
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        String fromDate1String = fromDate1.format(format);
+        String toDate1String = toDate1.format(format);
+        String fromDate2String = fromDate2.format(format);
+        String toDate2String = toDate2.format(format);
+
+        String DisplayPeriod1 = fromDate1String + " - " + toDate1String;
+        String DisplayPeriod2 = fromDate2String + " - " + toDate2String;
+
+        // fixme: Can be turned into a modular function /\ \/ clean up
+        // Total Graph
+            // Energy Data
+            // todo: start of fixme section
+        String SelectedUtility = "energy";
+        Number condensedEnergyReadingDataSum1 = condenseComparisonDataToParam(fromDate1, toDate1, SelectedUtility, "sum");
+        Number condensedEnergyReadingDataSum2 = condenseComparisonDataToParam(fromDate2, toDate2, SelectedUtility, "sum");
+
+        Number absoluteDifferenceEnergyReadingSum = Math.abs((double) condensedEnergyReadingDataSum2 - (double) condensedEnergyReadingDataSum1);
+
+        XYChart.Data<String, Number> energyTotalP1 = new XYChart.Data<>(DisplayPeriod1, condensedEnergyReadingDataSum1);
+        XYChart.Data<String, Number> energyTotalDiff = new XYChart.Data<>("Difference", absoluteDifferenceEnergyReadingSum);
+        XYChart.Data<String, Number> energyTotalP2 = new XYChart.Data<>(DisplayPeriod2, condensedEnergyReadingDataSum2);
+
+        EnergyTotalSeries.getData().add(energyTotalP1);
+        EnergyTotalSeries.getData().add(energyTotalDiff);
+        EnergyTotalSeries.getData().add(energyTotalP2);
+            // todo: end of fixme section
+
+            // Water Data
+        SelectedUtility = "water";
+        Number condensedWaterReadingDataSum1 = condenseComparisonDataToParam(fromDate1, toDate1, SelectedUtility, "avg");
+        Number condensedWaterReadingDataSum2 = condenseComparisonDataToParam(fromDate2, toDate2, SelectedUtility, "avg");
+
+        Number absoluteDifferenceWaterReadingSum = Math.abs((double) condensedWaterReadingDataSum2 - (double) condensedWaterReadingDataSum1);
+
+        XYChart.Data<String, Number> waterTotalP1 = new XYChart.Data<>(DisplayPeriod1, condensedWaterReadingDataSum1);
+        XYChart.Data<String, Number> waterTotalDiff = new XYChart.Data<>("Difference", absoluteDifferenceWaterReadingSum);
+        XYChart.Data<String, Number> waterTotalP2 = new XYChart.Data<>(DisplayPeriod2, condensedWaterReadingDataSum2);
+
+        WaterTotalSeries.getData().add(waterTotalP1);
+        WaterTotalSeries.getData().add(waterTotalDiff);
+        WaterTotalSeries.getData().add(waterTotalP2);
+
+        // Color Bars, Before Adding Data so Listener can Query (Except Null)
+        stylizeComparisonBar(energyTotalP1,"-fx-bar-fill: #FFBA4A;");
+        stylizeComparisonBar(energyTotalDiff,"-fx-bar-fill: #FFBA4A;");
+        stylizeComparisonBar(energyTotalP2,"-fx-bar-fill: #FFBA4A;");
+
+        stylizeComparisonBar(waterTotalP1,"-fx-bar-fill: #5FB2F5;");
+        stylizeComparisonBar(waterTotalDiff,"-fx-bar-fill: #5FB2F5;");
+        stylizeComparisonBar(waterTotalP2,"-fx-bar-fill: #5FB2F5;");
+
+        // Add Both Datas to Graph
+        comparisonTotalGraph.getData().addAll(EnergyTotalSeries, WaterTotalSeries);
+
+        // Average Graph
+            // Energy Data
+        SelectedUtility = "energy";
+        Number condensedEnergyReadingDataAvg1 = condenseComparisonDataToParam(fromDate1, toDate1, SelectedUtility, "avg");
+        Number condensedEnergyReadingDataAvg2 = condenseComparisonDataToParam(fromDate2, toDate2, SelectedUtility, "avg");
+
+        Number absoluteDifferenceEnergyReadingAvg = Math.abs((double) condensedEnergyReadingDataAvg2 - (double) condensedEnergyReadingDataAvg1);
+
+        XYChart.Data<String, Number> energyAverageP1 = new XYChart.Data<>(DisplayPeriod1, condensedEnergyReadingDataAvg1);
+        XYChart.Data<String, Number> energyAverageDiff = new XYChart.Data<>("Difference", absoluteDifferenceEnergyReadingAvg);
+        XYChart.Data<String, Number> energyAverageP2 = new XYChart.Data<>(DisplayPeriod2, condensedEnergyReadingDataAvg2);
+
+        EnergyAverageSeries.getData().add(energyAverageP1);
+        EnergyAverageSeries.getData().add(energyAverageDiff);
+        EnergyAverageSeries.getData().add(energyAverageP2);
+
+            // Water Data
+        SelectedUtility = "water";
+        Number condensedWaterReadingDataAvg1 = condenseComparisonDataToParam(fromDate1, toDate1, SelectedUtility, "avg");
+        Number condensedWaterReadingDataAvg2 = condenseComparisonDataToParam(fromDate2, toDate2, SelectedUtility, "avg");
+
+        Number absoluteDifferenceWaterReadingAvg = Math.abs((double) condensedWaterReadingDataAvg2 - (double) condensedWaterReadingDataAvg1);
+
+        XYChart.Data<String, Number> waterAverageP1 = new XYChart.Data<>(DisplayPeriod1, condensedWaterReadingDataAvg1);
+        XYChart.Data<String, Number> waterAverageDiff = new XYChart.Data<>("Difference", absoluteDifferenceWaterReadingAvg);
+        XYChart.Data<String, Number> waterAverageP2 = new XYChart.Data<>(DisplayPeriod2, condensedWaterReadingDataAvg2);
+
+        WaterAverageSeries.getData().add(waterAverageP1);
+        WaterAverageSeries.getData().add(waterAverageDiff);
+        WaterAverageSeries.getData().add(waterAverageP2);
+
+        // Color Bars, Before Adding Data so Listener can Query (Except Null)
+        stylizeComparisonBar(energyAverageP1,"-fx-bar-fill: #FFBA4A;");
+        stylizeComparisonBar(energyAverageDiff,"-fx-bar-fill: #FFBA4A;");
+        stylizeComparisonBar(energyAverageP2,"-fx-bar-fill: #FFBA4A;");
+
+        stylizeComparisonBar(waterAverageP1,"-fx-bar-fill: #5FB2F5;");
+        stylizeComparisonBar(waterAverageDiff,"-fx-bar-fill: #5FB2F5;");
+        stylizeComparisonBar(waterAverageP2,"-fx-bar-fill: #5FB2F5;");
+
+        // Add Both Datas to Graph
+        comparisonAverageGraph.getData().addAll(EnergyAverageSeries, WaterAverageSeries);
+
+        // fixme: End
 
         // Optional: Hide the legend if individual colors make it irrelevant
 //        comparisonTotalGraph.setLegendVisible(false);

@@ -37,6 +37,8 @@ public class GoalsController {
     @FXML
     private TextField targetField;
     @FXML
+    private TextField periodField;
+    @FXML
     private ComboBox<String> periodComboBox;
     @FXML
     private Label errorLabel;
@@ -51,6 +53,13 @@ public class GoalsController {
     // static so goals are kept when the user leaves and returns to this screen
     // TODO: replace with database persistence
     private static List<Goal> goals = new ArrayList<>();
+
+    // reference to MainController for screen navigation
+    private MainController mainController;
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
     @FXML
     public void initialize() {
@@ -277,6 +286,12 @@ public class GoalsController {
         showCompletedGoals();
     }
 
+    @FXML
+    protected void onConservationClick() {
+        if (mainController != null) {
+            mainController.showConservation();
+        }
+    }
 
     private void showActiveGoals() {
         hideAllTabContent();

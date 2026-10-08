@@ -73,7 +73,7 @@
 
 
     <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
-        <Button fx:id="conservationMenu" text="Learn How to Begin Conserving!" styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity"/>
+        <Button fx:id="conservationMenu" text="Learn How to Begin Conserving!" styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onConservationClick"/>
     </VBox>
 
 </VBox>

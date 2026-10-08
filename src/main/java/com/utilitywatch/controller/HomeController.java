@@ -92,6 +92,8 @@ public class HomeController {
     // TODO: link this after conservation screens are done
     @FXML
     protected void onLearnMoreClick() {
-        // button currently does nothing
+        if (mainController != null) {
+            mainController.showConservation();
+        }
     }
 }

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.utilitywatch.controller.ConservationController"
+      styleClass="reports-root">
+    <padding>
+        <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="15.0">
+        <Label text="Conservations" styleClass="reports-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="X" styleClass="cancel-button" onAction="#onCancelClick"/>
+    </HBox>
+
+    <HBox spacing="15.0" VBox.vgrow="ALWAYS" prefHeight="200">
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+            <Button styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onAverageEnergyClick">
+                <graphic>
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                        <Label alignment="CENTER" maxWidth="150.0" text="Average Energy" styleClass="report-info-box-title"/>
+                        <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
+                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                <Label fx:id="averageEnergyLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="report-info-box-title"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </graphic>
+            </Button>
+        </VBox>
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+            <Button styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onAverageWaterClick">
+                <graphic>
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                        <Label alignment="CENTER" maxWidth="150.0" text="Average Water" styleClass="report-info-box-title"/>
+                        <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
+                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                <Label fx:id="averageWaterLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="report-info-box-title"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </graphic>
+            </Button>
+        </VBox>
+    </HBox>
+
+    <HBox spacing="15.0" VBox.vgrow="ALWAYS" prefHeight="200">
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+            <Button styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onCommonPatternsClick">
+                <graphic>
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                        <Label alignment="CENTER" maxWidth="150.0" text="Common Patterns" styleClass="report-info-box-title"/>
+                        <Label alignment="CENTER" maxWidth="150.0" text="Peak day usage:" styleClass="report-info-box-title"/>
+                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                <Label alignment="CENTER" maxWidth="150.0" text="Energy:" styleClass="report-info-box-title"/>
+                                <Label fx:id="commonPatternsEnergyLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="report-info-box-title"/>
+                            </VBox>
+                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                <Label alignment="CENTER" maxWidth="150.0" text="Water:" styleClass="report-info-box-title"/>
+                                <Label fx:id="commonPatternsWaterLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="report-info-box-title"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </graphic>
+            </Button>
+        </VBox>
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+            <Button styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onSeasonalClick">
+                <graphic>
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                        <Label alignment="CENTER" maxWidth="150.0" text="Average Energy" styleClass="report-info-box-title"/>
+                        <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
+                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                <Label alignment="CENTER" maxWidth="150.0" text="Energy:" styleClass="report-info-box-title"/>
+                                <Label fx:id="seasonalEnergyLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="report-info-box-title"/>
+                            </VBox>
+                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                <Label alignment="CENTER" maxWidth="150.0" text="Water:" styleClass="report-info-box-title"/>
+                                <Label fx:id="seasonalWaterLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="report-info-box-title"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </graphic>
+            </Button>
+        </VBox>
+    </HBox>
+
+</VBox>

@@ -19,8 +19,8 @@
 
     <Label text="Log In" styleClass="form-title"/>
 
-    <TextField fx:id="emailField" promptText="Email" maxWidth="250"/>
-    <PasswordField fx:id="passwordField" promptText="Password" maxWidth="250"/>
+    <TextField fx:id="emailField" promptText="Email" maxWidth="250" onAction="#onEmailFieldEnter"/>
+    <PasswordField fx:id="passwordField" promptText="Password" maxWidth="250" onAction="#onLoginClick"/>
 
     <Button text="Log In" styleClass="primary-button" onAction="#onLoginClick"/>
     <Label fx:id="errorLabel" styleClass="error-label"/>

@@ -36,4 +36,56 @@ public class GoalManager {
                 .filter(goal -> !goal.isCompleted())
                 .toList();
     }
+
+    /**
+     * updates the goal's progress and marks it completed when the target is reached (us8.4)
+     */
+    public Goal updateProgress(Goal goal, double achievedReduction) {
+        boolean completed = goal.isCompleted() || achievedReduction >= goal.getTargetReduction();
+        return new Goal(goal.getResourceType(), goal.getTargetReduction(), goal.getTargetPeriod(), completed, achievedReduction);
+    }
+
+    /**
+     * checks if the goal has just reached its target for the first time, allows a one time notification (us8.4)
+     */
+    public boolean justCompleted(Goal goal, double achievedReduction) {
+        return !goal.isCompleted() && achievedReduction >= goal.getTargetReduction();
+    }
+
+    /**
+     * returns only completed goals so the user can view them (us8.4)
+     */
+    public List<Goal> filterCompletedGoals(List<Goal> goals) {
+        return goals.stream()
+                .filter(Goal::isCompleted)
+                .toList();
+    }
+
+    /**
+     * edits an existing goal with a new target and period
+     * validates the new values and updates completion based on current progress (us8.5)
+     */
+    public Goal editGoal(Goal goal, double newTargetReduction, String newTargetPeriod) {
+        if (newTargetReduction < 0) {
+            throw new IllegalArgumentException("Target reduction must not be negative");
+        }
+
+        if (newTargetPeriod == null || newTargetPeriod.isBlank()) {
+            throw new IllegalArgumentException("Target period must not be empty");
+        }
+
+        // rechecks completion using the goal's existing progress (raising target reopens already completed goal)
+        boolean completed = goal.getCurrentProgress() >= newTargetReduction;
+
+        return new Goal(goal.getResourceType(), newTargetReduction, newTargetPeriod, completed, goal.getCurrentProgress());
+    }
+
+    /**
+     * removes the selected goal and returns the updated list of goals (us8.5)
+     */
+    public List<Goal> deleteGoal(List<Goal> goals, Goal goalToDelete) {
+        List<Goal> updatedGoals = new java.util.ArrayList<>(goals);
+        updatedGoals.remove(goalToDelete);
+        return updatedGoals;
+    }
 }

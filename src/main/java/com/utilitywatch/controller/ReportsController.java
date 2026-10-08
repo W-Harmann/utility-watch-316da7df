@@ -1,5 +1,8 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.consumptionDetector.ActiveHoursDetector;
+import com.utilitywatch.consumptionDetector.LongDurationDetector;
+import com.utilitywatch.consumptionDetector.SpikeDetector;
 import com.utilitywatch.consumptionDetector.UnusualConsumptionDetector;
 import com.utilitywatch.reports.ConsumptionSummaryCalculator;
 import com.utilitywatch.Reading;
@@ -10,21 +13,22 @@ import com.utilitywatch.reports.ReportsDataService;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
-
+import java.util.stream.Collectors;
 
 
 public class ReportsController {
@@ -85,6 +89,12 @@ public class ReportsController {
     private Label variabilityValueLabel;
     @FXML
     private Label daysRecordedValueLabel;
+    @FXML
+    private Label selectedDateRange;
+    @FXML
+    private Label selectedUtilityUsed;
+    @FXML
+    private Label selectedUnusualReason;
 
     // reference to MainController for screen navigation
     private MainController mainController;
@@ -111,6 +121,9 @@ public class ReportsController {
             if (statisticsContentBox.isVisible()) {
                 updateStatisticsData();
             }
+            if (unusualPatternsContentBox.isVisible()) {
+                updateUnusualConsumptionData();
+            }
         });
         updateChartColour();
 
@@ -129,6 +142,9 @@ public class ReportsController {
         updateOverviewData();
         if (statisticsContentBox.isVisible()) {
             updateStatisticsData();
+        }
+        if (unusualPatternsContentBox.isVisible()) {
+            updateUnusualConsumptionData();
         }
     }
 
@@ -206,59 +222,213 @@ public class ReportsController {
 
     // ---------- UNUSUAL PATTERNS TAB ----------
 
-    // loads sample unusual consumption data
-    private void loadUnusualConsumptionData() {
-        // prevents duplicate data from being added to the chart
-        if (!unusualConsumptionChart.getData().isEmpty()) {
-            return;
-        }
-        User currentUser = Session.getInstance().getCurrentUser();
-        int currentUserId = currentUser.getId();
+    private LinkedHashMap<List<Reading>, String> flaggedReadingsMap = new LinkedHashMap<>();
+    private int selectedIndex = 0;
 
-        List<Reading> readings = new ArrayList<>(dataService.getReadings("energy", LocalDate.MIN, LocalDate.now()));
+    // loads sample unusual consumption data
+    private void updateUnusualConsumptionData() {
+        // prevents duplicate data from being added to the chart
+        consumptionChart.getData().clear();
+
+        // check which resource toggles are currently selected
+        boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
+        boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
+
+
+
+        List<Reading> energyReadings = new ArrayList<>(dataService.getReadings("energy", periodStart, periodEnd));
+        List<Reading> waterReadings = new ArrayList<>(dataService.getReadings("water", periodStart, periodEnd));
+
+        LinkedHashMap<List<Reading>, String> utilityFlags = new LinkedHashMap<>();
+
+        if (showEnergy && !energyReadings.isEmpty()) {
+            // For the dates to be in ascending order
+            energyReadings.sort(Comparator.comparing(Reading::getDateTime));
+
+            LinkedHashMap<List<Reading>, String> energyFlags = loadUnusualConsumptionData(energyReadings);
+            utilityFlags.putAll(energyFlags);
+        }
+
+
+
+        if (showWater && !waterReadings.isEmpty()) {
+            waterReadings.sort(Comparator.comparing(Reading::getDateTime));
+
+            LinkedHashMap<List<Reading>, String> waterFlags = loadUnusualConsumptionData(waterReadings);
+            utilityFlags.putAll(waterFlags);
+        }
+
+
+
+        this.flaggedReadingsMap = sortFlaggedReadings(utilityFlags);
+
+
+        selectedIndex = 0;
+        showSelectedUnusualStats();
+
+        // adds both data series to the consumption chart
+        ///unusualConsumptionChart.getData().addAll(series, flaggedSeries);
+    }
+
+    private LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
 
         // For the dates to be in ascending order
-        Collections.reverse(readings);
+        readings.sort(Comparator.comparing(Reading::getDateTime));
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+        ///DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
 
         // creates the energy consumption data series and adds each energy value to its date
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        ///XYChart.Series<String, Number> series = new XYChart.Series<>();
 
-        XYChart.Series<String, Number> flaggedSeries = new XYChart.Series<>();
+        ///XYChart.Series<String, Number> flaggedSeries = new XYChart.Series<>();
 
         //TODO remove magic numbers
 
-        ///ActiveHoursDetector activeHoursDetector = new ActiveHoursDetector(LocalTime.of(6,0), LocalTime.of(23, 0));
-        //LongDurationDetector longDurationDetector = new LongDurationDetector(18.0, 72);
-        ///SpikeDetector spikeDetector = new SpikeDetector(3.0, 3);
+        ActiveHoursDetector activeHoursDetector = new ActiveHoursDetector(LocalTime.of(6,0), LocalTime.of(0, 0));
+        LongDurationDetector longDurationDetector = new LongDurationDetector(15.0, 72);
+        SpikeDetector spikeDetector = new SpikeDetector(1.3);
         UnusualConsumptionDetector unusualConsumptionDetector = new UnusualConsumptionDetector();
 
-        //A week of data assuming each entry is separated by a day
-        int limit = 7;
-        int count = 0;
-        List<Double> weeklyReadings;
+        boolean previousValueFlagged = false;
+        LocalDateTime startOfWeekReading = null;
+
+
+        List<Double> weeklyReadings = new ArrayList<>();
+        List<Double> recordedWeeklyReadings = new ArrayList<>();
+
+
+        List<Reading> flaggedReading;
+        LinkedHashMap<List<Reading>, String> flaggedReadingsMap = new LinkedHashMap<>();
+
 
         for (Reading reading : readings) {
-            // TODO make section consider different value based on toggled utility
-            if (Objects.equals(reading.getUnit(), "kWh")) {
-                weeklyReadings = new ArrayList<>();
-                if (count != 0) {
-                    for (int i = count - 1; i >= Math.max(0, count - limit); i--) {
-                        weeklyReadings.add(readings.get(i).getQuantity());
+            if (startOfWeekReading == null) {
+                startOfWeekReading = reading.getDateTime();
+            }
+
+            if (!recordedWeeklyReadings.isEmpty()) {
+                if (unusualConsumptionDetector.isUnusual(reading.getQuantity(), recordedWeeklyReadings)) {
+                    if (previousValueFlagged) {
+                        flaggedReadingsMap.sequencedKeySet().getLast().add(reading);
                     }
-                    if (unusualConsumptionDetector.isUnusual(reading.getQuantity(), weeklyReadings)) {
-                        flaggedSeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+                    else {
+                        flaggedReading = new ArrayList<>(List.of(reading));
+                        flaggedReadingsMap.put(flaggedReading, "Differs from previous week");
+                        previousValueFlagged = true;
                     }
                 }
+                else {
+                    previousValueFlagged = false;
+                }
+            }
 
-                series.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
-                count++;
+            if (reading.getDateTime().isAfter(startOfWeekReading.plusWeeks(1))) {
+
+                startOfWeekReading = reading.getDateTime();
+
+                recordedWeeklyReadings = weeklyReadings;
+
+                weeklyReadings = new ArrayList<>();
+            }
+
+            weeklyReadings.add(reading.getQuantity());
+
+        }
+
+        List<List<Reading>> flaggedLongDuration;
+
+        flaggedLongDuration = longDurationDetector.hasLongDurationUsage(readings);
+
+        for (List<Reading> reading : flaggedLongDuration) {
+            flaggedReadingsMap.put(reading, "Consistently high activity");
+        }
+
+
+        List<Reading> spikes;
+
+        spikes = spikeDetector.hasSpikes(readings);
+
+        for (Reading reading : spikes) {
+            List<Reading> spikedReading = new ArrayList<>(List.of(reading));
+            flaggedReadingsMap.put(spikedReading, "Spike");
+        }
+
+
+
+        previousValueFlagged = false;
+
+        for (Reading reading : readings) {
+
+            if (activeHoursDetector.isUnusual(reading, 1)) {
+                if (previousValueFlagged) {
+                    flaggedReadingsMap.sequencedKeySet().getLast().add(reading);
+                }
+                else {
+                    flaggedReading = new ArrayList<>(List.of(reading));
+                    flaggedReadingsMap.put(flaggedReading, "Activity outside of active hours");
+                    previousValueFlagged = true;
+                }
+            }
+            else {
+                previousValueFlagged = false;
             }
         }
 
-        // adds both data series to the consumption chart
-        unusualConsumptionChart.getData().addAll(series, flaggedSeries);
+        return flaggedReadingsMap;
+    }
+
+    private LinkedHashMap<List<Reading>, String> sortFlaggedReadings(LinkedHashMap<List<Reading>, String> utilityFlags) {
+
+        // orders flagged reading map
+        LinkedHashMap<List<Reading>, String> sortedFlaggedReadings = new LinkedHashMap<>();
+
+        utilityFlags.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing(list ->
+                        list.stream()
+                                .map(Reading::getDateTime)
+                                .min(LocalDateTime::compareTo)
+                                .orElse(LocalDateTime.MAX)
+                )))
+                .forEachOrdered(entry -> sortedFlaggedReadings.put(entry.getKey(), entry.getValue()));
+
+        return sortedFlaggedReadings;
+    }
+
+    // calculates and displays statistics for flagged reading
+    private void showSelectedUnusualStats() {
+
+        if (!flaggedReadingsMap.isEmpty()) {
+            List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
+            List<String> flaggedReadingsReasons = new ArrayList<>(flaggedReadingsMap.sequencedValues());
+
+            List<Reading> flaggedReadings = flaggedReadingsList.get(selectedIndex);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd hh:mma");
+
+            double totalUsage = 0;
+
+            if (flaggedReadings.size() > 1) {
+                selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime().format(formatter) + " - " + flaggedReadings.getLast().getDateTime().format(formatter));
+            } else {
+                selectedDateRange.setText("Selected: " + flaggedReadings.getFirst().getDateTime().format(formatter));
+            }
+
+            for (Reading reading : flaggedReadings) {
+                totalUsage += reading.getQuantity();
+            }
+
+            selectedUtilityUsed.setText("Utility used: " + totalUsage + flaggedReadings.getFirst().getUnit());
+
+            selectedUnusualReason.setText("Reason: " + flaggedReadingsReasons.get(selectedIndex));
+        }
+        else {
+            selectedDateRange.setText("No unusual data found");
+
+            selectedUtilityUsed.setText("");
+
+            selectedUnusualReason.setText("");
+        }
+
     }
 
 
@@ -381,6 +551,22 @@ public class ReportsController {
     }
 
     @FXML
+    protected void onPreviousUnusualStatClick() {
+        if (selectedIndex > 0) {
+            selectedIndex--;
+            showSelectedUnusualStats();
+        }
+    }
+
+    @FXML
+    protected void onNextUnusualStatClick() {
+        if (selectedIndex < flaggedReadingsMap.size() - 1) {
+            selectedIndex++;
+            showSelectedUnusualStats();
+        }
+    }
+
+    @FXML
     protected void onStatisticsTabClick() {
         showStatistics();
     }
@@ -403,7 +589,8 @@ public class ReportsController {
         hideAllTabContent();
         unusualPatternsContentBox.setVisible(true);
         unusualPatternsContentBox.setManaged(true);
-        loadUnusualConsumptionData();
+
+        updateUnusualConsumptionData();
 
         // refreshes the unusual consumption chart layout after the content becomes visible
         Platform.runLater(unusualConsumptionChart::requestLayout);

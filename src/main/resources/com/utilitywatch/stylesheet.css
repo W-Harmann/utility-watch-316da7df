@@ -53,6 +53,12 @@
     -fx-text-fill: white;
 }
 
+.generate-report-button:hover {
+    -fx-background-color: #0E6407;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
 .utility-toggle {
     -fx-background-color: #eeeeee;
     -fx-text-fill: #333333;
@@ -152,6 +158,15 @@
     -fx-font-weight: bold;
 }
 
+/* dashboard tiles */
+.stat-tile-button {
+    -fx-cursor: hand;
+}
+
+.stat-tile-button:hover {
+    -fx-opacity: 0.85;
+}
+
 .chart-title {
     -fx-font-size: 13px;
     -fx-font-weight: bold;
@@ -180,7 +195,7 @@
     -fx-stroke: #CB0E11
 }
 #unusualConsumptionChart .default-color1.chart-line-symbol {
-    -fx-background-color: #CB0E11, white;
+    -fx-background-color: #CB0E11, #CB0E11;
 }
 
 /* energy series line and data point for graph */
@@ -225,4 +240,51 @@
 
 .error-label {
     -fx-text-fill: #d32f2f;
+}
+
+.quick-tip-box {
+    -fx-background-color: #CB943C;
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-padding: 5;
+
+}
+
+.quick-tip-text {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+}
+
+.quick-tip-title {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.goal-progress-energy .bar {
+    -fx-background-color: #FFBA4A;
+}
+
+.goal-progress-energy .track {
+    -fx-background-color: #556671;
+}
+
+.goal-progress-water .bar {
+    -fx-background-color: #5FB2F5;
+}
+
+.goal-progress-water .track {
+    -fx-background-color: #556671;
+}
+
+.error-text {
+    -fx-text-fill: #CB0E11;
+    -fx-font-size: 12px;
+}
+
+.goal-entry {
+    -fx-padding: 12 15 12 15;
+    -fx-border-color: #CCCCCC;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
 }

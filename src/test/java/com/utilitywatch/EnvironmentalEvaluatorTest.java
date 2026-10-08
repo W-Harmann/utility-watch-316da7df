@@ -13,7 +13,10 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import com.utilitywatch.EnvironmentalEvaluator.FootprintPoint;
+import com.utilitywatch.EnvironmentalEvaluator.Grouping;
 
 public class EnvironmentalEvaluatorTest {
 
@@ -24,9 +27,9 @@ public class EnvironmentalEvaluatorTest {
         evaluator = new EnvironmentalEvaluator();
     }
 
-        //
-        // Criteria: The user can set a time range to measure impact in a range and the estimated CO₂ equivalent in kilograms for the selected period.
-        //
+    //
+    // Criteria: The user can set a time range to measure impact in a range and the estimated CO₂ equivalent in kilograms for the selected period.
+    //
 
     // See *CostBudgetEvaluatorTest (for the follow test details for Readings and TimeRange)
     // -- Because to calculate emissions, the app needs to know the readings
@@ -107,6 +110,14 @@ public class EnvironmentalEvaluatorTest {
                 0.3,
                 evaluator.getEmissionRate("water")
         );
+    }
+
+    @Test
+    void shouldNotAcceptNegativeEmissionRate() {
+        evaluator.setEmissionRate("energy", 0.6);
+
+        assertFalse(evaluator.setEmissionRate("energy", -1));   // rejected
+        assertEquals(0.6, evaluator.getEmissionRate("energy"));  // old rate kept
     }
 
     // Test 1
@@ -323,9 +334,243 @@ public class EnvironmentalEvaluatorTest {
     @Test
     void shouldNotAcceptNegativeStateAverage() {
         evaluator.setStateAverageKgPerDay(0.5);
-        evaluator.setStateAverageKgPerDay(-1);
+        assertFalse(evaluator.setStateAverageKgPerDay(-1));   // rejected
 
         assertEquals(0.5, evaluator.getStateAverageKgPerDay());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // As an Environmentally Conscious user, I want to track how my environmental impact changes over
+    // time so that I can see whether my conservation efforts are actually reducing my footprint.
+    //      [ ] The footprint is shown as a chart over the selected range, with one point per week or month.
+    //      [ ] The user can choose weekly or monthly grouping.
+    //      [ ] The chart follows the utility selection (energy, water or both).
+    //      [ ] Periods with no readings are shown as "no data", clearly distinguished from a genuine zero footprint.
+    //
+    // Notes: These test the data behind the chart (getFootprintTrend), not the chart itself.
+    //        Weeks run Monday to Sunday. The first and last periods are cut to fit the selected range.
+    //        "No data" is a point whose kg is null, so it can never be confused with 0 kg.
+    // ---------------------------------------------------------------------------------------------
+
+    // Jul - Sep 2026, energy at 0.5 kg/kWh, water at 0.25 kg/L
+    //   July:      energy (10 + 6) * 0.5 = 8 kg,  water 20 * 0.25 = 5 kg  -> both 13 kg
+    //   August:    no readings                                            -> no data
+    //   September: energy 4 * 0.5 = 2 kg,         water 8 * 0.25 = 2 kg   -> both 4 kg
+    // Readings on Jun 30 and Oct 1 fall outside the range and must be ignored.
+    private void setUpJulyToSeptember() {
+        evaluator.setReadings(List.of(
+                new Reading(LocalDateTime.of(2026, 6, 30, 12, 0), 100, "energy"),   // outside
+                new Reading(LocalDateTime.of(2026, 7, 3, 12, 0), 10, "energy"),
+                new Reading(LocalDateTime.of(2026, 7, 10, 12, 0), 20, "water"),
+                new Reading(LocalDateTime.of(2026, 7, 20, 12, 0), 6, "energy"),
+                new Reading(LocalDateTime.of(2026, 9, 8, 12, 0), 4, "energy"),
+                new Reading(LocalDateTime.of(2026, 9, 15, 12, 0), 8, "water"),
+                new Reading(LocalDateTime.of(2026, 10, 1, 12, 0), 100, "energy"))); // outside
+        evaluator.setTimeRange(LocalDate.of(2026, 7, 1), LocalDate.of(2026, 9, 30));
+        evaluator.setEmissionRate("energy", 0.5);
+        evaluator.setEmissionRate("water", 0.25);
+    }
+
+    private static List<LocalDate> starts(List<FootprintPoint> points) {
+        return points.stream().map(FootprintPoint::periodStart).toList();
+    }
+
+    private static List<LocalDate> ends(List<FootprintPoint> points) {
+        return points.stream().map(FootprintPoint::periodEnd).toList();
+    }
+
+    /** kg as a double for easy comparison; only call this on a point that has data. */
+    private static double kg(FootprintPoint point) {
+        return point.kg().doubleValue();
+    }
+
+    //
+    // Criteria: The footprint is shown as a chart over the selected range, with one point per week or month.
+    //
+
+    @Test
+    void shouldHaveOnePointPerMonthInRange() {
+        setUpJulyToSeptember();
+
+        List<FootprintPoint> trend = evaluator.getFootprintTrend("both", Grouping.MONTHLY);
+
+        assertEquals(List.of(LocalDate.of(2026, 7, 1), LocalDate.of(2026, 8, 1), LocalDate.of(2026, 9, 1)),
+                starts(trend));
+        assertEquals(List.of(LocalDate.of(2026, 7, 31), LocalDate.of(2026, 8, 31), LocalDate.of(2026, 9, 30)),
+                ends(trend));
+    }
+
+    @Test
+    void shouldHaveOnePointPerWeekInRange() {
+        evaluator.setReadings(List.of(new Reading(LocalDateTime.of(2026, 7, 8, 12, 0), 1, "energy")));
+        evaluator.setTimeRange(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 26));   // Mon Jul 6 - Sun Jul 26
+
+        List<FootprintPoint> trend = evaluator.getFootprintTrend("energy", Grouping.WEEKLY);
+
+        assertEquals(List.of(LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 13), LocalDate.of(2026, 7, 20)),
+                starts(trend));
+        assertEquals(List.of(LocalDate.of(2026, 7, 12), LocalDate.of(2026, 7, 19), LocalDate.of(2026, 7, 26)),
+                ends(trend));
+    }
+
+    @Test
+    void shouldCutFirstAndLastMonthToFitRange() {
+        setUpJulyToSeptember();
+        evaluator.setTimeRange(LocalDate.of(2026, 7, 15), LocalDate.of(2026, 9, 10));
+
+        List<FootprintPoint> trend = evaluator.getFootprintTrend("energy", Grouping.MONTHLY);
+
+        assertEquals(List.of(LocalDate.of(2026, 7, 15), LocalDate.of(2026, 8, 1), LocalDate.of(2026, 9, 1)),
+                starts(trend));
+        assertEquals(LocalDate.of(2026, 9, 10), trend.get(2).periodEnd());
+        assertEquals(3.0, kg(trend.getFirst()));   // only the Jul 20 reading: 6 * 0.5 (Jul 3 is before the range)
+        assertEquals(2.0, kg(trend.get(2)));   // Sep 8: 4 * 0.5
+    }
+
+    @Test
+    void shouldStartFirstWeekOnRangeStartWhenItIsMidWeek() {
+        evaluator.setReadings(List.of(new Reading(LocalDateTime.of(2026, 7, 2, 12, 0), 1, "energy")));
+        evaluator.setTimeRange(LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 14));   // Wed Jul 1 - Tue Jul 14
+
+        List<FootprintPoint> trend = evaluator.getFootprintTrend("energy", Grouping.WEEKLY);
+
+        // Wed 1 - Sun 5, Mon 6 - Sun 12, Mon 13 - Tue 14
+        assertEquals(List.of(LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 6), LocalDate.of(2026, 7, 13)),
+                starts(trend));
+        assertEquals(List.of(LocalDate.of(2026, 7, 5), LocalDate.of(2026, 7, 12), LocalDate.of(2026, 7, 14)),
+                ends(trend));
+    }
+
+    @Test
+    void shouldIncludeReadingLaterOnLastDayOfRange() {
+        evaluator.setReadings(List.of(new Reading(LocalDateTime.of(2026, 7, 31, 18, 30), 10, "energy")));
+        evaluator.setTimeRange(LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31));
+        evaluator.setEmissionRate("energy", 0.5);
+
+        List<FootprintPoint> trend = evaluator.getFootprintTrend("energy", Grouping.MONTHLY);
+
+        assertTrue(trend.getFirst().hasData());
+        assertEquals(5.0, kg(trend.getFirst()));
+    }
+
+    @Test
+    void shouldRejectTrendWithoutValidRange() {
+        evaluator.setTimeRange(LocalDate.of(2026, 9, 30), LocalDate.of(2026, 7, 1));
+
+        assertThrows(IllegalStateException.class,
+                () -> evaluator.getFootprintTrend("both", Grouping.MONTHLY));
+    }
+
+    //
+    // Criteria: The user can choose weekly or monthly grouping.
+    //
+
+    @Test
+    void shouldGroupSameReadingsWeeklyOrMonthly() {
+        setUpJulyToSeptember();
+        evaluator.setTimeRange(LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31));
+
+        List<FootprintPoint> monthly = evaluator.getFootprintTrend("both", Grouping.MONTHLY);
+        List<FootprintPoint> weekly = evaluator.getFootprintTrend("both", Grouping.WEEKLY);
+
+        assertEquals(1, monthly.size());
+        assertEquals(13.0, kg(monthly.getFirst()));
+
+        // July 2026 in weeks: Jul 1-5, 6-12, 13-19, 20-26, 27-31
+        assertEquals(5, weekly.size());
+        assertEquals(5.0, kg(weekly.getFirst()));     // Jul 3 energy 10 * 0.5
+        assertEquals(5.0, kg(weekly.get(1)));     // Jul 10 water 20 * 0.25
+        assertFalse(weekly.get(2).hasData());     // Jul 13-19: nothing
+        assertEquals(3.0, kg(weekly.get(3)));     // Jul 20 energy 6 * 0.5
+        assertFalse(weekly.get(4).hasData());     // Jul 27-31: nothing
+    }
+
+    @Test
+    void shouldKeepWeekTogetherAcrossMonthBoundary() {
+        evaluator.setReadings(List.of(
+                new Reading(LocalDateTime.of(2026, 6, 30, 12, 0), 2, "energy"),
+                new Reading(LocalDateTime.of(2026, 7, 2, 12, 0), 4, "energy")));
+        evaluator.setTimeRange(LocalDate.of(2026, 6, 29), LocalDate.of(2026, 7, 5));   // Mon Jun 29 - Sun Jul 5
+        evaluator.setEmissionRate("energy", 0.5);
+
+        List<FootprintPoint> weekly = evaluator.getFootprintTrend("energy", Grouping.WEEKLY);
+        List<FootprintPoint> monthly = evaluator.getFootprintTrend("energy", Grouping.MONTHLY);
+
+        assertEquals(1, weekly.size());           // one week, spanning June and July
+        assertEquals(3.0, kg(weekly.getFirst()));     // (2 + 4) * 0.5
+        assertEquals(2, monthly.size());          // the same days split into June and July
+        assertEquals(1.0, kg(monthly.getFirst()));
+        assertEquals(2.0, kg(monthly.get(1)));
+    }
+
+    //
+    // Criteria: The chart follows the utility selection (energy, water or both).
+    //
+
+    @Test
+    void shouldFollowEnergySelection() {
+        setUpJulyToSeptember();
+
+        List<FootprintPoint> trend = evaluator.getFootprintTrend("energy", Grouping.MONTHLY);
+
+        assertEquals(8.0, kg(trend.getFirst()));
+        assertEquals(2.0, kg(trend.get(2)));
+    }
+
+    @Test
+    void shouldFollowWaterSelection() {
+        setUpJulyToSeptember();
+
+        List<FootprintPoint> trend = evaluator.getFootprintTrend("water", Grouping.MONTHLY);
+
+        assertEquals(5.0, kg(trend.getFirst()));
+        assertEquals(2.0, kg(trend.get(2)));
+    }
+
+    @Test
+    void shouldSumBothUtilitiesForBothSelection() {
+        setUpJulyToSeptember();
+
+        List<FootprintPoint> trend = evaluator.getFootprintTrend("both", Grouping.MONTHLY);
+
+        assertEquals(13.0, kg(trend.getFirst()));    // 8 + 5
+        assertEquals(4.0, kg(trend.get(2)));     // 2 + 2
+    }
+
+    //
+    // Criteria: Periods with no readings are shown as "no data", clearly distinguished from a genuine zero footprint.
+    //
+
+    @Test
+    void shouldMarkPeriodWithNoReadingsAsNoData() {
+        setUpJulyToSeptember();
+
+        FootprintPoint august = evaluator.getFootprintTrend("both", Grouping.MONTHLY).get(1);
+
+        assertFalse(august.hasData());
+        assertNull(august.kg());
+    }
+
+    @Test
+    void shouldShowGenuineZeroWhenReadingsAreZero() {
+        evaluator.setReadings(List.of(new Reading(LocalDateTime.of(2026, 8, 10, 12, 0), 0, "energy")));
+        evaluator.setTimeRange(LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31));
+        evaluator.setEmissionRate("energy", 0.5);
+
+        FootprintPoint august = evaluator.getFootprintTrend("energy", Grouping.MONTHLY).getFirst();
+
+        assertTrue(august.hasData());
+        assertEquals(0.0, kg(august));
+    }
+
+    @Test
+    void shouldBeNoDataWhenOnlyTheOtherUtilityHasReadings() {
+        setUpJulyToSeptember();
+        evaluator.setTimeRange(LocalDate.of(2026, 7, 9), LocalDate.of(2026, 7, 15));   // only the water reading
+
+        FootprintPoint point = evaluator.getFootprintTrend("energy", Grouping.MONTHLY).getFirst();
+
+        assertFalse(point.hasData());
     }
 
 }

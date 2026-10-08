@@ -624,7 +624,7 @@ public class ReportsController {
         }
 
         trendEnergyGraph.setTitle("(kWh) Energy Trend of: " + graphName);
-        trendWaterGraph.setTitle("(kL) Water Trend of: " + graphName);
+        trendWaterGraph.setTitle("(L) Water Trend of: " + graphName);
 
         // adds data series to the consumption chart
         trendEnergyGraph.getData().addAll(EnergyGraphSum, EnergyGraphAvg);
@@ -775,7 +775,8 @@ public class ReportsController {
                 DataPeriod2 = (double) condenseComparisonDataToParam(fromDate2, toDate2, Utility, CalculationType);
 
                 // set Labels
-                AssociatedLabel.setText(Utility.substring(0,1).toUpperCase(Locale.ROOT) + Utility.substring(1) + ": " + difference() + " kWh");
+                String unit = Utility.equals("water") ? "L" : "kWh";
+                AssociatedLabel.setText(Utility.substring(0,1).toUpperCase(Locale.ROOT) + Utility.substring(1) + ": " + difference() + " " + unit);
 
                 double percentChangeData = percentChange(2);
 

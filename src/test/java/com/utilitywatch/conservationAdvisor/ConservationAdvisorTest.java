@@ -81,7 +81,7 @@ class ConservationAdvisorTest {
         // check that the duration has increased (2 hours in seconds)
         assertEquals(7200, durationChange);
 
-        // check that consumption increased (8.0 compared to 5.0)
-        assertEquals(3, consumptionChange);
+        // check that consumption increased 60% (8.0 compared to 5.0)
+        assertEquals(60, consumptionChange);
     }
 }

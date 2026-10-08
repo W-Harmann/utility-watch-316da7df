@@ -4,13 +4,15 @@ import com.utilitywatch.Reading;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 public class ConservationAdvisor {
     public Optional<Double> calculatePercentChange(Optional<List<Reading>> previousPeriod, List<Reading> currentPeriod) {
 
-        if (previousPeriod.isPresent()) {
+        if (previousPeriod.isPresent() && !previousPeriod.get().isEmpty() && !currentPeriod.isEmpty()) {
 
             double previousQuantity = 0;
             double previousAverage;
@@ -65,22 +67,11 @@ public class ConservationAdvisor {
 
     public double compareConsumptionLevel(List<Reading> previousPeriod, List<Reading> currentPeriod) {
 
-        double previousQuantity = 0;
-        double previousAverage;
-        for (Reading quantity : previousPeriod) {
-            previousQuantity += quantity.getQuantity();
-        }
 
-        previousAverage = previousQuantity / previousPeriod.size();
+        Double previousMax = Collections.max(previousPeriod, Comparator.comparing(Reading::getQuantity)).getQuantity();
 
-        double currentQuantity = 0;
-        double currentAverage;
-        for (Reading quantity : currentPeriod) {
-            currentQuantity += quantity.getQuantity();
-        }
+        Double currentMax = Collections.max(currentPeriod, Comparator.comparing(Reading::getQuantity)).getQuantity();
 
-        currentAverage = currentQuantity / currentPeriod.size();
-
-        return currentAverage - previousAverage;
+        return (currentMax - previousMax) / previousMax * 100;
     }
 }

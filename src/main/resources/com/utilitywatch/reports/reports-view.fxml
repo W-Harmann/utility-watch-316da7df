@@ -294,6 +294,7 @@
     <VBox fx:id="comparisonsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS" maxHeight="Infinity">
 
         <HBox spacing="15.0" alignment="BASELINE_RIGHT">
+            <Label text="Compare to => "/>
             <Label text="From:"/>
             <DatePicker fx:id="fromDatePickerComparison" promptText="Start date 2" onAction="#updateComparisons"/>
             <Label text="To:"/>
@@ -329,13 +330,13 @@
                 <HBox>
                     <VBox styleClass="comparisons-tab-widget">
                         <Label text="Change" styleClass="report-info-box-subtitle"/>
-                        <Label fx:id="comparisonTotalChangeEnergyLabel" text="Energy: 326 kWh"/>
-                        <Label fx:id="comparisonTotalChangeWaterLabel" text="Water: 326 kLh"/>
+                        <Label fx:id="comparisonTotalChangeEnergyLabel" text="Energy: - kWh"/>
+                        <Label fx:id="comparisonTotalChangeWaterLabel" text="Water: - kL"/>
                     </VBox>
                     <VBox styleClass="comparisons-tab-widget">
                         <Label text="\%" styleClass="report-info-box-subtitle"/>
-                        <Label fx:id="comparisonTotalPercentChangeEnergyLabel" text="+100%"/>
-                        <Label fx:id="comparisonTotalPercentChangeWaterLabel" text="+100%"/>
+                        <Label fx:id="comparisonTotalPercentChangeEnergyLabel" text="0%"/>
+                        <Label fx:id="comparisonTotalPercentChangeWaterLabel" text="0%"/>
                     </VBox>
                 </HBox>
             </VBox>
@@ -359,13 +360,13 @@
                 <HBox>
                     <VBox styleClass="comparisons-tab-widget">
                         <Label text="Change" styleClass="report-info-box-subtitle"/>
-                        <Label fx:id="comparisonAvgChangeEnergyLabel" text="Energy: 326 kWh"/>
-                        <Label fx:id="comparisonAvgChangeWaterLabel" text="Water: 326 kLh"/>
+                        <Label fx:id="comparisonAvgChangeEnergyLabel" text="Energy: - kWh"/>
+                        <Label fx:id="comparisonAvgChangeWaterLabel" text="Water: - kL"/>
                     </VBox>
                     <VBox styleClass="comparisons-tab-widget">
                         <Label text="\%" styleClass="report-info-box-subtitle"/>
-                        <Label fx:id="comparisonAvgPercentChangeEnergyLabel" text="+100%"/>
-                        <Label fx:id="comparisonAvgPercentChangeWaterLabel" text="+100%"/>
+                        <Label fx:id="comparisonAvgPercentChangeEnergyLabel" text="0%"/>
+                        <Label fx:id="comparisonAvgPercentChangeWaterLabel" text="0%"/>
                     </VBox>
                 </HBox>
             </VBox>

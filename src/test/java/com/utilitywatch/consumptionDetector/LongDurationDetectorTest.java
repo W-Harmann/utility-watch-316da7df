@@ -30,7 +30,7 @@ class LongDurationDetectorTest {
                 new Reading(LocalDateTime.of(2026, 9, 10, 7, 0), 5.0)
         );
 
-        boolean result = detector.hasLongDurationUsage(readings);
+        boolean result = !detector.hasLongDurationUsage(readings).isEmpty();
         assertTrue(result);
     }
 

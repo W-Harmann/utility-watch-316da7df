@@ -14,21 +14,20 @@ class SpikeDetectorTest {
     void setUp() {
         // baseline of 3.0
         // flagged if 3+ recurring spikes above it are found
-        detector = new SpikeDetector(3.0, 3);
+        detector = new SpikeDetector(3.0);
     }
 
     @Test
     void shouldFlagUnusualConsistentSpikes() {
-        // same time each week, 3 readings of 10.0
-        // each reading spikes above the baseline of 3.0
+        // a value of 3x compared to surrounding values
         List<Reading> readings = List.of(
                 new Reading(LocalDateTime.of(2026, 9, 1, 12, 0), 10.0),
-                new Reading(LocalDateTime.of(2026, 9, 8, 12, 0), 10.0),
+                new Reading(LocalDateTime.of(2026, 9, 8, 12, 0), 30.0),
                 new Reading(LocalDateTime.of(2026, 9, 15, 12, 0), 10.0)
         );
 
         // 3 recurring spikes found (meets the minimum of 3)
-        boolean result = detector.hasConsistentSpikes(readings);
-        assertTrue(result);
+        List<Reading> result = detector.hasSpikes(readings);
+        assertTrue(!result.isEmpty());
     }
 }

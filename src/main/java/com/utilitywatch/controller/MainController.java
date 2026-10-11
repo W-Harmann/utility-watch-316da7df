@@ -153,6 +153,7 @@ public class MainController {
     @FXML
     protected void onLogOutClick() {
         authService.logOut(Session.getInstance().getCurrentUser());
+        SharedDateRange.clear();
         try {
             Stage stage = (Stage) contentArea.getScene().getWindow();
             Parent root = FXMLLoader.load(getClass().getResource("/com/utilitywatch/login-view.fxml"));
@@ -168,4 +169,4 @@ public class MainController {
         contentLabel.setText(text);
         contentArea.getChildren().setAll(contentLabel);
     }
-}
+}

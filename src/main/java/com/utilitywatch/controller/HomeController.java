@@ -89,6 +89,14 @@ public class HomeController {
         }
     }
 
+    // opens customise report screen for data export
+    @FXML
+    protected void onExportDataClick() {
+        if (mainController != null) {
+            mainController.showCustomiseReport();
+        }
+    }
+
     // TODO: link this after conservation screens are done
     @FXML
     protected void onLearnMoreClick() {

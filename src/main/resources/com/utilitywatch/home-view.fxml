@@ -56,7 +56,7 @@
     </HBox>
 
     <!-- trend chart -->
-    <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+    <HBox spacing="15.0" VBox.vgrow="SOMETIMES" prefHeight="260.0" maxHeight="300.0">
         <LineChart fx:id="trendChart" title="7 Day Consumption Trends" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
             <xAxis>
                 <CategoryAxis/>
@@ -69,7 +69,7 @@
         <!-- clickable goals tile with coloured progress bars -->
         <VBox fx:id="goalProgressBox" onMouseClicked="#onGoalProgressClick" spacing="12.0" styleClass="report-info-box, stat-tile-button"
               HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-            <Label text="Active Goal Progress" styleClass="report-info-box-title"/>
+            <Label text="Active Goal Progress" styleClass="home-tile-title"/>
 
             <VBox spacing="4.0">
                 <HBox>
@@ -95,33 +95,41 @@
         </VBox>
     </HBox>
 
-    <!-- recent alerts and quick tip tiles -->
-    <HBox spacing="15.0">
+    <!-- recent alerts, export data, and quick tip tiles -->
+    <HBox spacing="15.0" minHeight="170.0" VBox.vgrow="ALWAYS">
         <!-- clickable view all button that navigates to alerts screen -->
-        <VBox spacing="10.0" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+        <VBox spacing="10.0" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" prefWidth="0">
             <HBox alignment="CENTER_LEFT">
-                <Label text="Recent System Alerts" styleClass="report-info-box-title"/>
+                <Label text="Recent System Alerts" styleClass="home-tile-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button styleClass="stat-tile-button" text="View All" onAction="#onViewAllAlertsClick"/>
             </HBox>
 
             <VBox spacing="2.0">
                 <Label text="Unusual High Energy usage detected"/>
-                <Label text="Aug 22 (2h duration) - Severe Spike (+32% above usual)" styleClass="report-note"/>
+                <Label text="Aug 22 (2h duration) - Severe Spike (+32% above usual)" styleClass="report-note" wrapText="true"/>
             </VBox>
 
             <VBox spacing="2.0">
                 <Label text="Short Energy Spike detected"/>
-                <Label text="Aug 24 (1h duration) - Moderate anomaly registered" styleClass="report-note"/>
+                <Label text="Aug 24 (1h duration) - Moderate anomaly registered" styleClass="report-note" wrapText="true"/>
             </VBox>
+        </VBox>
+
+        <!-- export data tile - opens the customise report screen so the user can export any of their data -->
+        <VBox spacing="10.0" alignment="CENTER" styleClass="export-data-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <Label text="Export your data" styleClass="home-tile-title"/>
+            <Label text="Choose a utility, a period and what to include, then save your report as a file."
+                   styleClass="quick-tip-text" wrapText="true" textAlignment="CENTER" maxWidth="250.0"/>
+            <Button fx:id="exportDataButton" text="Export Data" styleClass="stat-tile-button" onAction="#onExportDataClick"/>
         </VBox>
 
         <!-- quick tip box for conservation ideas-->
         <VBox spacing="10.0" alignment="CENTER" styleClass="quick-tip-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-            <Label text="Quick Tip!" styleClass="quick-tip-title"/>
+            <Label text="Quick Tip!" styleClass="home-tile-title"/>
             <Label text="Turning down your hot water system by just 5 degrees can save up to 10% on your average weekly energy bill!"
                    styleClass="quick-tip-text" wrapText="true" textAlignment="CENTER" maxWidth="250.0"/>
-            <Button text="Learn How to Conserve" styleClass="generate-report-button" onAction="#onLearnMoreClick"/>
+            <Button text="Learn How to Conserve" styleClass="stat-tile-button" onAction="#onLearnMoreClick"/>
         </VBox>
     </HBox>
 

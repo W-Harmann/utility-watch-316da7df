@@ -52,6 +52,13 @@ public class GoalsController {
     // TODO: replace with database persistence
     private static List<Goal> goals = new ArrayList<>();
 
+    // reference to MainController for screen navigation
+    private MainController mainController;
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
+
     @FXML
     public void initialize() {
         periodComboBox.getItems().addAll(PERIODS);
@@ -277,6 +284,12 @@ public class GoalsController {
         showCompletedGoals();
     }
 
+    @FXML
+    protected void onConservationClick() {
+        if (mainController != null) {
+            mainController.showConservation();
+        }
+    }
 
     private void showActiveGoals() {
         hideAllTabContent();

@@ -24,6 +24,8 @@ public class MainController {
 
     // links to the relevant navigation button
     @FXML
+    private ToggleButton homeNavButton;
+    @FXML
     private ToggleButton reportsNavButton;
     @FXML
     private ToggleButton goalsNavButton;
@@ -42,7 +44,13 @@ public class MainController {
 
     @FXML
     protected void onHomeClick() {
+        homeNavButton.setSelected(true);
         loadScreen("/com/utilitywatch/home-view.fxml");
+    }
+
+    // public so other screens like customise report can return to the dashboard
+    public void showHome() {
+        onHomeClick();
     }
 
     @FXML
@@ -75,6 +83,10 @@ public class MainController {
     @FXML
     protected void onGoalsClick() {
         showGoals();
+    }
+
+    public void showConservation() {
+        loadScreen("/com/utilitywatch/conservation-view.fxml");
     }
 
     // public so home controller's goals tile can navigate here
@@ -131,6 +143,10 @@ public class MainController {
                 reportsController.setMainController(this);
             } else if (controller instanceof CustomiseReportController customiseController) {
                 customiseController.setMainController(this);
+            } else if (controller instanceof GoalsController goalsController) {
+                goalsController.setMainController(this);
+            } else if (controller instanceof ConservationController conservationController) {
+                conservationController.setMainController(this);
             } else if (controller instanceof HomeController homeController) {
                 homeController.setMainController(this);
             }
@@ -142,6 +158,7 @@ public class MainController {
     @FXML
     protected void onLogOutClick() {
         authService.logOut(Session.getInstance().getCurrentUser());
+        SharedDateRange.clear();
         try {
             Stage stage = (Stage) contentArea.getScene().getWindow();
             Parent root = FXMLLoader.load(getClass().getResource("/com/utilitywatch/login-view.fxml"));

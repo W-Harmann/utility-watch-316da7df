@@ -1,5 +1,6 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.login.Session;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import java.time.LocalDate;
@@ -15,9 +16,11 @@ public class PeriodPickerController {
 
     @FXML
     public void initialize() {
-        // default period is last 30 days
-        fromDatePicker.setValue(LocalDate.now().minusDays(30));
-        toDatePicker.setValue(LocalDate.now());
+        // period is shared between pages; by default it runs from the first to the latest reading
+        int userId = Session.getInstance().getCurrentUser().getId();
+        SharedDateRange.useDefaultIfNotChosen(SharedReadingDAO.getDAO().getReadingsForUser(userId));
+        fromDatePicker.setValue(SharedDateRange.getFrom());
+        toDatePicker.setValue(SharedDateRange.getTo());
 
         fromDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> handlePeriodChange());
         toDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> handlePeriodChange());
@@ -39,6 +42,9 @@ public class PeriodPickerController {
             toDatePicker.setValue(from);
             return;
         }
+
+        // remember the chosen period for the other pages
+        SharedDateRange.set(from, to);
 
         if (onPeriodChanged != null) {
             onPeriodChanged.run();
@@ -62,4 +68,4 @@ public class PeriodPickerController {
         fromDatePicker.setValue(start);
         toDatePicker.setValue(end);
     }
-}
+}

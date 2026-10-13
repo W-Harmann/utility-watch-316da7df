@@ -2,8 +2,13 @@ package com.utilitywatch;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -135,6 +140,62 @@ public class EnvironmentalEvaluator extends ReadingEvaluator {
             return 0;
         }
         return percentageDifference(calculateEmissionExact(BOTH), average);
+    }
+
+    // ---- Footprint over time ----
+
+    /** How the footprint chart groups readings: one point per week (Monday to Sunday) or per calendar month. */
+    public enum Grouping { WEEKLY, MONTHLY }
+
+    /**
+     * One point on the footprint chart: a week or month, cut to fit the selected range.
+     * kg is null when the period has no readings for the selection ("no data"),
+     * which is different from a genuine footprint of 0 kg.
+     */
+    public record FootprintPoint(LocalDate periodStart, LocalDate periodEnd, BigDecimal kg) {
+        public boolean hasData() {
+            return kg != null;
+        }
+    }
+
+    /** The footprint for each week or month in the selected range, oldest first. */
+    public List<FootprintPoint> getFootprintTrend(String selection, Grouping grouping) {
+        List<String> utilities = resolveSelection(selection);
+        List<LocalDateTime> range = requireValidRange();
+        LocalDate lastDay = range.get(1).toLocalDate();
+
+        List<FootprintPoint> points = new ArrayList<>();
+        LocalDate start = range.get(0).toLocalDate();
+        while (!start.isAfter(lastDay)) {
+            LocalDate end = grouping == Grouping.WEEKLY
+                    ? start.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+                    : start.with(TemporalAdjusters.lastDayOfMonth());
+            if (end.isAfter(lastDay)) {
+                end = lastDay;
+            }
+            points.add(new FootprintPoint(start, end, footprintBetween(utilities, start, end, range)));
+            start = end.plusDays(1);
+        }
+        return points;
+    }
+
+    /** kg of CO2 for the readings in one period (and inside the selected range), or null if there are none. */
+    private BigDecimal footprintBetween(List<String> utilities, LocalDate start, LocalDate end,
+                                        List<LocalDateTime> range) {
+        LocalDateTime from = start.atStartOfDay().isBefore(range.get(0)) ? range.get(0) : start.atStartOfDay();
+        LocalDateTime to = end.atTime(LocalTime.MAX).isAfter(range.get(1)) ? range.get(1) : end.atTime(LocalTime.MAX);
+
+        BigDecimal total = BigDecimal.ZERO;
+        boolean anyReadings = false;
+        for (Reading reading : getReadings()) {
+            LocalDateTime time = reading.getDateTime();
+            if (utilities.contains(reading.getResourceType()) && !time.isBefore(from) && !time.isAfter(to)) {
+                BigDecimal rate = emissionRates.getOrDefault(reading.getResourceType(), BigDecimal.ZERO);
+                total = total.add(BigDecimal.valueOf(reading.getQuantity()).multiply(rate));
+                anyReadings = true;
+            }
+        }
+        return anyReadings ? total : null;
     }
 
     // ---- helpers ----

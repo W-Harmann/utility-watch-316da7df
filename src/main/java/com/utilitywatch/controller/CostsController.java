@@ -92,12 +92,12 @@ public class CostsController {
             }
         });
 
-        // default period: this month so far
-        LocalDate today = LocalDate.now();
-        fromDatePicker.setValue(today.withDayOfMonth(1));
-        toDatePicker.setValue(today);
-        fromDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> refresh());
-        toDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> refresh());
+        // period is shared between pages; by default it runs from the first to the latest reading
+        SharedDateRange.useDefaultIfNotChosen(readings);
+        fromDatePicker.setValue(SharedDateRange.getFrom());
+        toDatePicker.setValue(SharedDateRange.getTo());
+        fromDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> onPeriodChanged());
+        toDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> onPeriodChanged());
 
         if (SharedUtilitySettings.getMonthlyBudget() > 0) {
             budgetField.setText(plain(SharedUtilitySettings.getMonthlyBudget()));
@@ -107,6 +107,12 @@ public class CostsController {
     }
 
     // ---- Refreshing the page ----
+
+    // remember the chosen period for the other pages, then update this one
+    private void onPeriodChanged() {
+        SharedDateRange.set(fromDatePicker.getValue(), toDatePicker.getValue());
+        refresh();
+    }
 
     private void refresh() {
         errorLabel.setText("");

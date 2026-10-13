@@ -1,23 +1,15 @@
 package com.utilitywatch.controller;
 
-import com.utilitywatch.goals.Goal;
-import com.utilitywatch.goals.GoalAlertStore;
-import com.utilitywatch.goals.GoalManager;
-import com.utilitywatch.reports.ConsumptionSummaryCalculator;
-import com.utilitywatch.reports.ReportsDataService;
+import com.utilitywatch.goals.*;
+import com.utilitywatch.reports.*;
 import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.fxml.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.*;
+import java.util.*;
 
 public class GoalsController {
     @FXML
@@ -40,6 +32,12 @@ public class GoalsController {
     private ComboBox<String> periodComboBox;
     @FXML
     private Label errorLabel;
+
+    private final GoalProgressCalculator progressCalculator = new GoalProgressCalculator();
+
+    // goals with no previous readings
+    // uses object identity because each progress update creates a new goal object
+    private final Set<Goal> goalsWithoutData = Collections.newSetFromMap(new IdentityHashMap<>());
 
     // provides set period options so users select a valid format instead of entering the period as free text
     private static final List<String> PERIODS = List.of("1 Month", "3 Months", "6 Months", "1 Year");
@@ -64,7 +62,6 @@ public class GoalsController {
         periodComboBox.getItems().addAll(PERIODS);
         refreshGoalLists();
     }
-
 
     @FXML
     protected void onCreateNewGoalClick() {
@@ -118,7 +115,9 @@ public class GoalsController {
 
     // us8.4 calculates the percentage reduction between the two most recent periods
     // returns 0 if either period has no readings
-    private double calculateAchievedReduction(Goal goal) {
+    // usS8.3 compares the latest period with the previous one (if available)
+    private OptionalDouble calculateAchievedReduction(Goal goal) {
+        // get the number of days in the goal period
         int days = periodToDays(goal.getTargetPeriod());
         LocalDate today = LocalDate.now();
         LocalDate currentStart = today.minusDays(days - 1);
@@ -128,17 +127,13 @@ public class GoalsController {
         List<Double> current = dataService.getReadingQuantities(goal.getResourceType(), currentStart, today);
         List<Double> previous = dataService.getReadingQuantities(goal.getResourceType(), previousStart, previousEnd);
 
+        // skip calculation if either period has no readings
         if (current.isEmpty() || previous.isEmpty()) {
-            return 0.0;
+            return OptionalDouble.empty();
         }
 
-        double previousTotal = calculator.calculateTotal(previous);
-        if (previousTotal <= 0) {
-            return 0.0;
-        }
-
-        double currentTotal = calculator.calculateTotal(current);
-        return Math.max(0.0, (previousTotal - currentTotal) / previousTotal * 100);
+        // calculate the percentage reduction between the two period totals
+        return progressCalculator.reductionPercent(calculator.calculateTotal(previous), calculator.calculateTotal(current));
     }
 
     private int periodToDays(String period) {
@@ -154,10 +149,12 @@ public class GoalsController {
     // us8.4 updates goal progress from readings, sends alerts for newly completed goals, and refreshes both lists
     private void refreshGoalLists() {
         List<Goal> newlyCompletedGoals = new ArrayList<>();
+        goalsWithoutData.clear();
 
         for (int goalIndex = 0; goalIndex < goals.size(); goalIndex++) {
             Goal goal = goals.get(goalIndex);
-            double achievedReduction = calculateAchievedReduction(goal);
+            OptionalDouble achieved = calculateAchievedReduction(goal);
+            double achievedReduction = achieved.orElse(0.0);
 
             if (goalManager.justCompleted(goal, achievedReduction)) {
                 newlyCompletedGoals.add(goal);
@@ -170,7 +167,13 @@ public class GoalsController {
                         resource + " successfully reduced by " + (int) goal.getTargetReduction()
                                 + "% (" + goal.getTargetPeriod() + ")"));
             }
-            goals.set(goalIndex, goalManager.updateProgress(goal, achievedReduction));
+
+            // update progress and track goals without readings
+            Goal updatedGoal = goalManager.updateProgress(goal, achievedReduction);
+            goals.set(goalIndex, updatedGoal);
+            if (achieved.isEmpty()) {
+                goalsWithoutData.add(updatedGoal);
+            }
         }
 
         goalContainer.getChildren().clear();
@@ -213,7 +216,7 @@ public class GoalsController {
             VBox goalEntry = loader.load();
 
             GoalEntryController controller = loader.getController();
-            controller.setData(goal, () -> onEditGoal(goal), () -> onDeleteGoal(goal));
+            controller.setData(goal, !goalsWithoutData.contains(goal), () -> onEditGoal(goal), () -> onDeleteGoal(goal));
 
             container.getChildren().add(goalEntry);
 

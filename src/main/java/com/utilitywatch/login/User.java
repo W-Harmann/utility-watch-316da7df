@@ -2,10 +2,11 @@ package com.utilitywatch.login;
 
 import com.utilitywatch.PasswordHasher;
 
-// one registered account - email, hashed password, property address, plus id once saved
+// one registered account - name, email, hashed password, property address, plus id once saved
 public class User {
 
     private int id;
+    private String name;
     private String email;
     private String passwordHash;
     private String propertyAddress;
@@ -21,6 +22,15 @@ public class User {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    // package-private on purpose, same as email - changes go through AuthenticationService
+    void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {

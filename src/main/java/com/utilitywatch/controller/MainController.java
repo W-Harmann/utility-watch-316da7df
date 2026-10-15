@@ -118,7 +118,7 @@ public class MainController {
 
     @FXML
     protected void onSettingsClick() {
-        showLabel("Settings");
+        loadScreen("/com/utilitywatch/settings-view.fxml");
     }
 
     // shared method for loading screens into the main content area

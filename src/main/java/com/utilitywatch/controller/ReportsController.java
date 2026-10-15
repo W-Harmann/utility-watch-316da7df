@@ -887,6 +887,8 @@ public class ReportsController {
         selectedIndex = 0;
         showSelectedUnusualStats();
 
+        updateUnusualChart(energyReadings, waterReadings);
+
         // adds both data series to the consumption chart
         ///unusualConsumptionChart.getData().addAll(series, flaggedSeries);
     }
@@ -1013,6 +1015,57 @@ public class ReportsController {
                 .forEachOrdered(entry -> sortedFlaggedReadings.put(entry.getKey(), entry.getValue()));
 
         return sortedFlaggedReadings;
+    }
+
+    private void updateUnusualChart(List<Reading> energyReadings, List<Reading> waterReadings) {
+        // remove any existing data before displaying the updated readings
+        unusualConsumptionChart.getData().clear();
+
+        // check which resource toggles are currently selected
+        boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
+        boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+
+        // add the energy readings to the chart if energy is selected and data is available
+        if (showEnergy) {
+            XYChart.Series<String, Number> energySeries = new XYChart.Series<>();
+            energySeries.setName("Energy (kWh)");
+            // add each energy reading as a separate data point
+            for (Reading reading : energyReadings) {
+                energySeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+            }
+            unusualConsumptionChart.getData().add(energySeries);
+        }
+        else {
+            unusualConsumptionChart.getData().add(new XYChart.Series<>());
+        }
+
+        // add the water readings to the chart if water is selected and data is available
+        if (showWater) {
+            XYChart.Series<String, Number> waterSeries = new XYChart.Series<>();
+            waterSeries.setName("Water (L)");
+            // add each water reading as a separate data point
+            for (Reading reading : waterReadings) {
+                waterSeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+            }
+            unusualConsumptionChart.getData().add(waterSeries);
+        }
+        else {
+            unusualConsumptionChart.getData().add(new XYChart.Series<>());
+        }
+
+        List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
+
+
+        for (List<Reading> flaggedReading : flaggedReadingsList) {
+            XYChart.Series<String, Number> flaggedSeries = new XYChart.Series<>();
+            for (Reading reading : flaggedReading) {
+                flaggedSeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+            }
+            unusualConsumptionChart.getData().add(flaggedSeries);
+        }
+
     }
 
     // calculates and displays statistics for flagged reading

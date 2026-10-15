@@ -1,17 +1,32 @@
 package com.utilitywatch.controller;
 
+import com.utilitywatch.home.DashboardSummary;
+import com.utilitywatch.home.DashboardSummaryService;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
-import java.util.List;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+
+/** shows the user's latest readings, goals, and alerts on the home dashboard */
 public class HomeController {
 
     @FXML
     private Label welcomeLabel;
     @FXML
+    private Label summaryLabel;
+    @FXML
+    private Label energyValueLabel;
+    @FXML
+    private Label waterValueLabel;
+    @FXML
+    private Label costValueLabel;
+    @FXML
     private LineChart<String, Number> trendChart;
+
+    private final DashboardSummaryService summaryService = new DashboardSummaryService();
 
     // references MainController so buttons like the cost tile can navigate to other screens
     private MainController mainController;
@@ -25,27 +40,54 @@ public class HomeController {
     public void initialize() {
         // TODO: add username to register/login for a personalised greeting (if user entered one)
         welcomeLabel.setText("Welcome back!");
-        loadExampleTrendData();
+        loadReadingData();
     }
 
-    // currently loads the trend chart with example data
-    private void loadExampleTrendData() {
-        List<String> days = List.of("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun");
-        List<Double> energyValues = List.of(10.2, 11.5, 9.8, 12.4, 13.1, 8.6, 10.9);
-        List<Double> waterValues = List.of(150.5, 175.0, 167.0, 180.1, 155.0, 190.0, 170.0);
+    // fills the tiles, cost estimate, and 7 day chart from the user's readings
+    private void loadReadingData() {
+        Optional<DashboardSummary> summary = summaryService.buildSummary();
+
+        // shows a message and clears the values if there are no readings to display
+        if (summary.isEmpty()) {
+            summaryLabel.setText("No readings yet. Add readings to see your summary.");
+            energyValueLabel.setText("No data");
+            waterValueLabel.setText("No data");
+            costValueLabel.setText("No data");
+            return;
+        }
+
+        DashboardSummary data = summary.get();
+
+        // shows the date of the latest readings used in the summary and the total energy and water used on that day
+        summaryLabel.setText("Showing your latest readings from " + data.day().format(DateTimeFormatter.ofPattern("EEE d MMM yyyy")) + ".");
+        energyValueLabel.setText(String.format("%.1f kWh", data.energyTotal()));
+        waterValueLabel.setText(String.format("%.0f Litres", data.waterTotal()));
+
+        // calculates and displays the daily cost using teh rates saved on the costs screen
+        double cost = summaryService.estimateDailyCost(data.day(), SharedUtilitySettings.getEnergyRate(), SharedUtilitySettings.getWaterRate());
+        costValueLabel.setText(String.format("$%.2f AUD", cost));
+
+        loadTrendChart(data);
+    }
+
+    // builds the energy and water chart using the last 7 days of readings
+    private void loadTrendChart(DashboardSummary data) {
+        DateTimeFormatter dayFormat = DateTimeFormatter.ofPattern("EEE d");
 
         XYChart.Series<String, Number> energySeries = new XYChart.Series<>();
         energySeries.setName("Energy (kWh)");
-        for (int day = 0; day < days.size(); day++) {
-            energySeries.getData().add(new XYChart.Data<>(days.get(day), energyValues.get(day)));
-        }
-
         XYChart.Series<String, Number> waterSeries = new XYChart.Series<>();
         waterSeries.setName("Water (L)");
-        for (int day = 0; day < days.size(); day++) {
-            waterSeries.getData().add(new XYChart.Data<>(days.get(day), waterValues.get(day)));
+
+        // adds each day's date and usage total to the matching resource series
+        for (int day = 0; day < data.trendDays().size(); day++) {
+            String dayLabel = data.trendDays().get(day).format(dayFormat);
+            energySeries.getData().add(new XYChart.Data<>(dayLabel, data.energyTrend().get(day)));
+            waterSeries.getData().add(new XYChart.Data<>(dayLabel, data.waterTrend().get(day)));
         }
 
+        // removes the old chart data before adding the updated readings
+        trendChart.getData().clear();
         trendChart.getData().addAll(energySeries, waterSeries);
     }
 

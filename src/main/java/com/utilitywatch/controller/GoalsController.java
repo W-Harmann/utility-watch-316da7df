@@ -50,6 +50,11 @@ public class GoalsController {
     // TODO: replace with database persistence
     private static List<Goal> goals = new ArrayList<>();
 
+    // forget all goals, e.g. when an account is deleted
+    public static void clearGoals() {
+        goals = new ArrayList<>();
+    }
+
     // reference to MainController for screen navigation
     private MainController mainController;
 

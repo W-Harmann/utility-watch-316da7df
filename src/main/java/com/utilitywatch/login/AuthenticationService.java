@@ -49,6 +49,54 @@ public class AuthenticationService {
         return true;
     }
 
+    /**
+     * Updates name, email and property address together (US13.4). Name and email are required;
+     * the property address may be left blank. Everything is checked before anything is changed,
+     * so a refused update leaves the previous values in place.
+     * @throws IllegalArgumentException if name or email is blank, the email is invalid, or the email belongs to another account
+     */
+    public void updateProfile(User user, String name, String email, String propertyAddress) {
+        String newName = name == null ? "" : name.trim();
+        String newEmail = email == null ? "" : email.trim();
+        String newAddress = propertyAddress == null ? "" : propertyAddress.trim();
+
+        if (newName.isEmpty()) {
+            throw new IllegalArgumentException("Name is required");
+        }
+        if (newEmail.isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (!isValidEmail(newEmail)) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        if (!newEmail.equals(user.getEmail()) && userDAO.findByEmail(newEmail) != null) {
+            throw new IllegalArgumentException("Email is already registered");
+        }
+
+        String oldName = user.getName();
+        String oldEmail = user.getEmail();
+        String oldAddress = user.getPropertyAddress();
+
+        user.setName(newName);
+        user.setEmail(newEmail);
+        user.setPropertyAddress(newAddress.isEmpty() ? null : newAddress);
+        try {
+            userDAO.update(user);
+        } catch (RuntimeException e) {
+            // couldn't save, so put the previous values back
+            user.setName(oldName);
+            user.setEmail(oldEmail);
+            user.setPropertyAddress(oldAddress);
+            throw e;
+        }
+    }
+
+    /** Permanently removes the account and ends the session. (The user's readings are removed separately.) */
+    public void deleteAccount(User user) {
+        userDAO.delete(user.getId());
+        Session.getInstance().logout();
+    }
+
     /** @throws IllegalArgumentException if oldEmail is wrong, newEmail is invalid, or newEmail is taken */
     public void updateEmail(User user, String oldEmail, String newEmail) {
         if (!user.getEmail().equals(oldEmail)) {

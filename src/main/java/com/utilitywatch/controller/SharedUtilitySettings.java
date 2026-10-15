@@ -35,6 +35,15 @@ public final class SharedUtilitySettings {
     public static double getWaterEmission() { return waterEmission; }
     public static void setWaterEmission(double kgPerLitre) { waterEmission = kgPerLitre; }
 
+    // back to the starting values, e.g. when an account is deleted
+    public static void reset() {
+        energyRate = MOCK_ENERGY_RATE;
+        waterRate = MOCK_WATER_RATE;
+        energyEmission = MOCK_ENERGY_EMISSION;
+        waterEmission = MOCK_WATER_EMISSION;
+        monthlyBudget = 0;
+    }
+
     public static double getMonthlyBudget() { return monthlyBudget; }
     public static void setMonthlyBudget(double budget) { monthlyBudget = budget; }
 }

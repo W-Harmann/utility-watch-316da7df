@@ -1147,13 +1147,6 @@ public class ReportsController {
 
     // ---------- NAVIGATION ----------
     @FXML
-    protected void onGenerateReportClick() {
-        if (mainController != null) {
-            mainController.showCustomiseReport();
-        }
-    }
-
-    @FXML
     protected void onOverviewTabClick() {
         showOverview();
     }

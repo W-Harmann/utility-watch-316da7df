@@ -298,19 +298,25 @@
     -fx-background-color: #CB943C;
     -fx-background-radius: 12;
     -fx-text-fill: white;
-    -fx-padding: 5;
-
+    -fx-padding: 20 25 20 25;
 }
 
 .quick-tip-text {
     -fx-text-fill: white;
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
 }
 
-.quick-tip-title {
+.home-tile-title {
     -fx-text-fill: white;
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
+}
+
+.export-data-box {
+    -fx-background-color: #0E6407;
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-padding: 20 25 20 25;
 }
 
 .goal-progress-energy .bar {

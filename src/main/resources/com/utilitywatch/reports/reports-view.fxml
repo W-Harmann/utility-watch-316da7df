@@ -36,7 +36,6 @@
     <HBox alignment="CENTER_LEFT" spacing="10.0">
         <Label text="Detailed Report" styleClass="reports-title"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Generate Report" styleClass="generate-report-button" onAction="#onGenerateReportClick"/>
     </HBox>
 
     <!-- utility toggle and period selector button -->

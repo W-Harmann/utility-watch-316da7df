@@ -48,6 +48,11 @@ public class MainController {
         loadScreen("/com/utilitywatch/home-view.fxml");
     }
 
+    // public so other screens like customise report can return to the dashboard
+    public void showHome() {
+        onHomeClick();
+    }
+
     @FXML
     protected void onReadingsClick() {
         try {
@@ -169,4 +174,4 @@ public class MainController {
         contentLabel.setText(text);
         contentArea.getChildren().setAll(contentLabel);
     }
-}
+}

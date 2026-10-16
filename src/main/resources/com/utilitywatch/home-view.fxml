@@ -10,7 +10,6 @@
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.layout.Region?>
-<?import javafx.scene.control.ProgressBar?>
 
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.HomeController"
@@ -22,7 +21,7 @@
     <!-- welcome header -->
     <VBox spacing="2.0">
         <Label fx:id="welcomeLabel" text="Welcome back!" styleClass="reports-title"/>
-        <Label text="Here is your utility monitoring summary for today."/>
+        <Label fx:id="summaryLabel" text="Here is your utility monitoring summary."/>
     </VBox>
 
     <!-- three clickable stat tiles -->
@@ -31,7 +30,7 @@
             <graphic>
                 <VBox spacing="6.0" alignment="CENTER_LEFT">
                     <Label text="ENERGY CONSUMED" styleClass="report-note"/>
-                    <Label text="12.4 kWh" styleClass="stat-value"/>
+                    <Label fx:id="energyValueLabel" text="-" styleClass="stat-value"/>
                 </VBox>
             </graphic>
         </Button>
@@ -40,7 +39,7 @@
             <graphic>
                 <VBox spacing="6.0" alignment="CENTER_LEFT">
                     <Label text="WATER CONSUMED" styleClass="report-note"/>
-                    <Label text="340 Litres" styleClass="stat-value"/>
+                    <Label fx:id="waterValueLabel" text="-" styleClass="stat-value"/>
                 </VBox>
             </graphic>
         </Button>
@@ -49,7 +48,7 @@
             <graphic>
                 <VBox spacing="6.0" alignment="CENTER_LEFT">
                     <Label text="TODAY'S EST. COST" styleClass="report-note"/>
-                    <Label text="\$4.12 AUD" styleClass="stat-value"/>
+                    <Label fx:id="costValueLabel" text="-" styleClass="stat-value"/>
                 </VBox>
             </graphic>
         </Button>
@@ -70,28 +69,7 @@
         <VBox fx:id="goalProgressBox" onMouseClicked="#onGoalProgressClick" spacing="12.0" styleClass="report-info-box, stat-tile-button"
               HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
             <Label text="Active Goal Progress" styleClass="home-tile-title"/>
-
-            <VBox spacing="4.0">
-                <HBox>
-                    <Label text="Reduce Energy Usage"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="67%" styleClass="energy-column-header"/>
-                </HBox>
-                <ProgressBar progress="0.67" styleClass="goal-progress-energy" maxWidth="Infinity"/>
-                <Label text="Target: 15% reduction" styleClass="report-note"/>
-            </VBox>
-
-            <VBox spacing="4.0">
-                <HBox>
-                    <Label text="Reduce Water Usage"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="34%" styleClass="water-column-header"/>
-                </HBox>
-                <ProgressBar progress="0.34" styleClass="goal-progress-water" maxWidth="Infinity"/>
-                <Label text="Target: 10% reduction" styleClass="report-note"/>
-            </VBox>
-
-            <Label text="You are currently on track to meet both!" wrapText="true"/>
+            <VBox fx:id="goalsContainer" spacing="12.0"/>
         </VBox>
     </HBox>
 
@@ -104,16 +82,7 @@
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button styleClass="stat-tile-button" text="View All" onAction="#onViewAllAlertsClick"/>
             </HBox>
-
-            <VBox spacing="2.0">
-                <Label text="Unusual High Energy usage detected"/>
-                <Label text="Aug 22 (2h duration) - Severe Spike (+32% above usual)" styleClass="report-note" wrapText="true"/>
-            </VBox>
-
-            <VBox spacing="2.0">
-                <Label text="Short Energy Spike detected"/>
-                <Label text="Aug 24 (1h duration) - Moderate anomaly registered" styleClass="report-note" wrapText="true"/>
-            </VBox>
+            <VBox fx:id="alertsContainer" spacing="8.0"/>
         </VBox>
 
         <!-- export data tile - opens the customise report screen so the user can export any of their data -->

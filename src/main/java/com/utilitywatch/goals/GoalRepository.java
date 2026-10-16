@@ -47,4 +47,9 @@ public class GoalRepository {
     public void remove(Goal goal) {
         goals.remove(goal);
     }
+
+    /** removes every goal, e.g. when an account is deleted. */
+    public void clear() {
+        goals.clear();
+    }
 }

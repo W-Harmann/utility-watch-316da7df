@@ -50,7 +50,7 @@ public class GoalsController {
 
     // forget all goals, e.g. when an account is deleted
     public static void clearGoals() {
-        goals = new ArrayList<>();
+        GoalRepository.getInstance().clear();
     }
 
     // reference to MainController for screen navigation

@@ -904,14 +904,12 @@ public class ReportsController {
 
         this.flaggedReadingsMap = sortFlaggedReadings(utilityFlags);
 
-
         selectedIndex = 0;
-        showSelectedUnusualStats();
 
         updateUnusualChart(energyReadings, waterReadings);
 
-        // adds both data series to the consumption chart
-        ///unusualConsumptionChart.getData().addAll(series, flaggedSeries);
+        showSelectedUnusualStats();
+
     }
 
     private LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
@@ -1047,9 +1045,10 @@ public class ReportsController {
         boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
 
         // add the energy readings to the chart if energy is selected and data is available
+        XYChart.Series<Number, Number> energySeries = new XYChart.Series<>();
+        energySeries.setName("Energy (kWh)");
+
         if (showEnergy && !energyReadings.isEmpty()) {
-            XYChart.Series<Number, Number> energySeries = new XYChart.Series<>();
-            energySeries.setName("Energy (kWh)");
             // add each energy reading as a separate data point
             for (Reading reading : energyReadings) {
                 energySeries.getData().add(new XYChart.Data<>(reading.getDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), reading.getQuantity()));
@@ -1060,13 +1059,14 @@ public class ReportsController {
             });
         }
         else {
-            unusualConsumptionChart.getData().add(new XYChart.Series<>());
+            unusualConsumptionChart.getData().add(energySeries);
         }
 
         // add the water readings to the chart if water is selected and data is available
+        XYChart.Series<Number, Number> waterSeries = new XYChart.Series<>();
+        waterSeries.setName("Water (L)");
+
         if (showWater && !waterReadings.isEmpty()) {
-            XYChart.Series<Number, Number> waterSeries = new XYChart.Series<>();
-            waterSeries.setName("Water (L)");
             // add each water reading as a separate data point
             for (Reading reading : waterReadings) {
                 waterSeries.getData().add(new XYChart.Data<>(reading.getDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), reading.getQuantity()));
@@ -1077,7 +1077,7 @@ public class ReportsController {
             });
         }
         else {
-            unusualConsumptionChart.getData().add(new XYChart.Series<>());
+            unusualConsumptionChart.getData().add(waterSeries);
         }
 
         List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
@@ -1129,10 +1129,15 @@ public class ReportsController {
             long monthRange = 30L * 24 * 60 * 60 * 1000;
             long tickUnit = monthRange / 30;
 
+            xAxis.setAutoRanging(false);
+
             xAxis.setLowerBound((long) flaggedSeries.get(selected).getData().getFirst().getXValue() - monthRange / 2);
             xAxis.setUpperBound((long) flaggedSeries.get(selected).getData().getLast().getXValue() + monthRange / 2);
             xAxis.setTickUnit(tickUnit);
 
+        }
+        else {
+            xAxis.setAutoRanging(true);
         }
     }
 

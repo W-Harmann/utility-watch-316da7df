@@ -370,7 +370,7 @@
         <!-- unusual consumption chart -->
         <LineChart fx:id="unusualConsumptionChart" title="Utility Consumption" legendVisible="false" animated="false" VBox.vgrow="ALWAYS">
             <xAxis>
-                <CategoryAxis/>
+                <NumberAxis forceZeroInRange="false" autoRanging="false"/>
             </xAxis>
             <yAxis>
                 <NumberAxis/>

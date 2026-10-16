@@ -11,6 +11,7 @@ import com.utilitywatch.reports.ReportsDataService;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
 import javafx.scene.control.*;
@@ -24,6 +25,8 @@ import java.util.*;
 import java.time.*;
 import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
+import javafx.util.StringConverter;
+
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -52,7 +55,7 @@ public class ReportsController {
     // utility consumption charts
     @FXML private LineChart<String, Number> consumptionChart;
     @FXML private BarChart<String, Number> distributionChart;
-    @FXML private LineChart<String, Number> unusualConsumptionChart;
+    @FXML private LineChart<Number, Number> unusualConsumptionChart;
 
     // trend mode toggle buttons
     @FXML private HBox trendmodeToggle;
@@ -852,6 +855,23 @@ public class ReportsController {
         // prevents duplicate data from being added to the chart
         unusualConsumptionChart.getData().clear();
 
+        NumberAxis xAxis = (NumberAxis) unusualConsumptionChart.getXAxis();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+
+        xAxis.setTickLabelFormatter(new StringConverter<Number>() {
+            @Override
+            public String toString(Number epochMilliSeconds) {
+                LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMilliSeconds.longValue()), ZoneId.systemDefault());
+                return dateTime.format(formatter);
+            }
+
+            @Override
+            public Number fromString(String string) {
+                return null;
+            }
+        });
+
         // check which resource toggles are currently selected
         boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
         boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
@@ -1026,15 +1046,13 @@ public class ReportsController {
         boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
         boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
-
         // add the energy readings to the chart if energy is selected and data is available
         if (showEnergy && !energyReadings.isEmpty()) {
-            XYChart.Series<String, Number> energySeries = new XYChart.Series<>();
+            XYChart.Series<Number, Number> energySeries = new XYChart.Series<>();
             energySeries.setName("Energy (kWh)");
             // add each energy reading as a separate data point
             for (Reading reading : energyReadings) {
-                energySeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+                energySeries.getData().add(new XYChart.Data<>(reading.getDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), reading.getQuantity()));
             }
             unusualConsumptionChart.getData().add(energySeries);
             energySeries.getData().forEach(data -> {
@@ -1047,11 +1065,11 @@ public class ReportsController {
 
         // add the water readings to the chart if water is selected and data is available
         if (showWater && !waterReadings.isEmpty()) {
-            XYChart.Series<String, Number> waterSeries = new XYChart.Series<>();
+            XYChart.Series<Number, Number> waterSeries = new XYChart.Series<>();
             waterSeries.setName("Water (L)");
             // add each water reading as a separate data point
             for (Reading reading : waterReadings) {
-                waterSeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+                waterSeries.getData().add(new XYChart.Data<>(reading.getDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), reading.getQuantity()));
             }
             unusualConsumptionChart.getData().add(waterSeries);
             waterSeries.getData().forEach(data -> {
@@ -1067,9 +1085,9 @@ public class ReportsController {
         if(!flaggedReadingsList.isEmpty()) {
             for (int i = 0; i < flaggedReadingsList.size(); i++) {
 
-                XYChart.Series<String, Number> flaggedSeries = new XYChart.Series<>();
+                XYChart.Series<Number, Number> flaggedSeries = new XYChart.Series<>();
                 for (Reading reading : flaggedReadingsList.get(i)) {
-                    flaggedSeries.getData().add(new XYChart.Data<>(reading.getDateTime().format(formatter), reading.getQuantity()));
+                    flaggedSeries.getData().add(new XYChart.Data<>(reading.getDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), reading.getQuantity()));
                 }
                 unusualConsumptionChart.getData().add(flaggedSeries);
                 if (i == selectedIndex) {
@@ -1091,8 +1109,10 @@ public class ReportsController {
     private void updateUnusualFlaggedChart(int selected, int prevSelected) {
         List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
 
+        NumberAxis xAxis = (NumberAxis) unusualConsumptionChart.getXAxis();
+
         if(!flaggedReadingsList.isEmpty()) {
-            List<XYChart.Series<String, Number>> flaggedSeries = unusualConsumptionChart.getData()
+            List<XYChart.Series<Number, Number>> flaggedSeries = unusualConsumptionChart.getData()
                     .stream()
                     .filter(series -> series.getName() == null)
                     .toList();
@@ -1105,6 +1125,13 @@ public class ReportsController {
                 data.getNode().setStyle("-fx-background-color: #CB0E11, #CB0E11;");
                 data.getNode().toFront();
             });
+
+            long monthRange = 30L * 24 * 60 * 60 * 1000;
+            long tickUnit = monthRange / 30;
+
+            xAxis.setLowerBound((long) flaggedSeries.get(selected).getData().getFirst().getXValue() - monthRange / 2);
+            xAxis.setUpperBound((long) flaggedSeries.get(selected).getData().getLast().getXValue() + monthRange / 2);
+            xAxis.setTickUnit(tickUnit);
 
         }
     }

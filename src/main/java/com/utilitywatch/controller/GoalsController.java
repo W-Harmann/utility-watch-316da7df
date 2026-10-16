@@ -48,6 +48,11 @@ public class GoalsController {
     private final GoalRepository goalRepository = GoalRepository.getInstance();
     private final GoalProgressService goalProgressService = new GoalProgressService();
 
+    // forget all goals, e.g. when an account is deleted
+    public static void clearGoals() {
+        goals = new ArrayList<>();
+    }
+
     // reference to MainController for screen navigation
     private MainController mainController;
 

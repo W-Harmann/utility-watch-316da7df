@@ -79,6 +79,16 @@ public class ReadingDAO implements IReadingDAO {
         }
     }
 
+    // removes every reading belonging to a user (used when their account is deleted)
+    public void deleteReadingsForUser(int userId) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM readings WHERE userId = ?")) {
+            statement.setInt(1, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Reading getLastReading() {
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM readings ORDER BY id DESC LIMIT 1")) {

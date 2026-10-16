@@ -1,14 +1,19 @@
 package com.utilitywatch.controller;
 
-import com.utilitywatch.home.DashboardSummary;
-import com.utilitywatch.home.DashboardSummaryService;
+import com.utilitywatch.goals.*;
+import com.utilitywatch.home.*;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 /** shows the user's latest readings, goals, and alerts on the home dashboard */
 public class HomeController {
@@ -24,9 +29,20 @@ public class HomeController {
     @FXML
     private Label costValueLabel;
     @FXML
+    private VBox goalsContainer;
+    @FXML
+    private VBox alertsContainer;
+    @FXML
     private LineChart<String, Number> trendChart;
 
+    private static final int MAX_ALERTS_SHOWN = 2;
+    private static final int MAX_GOALS_SHOWN = 2;
+
     private final DashboardSummaryService summaryService = new DashboardSummaryService();
+    private final GoalProgressService goalProgressService = new GoalProgressService();
+    private final GoalProgressCalculator progressCalculator = new GoalProgressCalculator();
+    private final GoalManager goalManager = new GoalManager();
+    private final GoalRepository goalRepository = GoalRepository.getInstance();
 
     // references MainController so buttons like the cost tile can navigate to other screens
     private MainController mainController;
@@ -41,6 +57,8 @@ public class HomeController {
         // TODO: add username to register/login for a personalised greeting (if user entered one)
         welcomeLabel.setText("Welcome back!");
         loadReadingData();
+        loadGoals();
+        loadAlerts();
     }
 
     // fills the tiles, cost estimate, and 7 day chart from the user's readings
@@ -89,6 +107,90 @@ public class HomeController {
         // removes the old chart data before adding the updated readings
         trendChart.getData().clear();
         trendChart.getData().addAll(energySeries, waterSeries);
+    }
+
+    // shows a progress bar for each active goal (up to the maximum) or a message if there are none
+    private void loadGoals() {
+        goalsContainer.getChildren().clear();
+        List<Goal> activeGoals = goalManager.filterActiveGoals(goalRepository.getAll());
+
+        if (activeGoals.isEmpty()) {
+            Label emptyGoalsLabel = new Label("No active goals yet. Create one on the Goals screen.");
+            emptyGoalsLabel.setWrapText(true);
+            goalsContainer.getChildren().add(emptyGoalsLabel);
+            return;
+        }
+
+        // only the first few goals fit on the dashboard
+        int goalsToShow = Math.min(activeGoals.size(), MAX_GOALS_SHOWN);
+
+        for (int goalIndex = 0; goalIndex < goalsToShow; goalIndex++) {
+            Goal goal = activeGoals.get(goalIndex);
+
+            // progress is null when there are no readings to compare yet
+            OptionalDouble achievedReduction = goalProgressService.achievedReduction(goal);
+            Double progress = achievedReduction.isPresent()
+                    ? progressCalculator.progressFraction(achievedReduction.getAsDouble(), goal.getTargetReduction()) : null;
+            addGoalRow(goal, progress);
+        }
+
+        // tells the user there are more goals on the goals screen
+        int hiddenGoals = activeGoals.size() - goalsToShow;
+        if (hiddenGoals > 0) {
+            Label moreGoalsLabel = new Label("+" + hiddenGoals + " more on the Goals screen");
+            moreGoalsLabel.getStyleClass().add("report-note");
+            goalsContainer.getChildren().add(moreGoalsLabel);
+        }
+    }
+
+    // shows the latest goal alerts (newest first) or a message if there are none
+    private void loadAlerts() {
+        alertsContainer.getChildren().clear();
+        List<GoalAlertStore.GoalAlert> goalAlerts = GoalAlertStore.getAll();
+
+        if (goalAlerts.isEmpty()) {
+            Label emptyAlertsLabel = new Label("No recent alerts.");
+            emptyAlertsLabel.setWrapText(true);
+            alertsContainer.getChildren().add(emptyAlertsLabel);
+            return;
+        }
+
+        int firstAlertIndex = Math.max(0, goalAlerts.size() - MAX_ALERTS_SHOWN);
+
+        // goes from the newest alert backwards, up to the maximum allowed to be shown
+        for (int alertIndex = goalAlerts.size() - 1; alertIndex >= firstAlertIndex; alertIndex--) {
+            addAlertRow(goalAlerts.get(alertIndex));
+        }
+    }
+
+    // loads one goal row from fxml, fills it in, and adds it to the goals container
+    private void addGoalRow(Goal goal, Double progress) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/utilitywatch/dashboard-goal-row.fxml"));
+            VBox row = loader.load();
+
+            DashboardGoalRowController controller = loader.getController();
+            controller.setData(goal, progress);
+
+            goalsContainer.getChildren().add(row);
+        } catch (IOException e) {
+            goalsContainer.getChildren().add(new Label("Could not load this goal"));
+        }
+    }
+
+    // loads one alert row from fxml, fills it in, and adds itto the alerts container
+    private void addAlertRow(GoalAlertStore.GoalAlert alert) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/utilitywatch/dashboard-alert-row.fxml"));
+            VBox row = loader.load();
+
+            DashboardAlertRowController controller = loader.getController();
+            controller.setData(alert);
+
+            alertsContainer.getChildren().add(row);
+        } catch (IOException e) {
+            alertsContainer.getChildren().add(new Label("Could not load this alert"));
+        }
     }
 
     // sends the user to the reports screen

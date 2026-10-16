@@ -225,6 +225,7 @@
 }
 
 /* line colour for the unusual consumption chart based on selected utility toggle */
+/*
 #unusualConsumptionChart.energy-selected .default-color0.chart-series-line {
     -fx-stroke: #FFBA4A;
 }
@@ -243,12 +244,30 @@
 #unusualConsumptionChart.both-selected .default-color0.chart-line-symbol {
     -fx-background-color: #263238, white;
 }
-#unusualConsumptionChart .default-color1.chart-series-line {
+*/
+#unusualConsumptionChart .default-color2.chart-series-line {
     -fx-stroke: #CB0E11
 }
-#unusualConsumptionChart .default-color1.chart-line-symbol {
-    -fx-background-color: #CB0E11, #CB0E11;
+#unusualConsumptionChart .default-color3.chart-series-line {
+    -fx-stroke: #CB0E11
 }
+#unusualConsumptionChart .default-color4.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color5.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color6.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color7.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .chart-line-symbol {
+    -fx-background-color: #CB0E11, white;
+}
+
+
 
 /* energy series line and data point for graph */
 .default-color0.chart-series-line {

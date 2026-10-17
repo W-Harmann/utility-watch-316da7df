@@ -18,4 +18,9 @@ public class GoalAlertStore {
     public static List<GoalAlert> getAll() {
         return List.copyOf(alerts);
     }
+
+    // forget all alerts, e.g. when an account is deleted
+    public static void clear() {
+        alerts.clear();
+    }
 }

@@ -36,7 +36,6 @@
     <HBox alignment="CENTER_LEFT" spacing="10.0">
         <Label text="Detailed Report" styleClass="reports-title"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Generate Report" styleClass="generate-report-button" onAction="#onGenerateReportClick"/>
     </HBox>
 
     <!-- utility toggle and period selector button -->
@@ -137,9 +136,9 @@
             </VBox>
 
             <!-- consumption chart (row 1 column 2) -->
-            <LineChart fx:id="consumptionChart" title="Consumption over time" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <LineChart fx:id="consumptionChart" animated="false" title="Consumption over time" GridPane.columnIndex="1" GridPane.rowIndex="0">
                 <xAxis>
-                    <CategoryAxis/>
+                    <CategoryAxis fx:id="consumptionXAxis"/>
                 </xAxis>
                 <yAxis>
                     <NumberAxis/>
@@ -418,7 +417,7 @@
             </VBox>
         </HBox>
 
-        <BarChart fx:id="distributionChart" title="Daily usage distribution" legendVisible="false" VBox.vgrow="ALWAYS">
+        <BarChart fx:id="distributionChart" animated="false" title="Daily usage distribution" legendVisible="false" VBox.vgrow="ALWAYS">
             <xAxis>
                 <CategoryAxis/>
             </xAxis>

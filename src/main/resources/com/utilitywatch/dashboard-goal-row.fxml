@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="4.0" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.utilitywatch.controller.DashboardGoalRowController">
+    <HBox>
+        <Label fx:id="goalNameLabel"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="progressPercentLabel"/>
+    </HBox>
+    <ProgressBar fx:id="goalProgressBar" progress="0.0" maxWidth="Infinity"/>
+    <Label fx:id="goalTargetLabel" styleClass="report-note"/>
+</VBox>

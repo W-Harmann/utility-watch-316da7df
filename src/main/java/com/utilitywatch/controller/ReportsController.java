@@ -31,6 +31,7 @@ public class ReportsController {
     @FXML private VBox statisticsContentBox;
     @FXML private Label comingSoonLabel;
     @FXML private PeriodPickerController periodPickerController;
+    @FXML private GridPane overviewUnusualGrid;
 
     // utility toggle buttons
     @FXML private HBox utilityToggle;
@@ -110,6 +111,9 @@ public class ReportsController {
     // reference to MainController for screen navigation
     private MainController mainController;
 
+    // reports overview tab maximum unusual patterns shown
+    private static final int MAX_OVERVIEW_UNUSUAL_SHOWN = 3;
+
     private final ConsumptionSummaryCalculator calculator = new ConsumptionSummaryCalculator();
     private final DistributionCalculator distributionCalculator = new DistributionCalculator();
     private final ReportsDataService dataService = new ReportsDataService();
@@ -180,6 +184,7 @@ public class ReportsController {
 
         updateChart(energyReadings, waterReadings);
         updateStatLabels(energyValues, waterValues);
+        updateOverviewUnusualTable();
     }
 
     // clears the chart and adds the selected energy and/or water readings as series
@@ -889,15 +894,11 @@ public class ReportsController {
     private int selectedIndex = 0;
 
     // loads sample unusual consumption data
-    private void updateUnusualConsumptionData() {
-        // prevents duplicate data from being added to the chart
-        unusualConsumptionChart.getData().clear();
-
+    // finds the flagged readings for the selected utility and period, oldest first
+    private LinkedHashMap<List<Reading>, String> findFlaggedReadings() {
         // check which resource toggles are currently selected
         boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
         boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
-
-
 
         List<Reading> energyReadings = new ArrayList<>(dataService.getReadings("energy", periodStart, periodEnd));
         List<Reading> waterReadings = new ArrayList<>(dataService.getReadings("water", periodStart, periodEnd));
@@ -912,8 +913,6 @@ public class ReportsController {
             utilityFlags.putAll(energyFlags);
         }
 
-
-
         if (showWater && !waterReadings.isEmpty()) {
             waterReadings.sort(Comparator.comparing(Reading::getDateTime));
 
@@ -921,16 +920,64 @@ public class ReportsController {
             utilityFlags.putAll(waterFlags);
         }
 
+        return sortFlaggedReadings(utilityFlags);
+    }
 
+    // loads sample unusual consumption data - lookup moved to findFlaggedReadings()
+    private void updateUnusualConsumptionData() {
+        // prevents duplicate data from being added to the chart
+        unusualConsumptionChart.getData().clear();
 
-        this.flaggedReadingsMap = sortFlaggedReadings(utilityFlags);
-
+        this.flaggedReadingsMap = findFlaggedReadings();
 
         selectedIndex = 0;
         showSelectedUnusualStats();
 
         // adds both data series to the consumption chart
         ///unusualConsumptionChart.getData().addAll(series, flaggedSeries);
+    }
+
+    // fills the overview's unusual patterns table with the most recent flagged readings
+    private void updateOverviewUnusualTable() {
+        // removes old rows but keeps the heading row (row 0)
+        overviewUnusualGrid.getChildren().removeIf(node -> {
+            Integer row = GridPane.getRowIndex(node);
+            return row != null && row > 0;
+        });
+
+        List<Map.Entry<List<Reading>, String>> flagged = new ArrayList<>(findFlaggedReadings().entrySet());
+
+        if (flagged.isEmpty()) {
+            overviewUnusualGrid.add(new Label("No unusual patterns found for this period."), 0, 1, 3, 1);
+            return;
+        }
+
+        DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("MMM d h:mma");
+        int rowsToShow = Math.min(flagged.size(), MAX_OVERVIEW_UNUSUAL_SHOWN);
+
+        // flagged is oldest first, so read from the end to show the newest first
+        for (int row = 0; row < rowsToShow; row++) {
+            Map.Entry<List<Reading>, String> entry = flagged.get(flagged.size() - 1 - row);
+            List<Reading> readings = entry.getKey();
+
+            String when = readings.getFirst().getDateTime().format(timeFormat);
+            if (readings.size() > 1) {
+                when += " - " + readings.getLast().getDateTime().format(timeFormat);
+            }
+
+            double totalUsage = readings.stream().mapToDouble(Reading::getQuantity).sum();
+            String used = String.format("%.1f %s", totalUsage, readings.getFirst().getUnit());
+
+            Label reasonLabel = new Label(entry.getValue());
+            reasonLabel.setWrapText(true);
+
+            Label whenLabel = new Label(when);
+            whenLabel.setWrapText(true);
+            whenLabel.setMaxWidth(150.0); // wraps instead of running off the column
+            overviewUnusualGrid.add(whenLabel, 0, row + 1);
+            overviewUnusualGrid.add(reasonLabel, 1, row + 1);
+            overviewUnusualGrid.add(new Label(used), 2, row + 1);
+        }
     }
 
     private LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {

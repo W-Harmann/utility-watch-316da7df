@@ -78,7 +78,7 @@
         <!-- clickable view all button that navigates to alerts screen -->
         <VBox spacing="10.0" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" prefWidth="0">
             <HBox alignment="CENTER_LEFT">
-                <Label text="Recent System Alerts" styleClass="home-tile-title"/>
+                <Label text="Recent Notifications" styleClass="home-tile-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button styleClass="stat-tile-button" text="View All" onAction="#onViewAllAlertsClick"/>
             </HBox>

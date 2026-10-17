@@ -149,7 +149,7 @@ public class HomeController {
         List<GoalAlertStore.GoalAlert> goalAlerts = GoalAlertStore.getAll();
 
         if (goalAlerts.isEmpty()) {
-            Label emptyAlertsLabel = new Label("No recent alerts.");
+            Label emptyAlertsLabel = new Label("No recent notifications.");
             emptyAlertsLabel.setWrapText(true);
             alertsContainer.getChildren().add(emptyAlertsLabel);
             return;

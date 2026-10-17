@@ -6,7 +6,11 @@ import com.utilitywatch.database.ReadingDAO;
 import com.utilitywatch.login.Session;
 import com.utilitywatch.login.User;
 
+import com.utilitywatch.notifications.Notification;
+import com.utilitywatch.notifications.NotificationRepository;
+import com.utilitywatch.notifications.Type;
 import javafx.collections.FXCollections;
+import javafx.scene.chart.XYChart;
 import javafx.scene.layout.HBox;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -17,6 +21,14 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ReadingsController {
 
@@ -37,6 +49,8 @@ public class ReadingsController {
     private final CsvReadingImportService csvImportService = new CsvReadingImportService(readingDAO);
     private int currentUserId;
     private Reading readingBeingEdited = null; // null means the form is adding a new reading, not editing one
+
+    private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
 
     @FXML
     public void initialize() {
@@ -148,5 +162,43 @@ public class ReadingsController {
 
     private void refreshTable() {
         readingsTable.setItems(FXCollections.observableArrayList(readingDAO.getReadingsForUser(currentUserId)));
+        notifyUnusualPatterns();
+    }
+
+    // So that Notifications for unusual patterns are set upon data being changed.
+    private void notifyUnusualPatterns() {
+        LinkedHashMap<List<Reading>, String> flaggedReadingsMap = ReportsController.loadUnusualConsumptionData(readingDAO.getReadingsForUser(currentUserId));
+
+        if (!flaggedReadingsMap.isEmpty()) {
+
+            notificationRepository.clearUnusual();
+
+            for (Map.Entry<List<Reading>, String> flaggedReadingEntry : flaggedReadingsMap.entrySet()) {
+                List<Reading> flaggedReadings = flaggedReadingEntry.getKey();
+                String flaggedReason = flaggedReadingEntry.getValue();
+
+                double readingDuration = Duration.between(flaggedReadings.getFirst().getDateTime(), flaggedReadings.getLast().getDateTime()).toHours();
+
+                double totalUsage = 0;
+
+                for (Reading reading : flaggedReadings) {
+                    totalUsage += reading.getQuantity();
+                }
+
+                String formattedTotal = String.format("%.1f", totalUsage);
+
+                String formattedResourceType = flaggedReadings.getFirst().getResourceType().substring(0, 1).toUpperCase() + flaggedReadings.getFirst().getResourceType().substring(1);
+
+                notificationRepository.add(new Notification(
+                        flaggedReadings.getFirst().getDateTime(),
+                        "Unusual Pattern Detected: " + formattedResourceType + " Usage",
+                        formattedResourceType + " " + flaggedReason.toLowerCase() + " of " + formattedTotal + " "
+                                + flaggedReadings.getFirst().getUnit() + (readingDuration == 0 ? "" : " over " + readingDuration + " hours"),
+                        false,
+                        Type.UNUSUALPATTERN));
+            }
+        }
+
+
     }
 }

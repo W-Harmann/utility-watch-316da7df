@@ -1,6 +1,7 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.consumptionDetector.*;
+import com.utilitywatch.notifications.NotificationRepository;
 import com.utilitywatch.reports.*;
 import com.utilitywatch.Reading;
 import javafx.collections.FXCollections;
@@ -891,6 +892,8 @@ public class ReportsController {
     private LinkedHashMap<List<Reading>, String> flaggedReadingsMap = new LinkedHashMap<>();
     private int selectedIndex = 0;
 
+    private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
+
     // loads sample unusual consumption data
     private void updateUnusualConsumptionData() {
         // prevents duplicate data from being added to the chart
@@ -953,7 +956,7 @@ public class ReportsController {
 
     }
 
-    private LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
+    public static LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
 
         // For the dates to be in ascending order
         readings.sort(Comparator.comparing(Reading::getDateTime));
@@ -1207,7 +1210,7 @@ public class ReportsController {
 
             String formattedTotal = String.format("%.1f", totalUsage);
 
-            selectedUtilityUsed.setText("Utility used: " + formattedTotal + flaggedReadings.getFirst().getUnit());
+            selectedUtilityUsed.setText("Utility used: " + formattedTotal + " " + flaggedReadings.getFirst().getUnit());
 
             selectedUnusualReason.setText("Reason: " + flaggedReadingsReasons.get(selectedIndex));
         }

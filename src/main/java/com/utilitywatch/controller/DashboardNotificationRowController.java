@@ -23,12 +23,14 @@ public class DashboardNotificationRowController {
 
     // picks the resource out of the stored title and builds a short title
     private String shortTitle(String fullTitle) {
+
         if (fullTitle.contains("Energy")) {
-            return "Energy goal completed";
+            return "Energy " + fullTitle.split(":")[0].toLowerCase();
         }
-        if (fullTitle.contains("Water")) {
-            return "Water goal completed";
+        else if (fullTitle.contains("Water")) {
+            return "Water " + fullTitle.split(":")[0].toLowerCase();
         }
+
         return fullTitle;
     }
 }

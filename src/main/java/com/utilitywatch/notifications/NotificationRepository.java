@@ -18,7 +18,6 @@ public class NotificationRepository {
 
     private static NotificationRepository instance;
     private final INotificationDAO notificationDAO;
-    private final List<Notification> notifications = new ArrayList<>();
     private int loadedUserId = NO_USER;
 
     private NotificationRepository(INotificationDAO notificationDAO) {
@@ -36,37 +35,18 @@ public class NotificationRepository {
     /** @return a copy of the notification list that can be changed without affecting the original */
     public List<Notification> getAll() {
         loadNotificationsIfUserChanged();
-        return new ArrayList<>(notifications);
+        return notificationDAO.getNotificationsForUser(loadedUserId);
     }
 
     /** saves a new notification for the current user  */
     public void add(Notification notification) {
         loadNotificationsIfUserChanged();
         notificationDAO.insert(notification, loadedUserId);
-        notifications.add(notification);
     }
 
     /** updates the notification at the given position (e.g. when its progress changes) */
     public void set(int notificationIndex, Notification notification) {
         loadNotificationsIfUserChanged();
-        replaceAt(notificationIndex, notification);
-    }
-
-    /** replaces an existing notification with its updated version */
-    public void replace(Notification oldNotification, Notification newNotification) {
-        loadNotificationsIfUserChanged();
-        int notificationIndex = notifications.indexOf(oldNotification);
-        if (notificationIndex >= 0) {
-            replaceAt(notificationIndex, newNotification);
-        }
-    }
-
-    /** removes the given notification from the list */
-    public void remove(Notification notification) {
-        loadNotificationsIfUserChanged();
-        if (notifications.remove(notification)) {
-            notificationDAO.delete(notification.getId());
-        }
     }
 
     /** removes every notification, e.g. when an account is deleted */
@@ -75,15 +55,15 @@ public class NotificationRepository {
         if (user != null) {
             notificationDAO.deleteNotificationsForUser(user.getId());
         }
-        notifications.clear();
         loadedUserId = NO_USER;
     }
 
-    // keeps the database id on the new notification, then saves it
-    private void replaceAt(int index, Notification newNotification) {
-        newNotification.setId(notifications.get(index).getId());
-        notifications.set(index, newNotification);
-        notificationDAO.update(newNotification);
+    /** removes every unusual notification, to refresh when readings change. */
+    public void clearUnusual() {
+        User user = Session.getInstance().getCurrentUser();
+        if (user != null) {
+            notificationDAO.deleteUnusualNotificationsForUser(user.getId());
+        }
     }
 
     // reloads from the database when a different user is logged in
@@ -94,9 +74,8 @@ public class NotificationRepository {
             return;
         }
 
-        notifications.clear();
         if (userId != NO_USER) {
-            notifications.addAll(notificationDAO.getNotificationsForUser(userId));
+            notificationDAO.getNotificationsForUser(userId);
         }
         loadedUserId = userId;
     }

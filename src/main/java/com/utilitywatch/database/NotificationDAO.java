@@ -2,6 +2,7 @@ package com.utilitywatch.database;
 
 import com.utilitywatch.UtilityWatchConnection;
 import com.utilitywatch.notifications.Notification;
+import com.utilitywatch.notifications.Type;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -27,7 +28,8 @@ public class NotificationDAO implements INotificationDAO {
                     + "notificationTime VARCHAR NOT NULL,"
                     + "title VARCHAR NOT NULL,"
                     + "message VARCHAR NOT NULL,"
-                    + "ignoredStatus BOOLEAN NOT NULL"
+                    + "ignoredStatus BOOLEAN NOT NULL,"
+                    + "notificationType VARCHAR NOT NULL"
                     + ")");
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -38,14 +40,15 @@ public class NotificationDAO implements INotificationDAO {
     @Override
     public void insert(Notification notification, int userId) {
         try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO notifications (userId, notificationTime, title, message, ignoredStatus) "
-                        + "VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO notifications (userId, notificationTime, title, message, ignoredStatus, notificationType) "
+                        + "VALUES (?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, userId);
             statement.setString(2, notification.getDateTime().toString());
             statement.setString(3, notification.getTitle());
             statement.setString(4, notification.getMessage());
             statement.setBoolean(5, notification.getIgnoredStatus());
+            statement.setString(6, notification.getType().toString());
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -63,7 +66,7 @@ public class NotificationDAO implements INotificationDAO {
     public List<Notification> getNotificationsForUser(int userId) {
         List<Notification> notifications = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM notifications WHERE userId = ? ORDER BY id ASC")) {
+                "SELECT * FROM notifications WHERE userId = ? ORDER BY notificationTime DESC")) {
             statement.setInt(1, userId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -100,11 +103,23 @@ public class NotificationDAO implements INotificationDAO {
         }
     }
 
-    // delets a user's notifications when their account is deleted
+    // deletes a user's notifications when their account is deleted
     @Override
     public void deleteNotificationsForUser(int userId) {
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM notifications WHERE userId = ?")) {
             statement.setInt(1, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // deletes a user's unusual notifications to refresh when data is updated.
+    @Override
+    public void deleteUnusualNotificationsForUser(int userId) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM notifications WHERE userId = ? AND notificationType = ?")) {
+            statement.setInt(1, userId);
+            statement.setString(2, Type.UNUSUALPATTERN.toString());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -117,7 +132,8 @@ public class NotificationDAO implements INotificationDAO {
                 LocalDateTime.parse(resultSet.getString("notificationTime")),
                 resultSet.getString("title"),
                 resultSet.getString("message"),
-                resultSet.getBoolean("ignoredStatus"));
+                resultSet.getBoolean("ignoredStatus"),
+                Type.valueOf(resultSet.getString("notificationType")));
         notification.setId(resultSet.getInt("id"));
         return notification;
     }

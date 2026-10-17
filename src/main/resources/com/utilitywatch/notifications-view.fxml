@@ -37,17 +37,6 @@
 
     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
         <VBox fx:id="recentNotificationsContainer" spacing="10.0">
-            <HBox alignment="CENTER" spacing="10.0" styleClass="report-info-box">
-                <VBox>
-                    <Label text="Aug 21 2026 2:40PM" styleClass="reports-title"/>
-                    <Label text="Severe"/>
-                    <Label text="Energy Usage Spiked 32% above threshold"/>
-                </VBox>
-                <VBox alignment="CENTER">
-                    <Button text="View Details"/>
-                    <Button text="Non-Issue"/>
-                </VBox>
-            </HBox>
         </VBox>
     </ScrollPane>
 

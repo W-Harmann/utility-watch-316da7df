@@ -21,8 +21,8 @@ public class NotificationsController {
     @FXML
     public void initialize() {
         for (Notification notification : notificationRepository.getAll()) {
-            // index 0 to put the newest notification at the top
-            recentNotificationsContainer.getChildren().add(0, createNotificationEntryNode(notification));
+            // newest notifications are the first in the list
+            recentNotificationsContainer.getChildren().addLast(createNotificationEntryNode(notification));
         }
 
     }

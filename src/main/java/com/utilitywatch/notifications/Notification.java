@@ -8,6 +8,7 @@ public class Notification {
     private final String title;
     private final String message;
     private final boolean ignored;
+    private final Type type;
 
     private int id; // assigned by the database on insert, 0 until then
 
@@ -22,11 +23,12 @@ public class Notification {
     }
 
     // full constructor that includes progress tracking for us8.4 and us8.5
-    public Notification(LocalDateTime time, String title, String message, boolean ignored) {
+    public Notification(LocalDateTime time, String title, String message, boolean ignored, Type type) {
         this.time = time;
         this.title = title;
         this.message = message;
         this.ignored = ignored;
+        this.type = type;
     }
 
     public LocalDateTime getDateTime() {
@@ -43,5 +45,9 @@ public class Notification {
 
     public boolean getIgnoredStatus() {
         return ignored;
+    }
+
+    public Type getType() {
+        return type;
     }
 }

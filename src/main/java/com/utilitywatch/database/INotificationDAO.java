@@ -1,6 +1,7 @@
 package com.utilitywatch.database;
 
 import com.utilitywatch.notifications.Notification;
+import com.utilitywatch.notifications.Type;
 
 import java.util.List;
 
@@ -12,4 +13,5 @@ public interface INotificationDAO {
     void update(Notification notification);
     void delete(int id);
     void deleteNotificationsForUser(int userId);
+    void deleteUnusualNotificationsForUser(int userId);
 }

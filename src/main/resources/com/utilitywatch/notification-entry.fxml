@@ -11,4 +11,8 @@
         <Label fx:id="notificationTimeLabel" text="Date"/>
         <Label fx:id="notificationMessageLabel" text="Message"/>
     </VBox>
+    <VBox alignment="CENTER">
+        <Button text="View Details"/>
+        <Button text="Non-Issue"/>
+    </VBox>
 </HBox>

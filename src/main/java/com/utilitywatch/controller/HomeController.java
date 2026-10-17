@@ -37,7 +37,7 @@ public class HomeController {
     @FXML
     private LineChart<String, Number> trendChart;
 
-    private static final int MAX_ALERTS_SHOWN = 2;
+    private static final int MAX_NOTIFICATIONS_SHOWN = 2;
     private static final int MAX_GOALS_SHOWN = 2;
 
     private final DashboardSummaryService summaryService = new DashboardSummaryService();
@@ -160,10 +160,10 @@ public class HomeController {
             return;
         }
 
-        int firstAlertIndex = Math.max(0, notifications.size() - MAX_ALERTS_SHOWN);
+        int minNotification = Math.min(notifications.size(), MAX_NOTIFICATIONS_SHOWN);
 
         // goes from the newest notification backwards, up to the maximum allowed to be shown
-        for (int notificationIndex = notifications.size() - 1; notificationIndex >= firstAlertIndex; notificationIndex--) {
+        for (int notificationIndex = 0; notificationIndex < minNotification; notificationIndex++) {
             addAlertRow(notifications.get(notificationIndex));
         }
     }

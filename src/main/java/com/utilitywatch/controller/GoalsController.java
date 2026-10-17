@@ -3,6 +3,7 @@ package com.utilitywatch.controller;
 import com.utilitywatch.goals.*;
 import com.utilitywatch.notifications.Notification;
 import com.utilitywatch.notifications.NotificationRepository;
+import com.utilitywatch.notifications.Type;
 import com.utilitywatch.reports.*;
 import javafx.application.Platform;
 import javafx.fxml.*;
@@ -144,7 +145,8 @@ public class GoalsController {
                         "Goal Completed: Reduced " + resource + " Usage",
                         resource + " successfully reduced by " + (int) goal.getTargetReduction()
                                 + "% (" + goal.getTargetPeriod() + ")",
-                        false));
+                        false,
+                        Type.GOAL));
             }
 
             // update progress and track goals without readings

@@ -2,6 +2,8 @@ package com.utilitywatch.controller;
 
 import com.utilitywatch.goals.*;
 import com.utilitywatch.home.*;
+import com.utilitywatch.notifications.Notification;
+import com.utilitywatch.notifications.NotificationRepository;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.chart.LineChart;
@@ -15,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
-/** shows the user's latest readings, goals, and alerts on the home dashboard */
+/** shows the user's latest readings, goals, and notifications on the home dashboard */
 public class HomeController {
 
     @FXML
@@ -31,7 +33,7 @@ public class HomeController {
     @FXML
     private VBox goalsContainer;
     @FXML
-    private VBox alertsContainer;
+    private VBox notificationsContainer;
     @FXML
     private LineChart<String, Number> trendChart;
 
@@ -43,6 +45,8 @@ public class HomeController {
     private final GoalProgressCalculator progressCalculator = new GoalProgressCalculator();
     private final GoalManager goalManager = new GoalManager();
     private final GoalRepository goalRepository = GoalRepository.getInstance();
+
+    private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
 
     // references MainController so buttons like the cost tile can navigate to other screens
     private MainController mainController;
@@ -58,7 +62,7 @@ public class HomeController {
         welcomeLabel.setText("Welcome back!");
         loadReadingData();
         loadGoals();
-        loadAlerts();
+        loadNotifications();
     }
 
     // fills the tiles, cost estimate, and 7 day chart from the user's readings
@@ -143,23 +147,24 @@ public class HomeController {
         }
     }
 
-    // shows the latest goal alerts (newest first) or a message if there are none
-    private void loadAlerts() {
-        alertsContainer.getChildren().clear();
-        List<GoalAlertStore.GoalAlert> goalAlerts = GoalAlertStore.getAll();
+    // shows the latest notifications (newest first) or a message if there are none
 
-        if (goalAlerts.isEmpty()) {
-            Label emptyAlertsLabel = new Label("No recent alerts.");
-            emptyAlertsLabel.setWrapText(true);
-            alertsContainer.getChildren().add(emptyAlertsLabel);
+    private void loadNotifications() {
+        notificationsContainer.getChildren().clear();
+        List<Notification> notifications = notificationRepository.getAll();
+
+        if (notifications.isEmpty()) {
+            Label emptyNotificationsLabel = new Label("No recent notifications.");
+            emptyNotificationsLabel.setWrapText(true);
+            notificationsContainer.getChildren().add(emptyNotificationsLabel);
             return;
         }
 
-        int firstAlertIndex = Math.max(0, goalAlerts.size() - MAX_ALERTS_SHOWN);
+        int firstAlertIndex = Math.max(0, notifications.size() - MAX_ALERTS_SHOWN);
 
-        // goes from the newest alert backwards, up to the maximum allowed to be shown
-        for (int alertIndex = goalAlerts.size() - 1; alertIndex >= firstAlertIndex; alertIndex--) {
-            addAlertRow(goalAlerts.get(alertIndex));
+        // goes from the newest notification backwards, up to the maximum allowed to be shown
+        for (int notificationIndex = notifications.size() - 1; notificationIndex >= firstAlertIndex; notificationIndex--) {
+            addAlertRow(notifications.get(notificationIndex));
         }
     }
 
@@ -178,18 +183,18 @@ public class HomeController {
         }
     }
 
-    // loads one alert row from fxml, fills it in, and adds itto the alerts container
-    private void addAlertRow(GoalAlertStore.GoalAlert alert) {
+    // loads one notification row from fxml, fills it in, and adds itto the notifications container
+    private void addAlertRow(Notification notification) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/utilitywatch/dashboard-alert-row.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/utilitywatch/dashboard-notification-row.fxml"));
             VBox row = loader.load();
 
-            DashboardAlertRowController controller = loader.getController();
-            controller.setData(alert);
+            DashboardNotificationRowController controller = loader.getController();
+            controller.setData(notification);
 
-            alertsContainer.getChildren().add(row);
+            notificationsContainer.getChildren().add(row);
         } catch (IOException e) {
-            alertsContainer.getChildren().add(new Label("Could not load this alert"));
+            notificationsContainer.getChildren().add(new Label("Could not load this notification"));
         }
     }
 
@@ -225,11 +230,11 @@ public class HomeController {
         }
     }
 
-    // sends the user to the alerts screen
+    // sends the user to the notifications screen
     @FXML
-    protected void onViewAllAlertsClick() {
+    protected void onViewAllNotificationsClick() {
         if (mainController != null) {
-            mainController.showAlerts();
+            mainController.showNotifications();
         }
     }
 

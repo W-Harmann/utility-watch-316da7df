@@ -1,24 +1,24 @@
 package com.utilitywatch.controller;
 
-import com.utilitywatch.goals.GoalAlertStore;
+import com.utilitywatch.notifications.Notification;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import java.time.format.DateTimeFormatter;
 
-/** fills in one alert row on the home dashboard using a shortened format */
-public class DashboardAlertRowController {
+/** fills in one notification row on the home dashboard using a shortened format */
+public class DashboardNotificationRowController {
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("MMM d h:mma");
 
     @FXML
-    private Label alertTitleLabel;
+    private Label notificationTitleLabel;
     @FXML
-    private Label alertMessageLabel;
+    private Label notificationMessageLabel;
 
-    /** @param alert the goal alert to show */
-    public void setData(GoalAlertStore.GoalAlert alert) {
+    /** @param notification the goal notification to show */
+    public void setData(Notification notification) {
         // for example: 'Goal Completed: Reduced Water Usage' becomes 'Water goal completed'
-        alertTitleLabel.setText(shortTitle(alert.title()));
-        alertMessageLabel.setText(alert.time().format(TIME_FORMAT) + " - " + alert.message());
+        notificationTitleLabel.setText(shortTitle(notification.getTitle()));
+        notificationMessageLabel.setText(notification.getDateTime().format(TIME_FORMAT) + " - " + notification.getMessage());
     }
 
     // picks the resource out of the stored title and builds a short title

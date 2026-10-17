@@ -32,7 +32,7 @@ public class MainController {
     @FXML
     private ToggleButton costsNavButton;
     @FXML
-    private ToggleButton alertsNavButton;
+    private ToggleButton notificationsNavButton;
 
     private final AuthenticationService authService = SharedAuth.getService();
 
@@ -112,13 +112,13 @@ public class MainController {
     }
 
     @FXML
-    protected void onAlertsClick() {
-        showAlerts();
+    protected void onNotificationsClick() {
+        showNotifications();
     }
 
-    public void showAlerts() {
-        alertsNavButton.setSelected(true);
-        loadScreen("/com/utilitywatch/alerts-view.fxml");
+    public void showNotifications() {
+        notificationsNavButton.setSelected(true);
+        loadScreen("/com/utilitywatch/notifications-view.fxml");
     }
 
     @FXML

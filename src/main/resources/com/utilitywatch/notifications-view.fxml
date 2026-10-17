@@ -4,20 +4,20 @@
 <?import javafx.scene.layout.*?>
 
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.utilitywatch.controller.AlertsController"
+      fx:controller="com.utilitywatch.controller.NotificationsController"
       styleClass="reports-root"
       VBox.vgrow="ALWAYS"
       maxHeight="Infinity">
 
 
     <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <Label text="Alerts" styleClass="reports-title"/>
+        <Label text="Notifications" styleClass="reports-title"/>
     </HBox>
 
     <HBox spacing="15.0">
         <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
             <Label text="2" styleClass="stat-value"/>
-            <Label text="New Alerts" styleClass="report-info-box-title"/>
+            <Label text="New Notifications" styleClass="report-info-box-title"/>
         </VBox>
 
         <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
@@ -32,11 +32,11 @@
     </HBox>
 
     <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <Label text="Recent Alerts" styleClass="reports-title"/>
+        <Label text="Recent Notifications" styleClass="reports-title"/>
     </HBox>
 
     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
-        <VBox fx:id="recentAlertsContainer" spacing="10.0">
+        <VBox fx:id="recentNotificationsContainer" spacing="10.0">
             <HBox alignment="CENTER" spacing="10.0" styleClass="report-info-box">
                 <VBox>
                     <Label text="Aug 21 2026 2:40PM" styleClass="reports-title"/>
@@ -52,7 +52,7 @@
     </ScrollPane>
 
     <HBox alignment="CENTER_RIGHT" spacing="10.0">
-        <Button text="View All Alerts" styleClass="generate-report-button" onAction="#onViewAllAlerts"/>
+        <Button text="View All Notifications" styleClass="generate-report-button" onAction="#onViewAllNotifications"/>
     </HBox>
 
 </VBox>

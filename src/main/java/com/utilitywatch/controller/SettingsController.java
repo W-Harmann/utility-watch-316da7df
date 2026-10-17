@@ -1,11 +1,11 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.database.IReadingDAO;
-import com.utilitywatch.goals.GoalAlertStore;
 import com.utilitywatch.login.AuthenticationService;
 import com.utilitywatch.login.Session;
 import com.utilitywatch.login.User;
 
+import com.utilitywatch.notifications.NotificationRepository;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -82,10 +82,10 @@ public class SettingsController {
             return;
         }
 
-        // goals, alerts, cost settings and the date range are shared in-memory data,
+        // goals, notification, cost settings and the date range are shared in-memory data,
         // so clear them too or the next person to log in would see them
         GoalsController.clearGoals();
-        GoalAlertStore.clear();
+        NotificationRepository.getInstance().clear();
         SharedUtilitySettings.reset();
         SharedDateRange.clear();
 

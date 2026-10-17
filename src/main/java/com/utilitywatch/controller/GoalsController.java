@@ -131,14 +131,7 @@ public class GoalsController {
 
             if (goalManager.justCompleted(goal, achievedReduction)) {
                 newlyCompletedGoals.add(goal);
-
-                // also saved as an alert so it appears on the alerts screen (us8.4)
-                String resource = "energy".equals(goal.getResourceType()) ? "Energy" : "Water";
-                GoalAlertStore.add(new GoalAlertStore.GoalAlert(
-                        LocalDateTime.now(),
-                        "Goal Completed: Reduced " + resource + " Usage",
-                        resource + " successfully reduced by " + (int) goal.getTargetReduction()
-                                + "% (" + goal.getTargetPeriod() + ")"));
+                saveCompletionAlert(goal);
             }
 
             // update progress and track goals without readings
@@ -167,6 +160,16 @@ public class GoalsController {
         if (!newlyCompletedGoals.isEmpty()) {
             Platform.runLater(() -> showCompletionAlert(newlyCompletedGoals));
         }
+    }
+
+    // saves a completion alert so it appears on the notifications screen (us8.4)
+    private void saveCompletionAlert(Goal goal) {
+        String resource = "energy".equals(goal.getResourceType()) ? "Energy" : "Water";
+        GoalAlertStore.add(new GoalAlertStore.GoalAlert(
+                LocalDateTime.now(),
+                "Goal Completed: Reduced " + resource + " Usage",
+                resource + " successfully reduced by " + (int) goal.getTargetReduction()
+                        + "% (" + goal.getTargetPeriod() + ")"));
     }
 
     // displays a message showing the details of each goal that has been completed
@@ -205,7 +208,7 @@ public class GoalsController {
     private void onEditGoal(Goal goal) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Edit Goal");
-        dialog.setHeaderText("Edit your " + goal.getResourceType() + " goal");
+        dialog.setHeaderText("Edit your " + goal.getResourceType() + " goal (resource type can't be changed)");
 
         TextField targetInput = new TextField(String.valueOf((int) goal.getTargetReduction()));
         ComboBox<String> periodInput = new ComboBox<>();
@@ -229,9 +232,21 @@ public class GoalsController {
         try {
             double newTarget = Double.parseDouble(targetInput.getText().trim());
             Goal edited = goalManager.editGoal(goal, newTarget, periodInput.getValue());
+
+            // check if the goal was completed by the edit
+            boolean newlyCompleted = !goal.isCompleted() && edited.isCompleted();
             goalRepository.replace(goal, edited);
             errorLabel.setText("");
+
+            if (newlyCompleted) {
+                saveCompletionAlert(edited);
+            }
+
             refreshGoalLists(); // updates progress using the new goal target and period
+
+            if (newlyCompleted) {
+                Platform.runLater(() -> showCompletionAlert(List.of(edited)));
+            }
         } catch (NumberFormatException e) {
             errorLabel.setText("Target reduction must be a number, e.g. 15");
         } catch (IllegalArgumentException e) {

@@ -48,6 +48,11 @@ public class MainController {
         loadScreen("/com/utilitywatch/home-view.fxml");
     }
 
+    // public so other screens like customise report can return to the dashboard
+    public void showHome() {
+        onHomeClick();
+    }
+
     @FXML
     protected void onReadingsClick() {
         try {
@@ -118,7 +123,7 @@ public class MainController {
 
     @FXML
     protected void onSettingsClick() {
-        showLabel("Settings");
+        loadScreen("/com/utilitywatch/settings-view.fxml");
     }
 
     // shared method for loading screens into the main content area
@@ -153,6 +158,7 @@ public class MainController {
     @FXML
     protected void onLogOutClick() {
         authService.logOut(Session.getInstance().getCurrentUser());
+        SharedDateRange.clear();
         try {
             Stage stage = (Stage) contentArea.getScene().getWindow();
             Parent root = FXMLLoader.load(getClass().getResource("/com/utilitywatch/login-view.fxml"));

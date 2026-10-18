@@ -139,6 +139,58 @@
     -fx-text-fill: #5FB2F5;
 }
 
+.trends-tab-utility-unactive {
+    -fx-background-color: #556671;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.trends-tab-utility-unactive .label {
+    -fx-text-fill: darkgray;
+    -fx-font-style: italic;
+}
+
+.trends-tab-utility-unactive .check-box {
+    -fx-text-fill: darkgray;
+}
+
+.trends-tab-utility-active {
+    -fx-background-color: #263238;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.trends-tab-utility-active .label {
+    -fx-text-fill: white;
+    -fx-font-style: normal;
+}
+
+.trends-tab-utility-active .check-box {
+    -fx-text-fill: white;
+}
+
+.trends-tab-utility-display {
+    -fx-background-color: #eeeeee;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.trends-tab-utility-display .label {
+    -fx-text-fill: black;
+}
+
+.trends-tab-utility-display .chart-series-line {}
+
+.trends-tab-utility-display .chart-legend-item {}
+
+.comparisons-tab-widget {
+    -fx-background-color: #556671;
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.comparisons-tab-display .chart-bar {}
+
 .cancel-button {
     -fx-background-color: #CB0E11;
     -fx-text-fill: white;
@@ -172,19 +224,32 @@
     -fx-font-weight: bold;
 }
 
-/* line colour for the unusual consumption chart based on selected utility toggle */
-#unusualConsumptionChart.energy-selected .default-color0.chart-series-line {
+/* ---- line charts default series colours (energy yellow, water blue) ---- */
+/* energy series line and data point for graph */
+.default-color0.chart-series-line {
     -fx-stroke: #FFBA4A;
 }
-#unusualConsumptionChart.energy-selected .default-color0.chart-line-symbol {
+.default-color0.chart-line-symbol {
     -fx-background-color: #FFBA4A, white;
 }
-#unusualConsumptionChart.water-selected .default-color0.chart-series-line {
+/* water series line and data point for graph */
+.default-color1.chart-series-line {
     -fx-stroke: #5FB2F5;
 }
-#unusualConsumptionChart.water-selected .default-color0.chart-line-symbol {
+.default-color1.chart-line-symbol {
     -fx-background-color: #5FB2F5, white;
 }
+
+/* ---- line charts: water only is the first series so recolour it blue ---- */
+/* consumption chart water utility toggle for reports overview tab */
+.water-selected .default-color0.chart-series-line {
+    -fx-stroke: #5FB2F5;
+}
+.water-selected .default-color0.chart-line-symbol {
+    -fx-background-color: #5FB2F5, white;
+}
+
+/* ---- unusual patterns chart: dark line for both, red for flagged readings ---- */
 #unusualConsumptionChart.both-selected .default-color0.chart-series-line {
     -fx-stroke: #263238;
 }
@@ -198,31 +263,13 @@
     -fx-background-color: #CB0E11, #CB0E11;
 }
 
-/* energy series line and data point for graph */
-.default-color0.chart-series-line {
-    -fx-stroke: #FFBA4A;
-}
-.default-color0.chart-line-symbol {
-    -fx-background-color: #FFBA4A, white;
-}
-
-/* water series line and data point for graph */
-.default-color1.chart-series-line {
-    -fx-stroke: #5FB2F5;
-}
-.default-color1.chart-line-symbol {
-    -fx-background-color: #5FB2F5, white;
-}
-
-/* bar colour for the statistics distribution chart based on selected utility toggle */
+/* ---- bar charts: colour by selected utility ---- */
 .energy-selected .chart-bar {
     -fx-bar-fill: #FFBA4A;
 }
-
 .water-selected .chart-bar {
     -fx-bar-fill: #5FB2F5;
 }
-
 .both-selected .chart-bar {
     -fx-bar-fill: #263238;
 }
@@ -246,19 +293,25 @@
     -fx-background-color: #CB943C;
     -fx-background-radius: 12;
     -fx-text-fill: white;
-    -fx-padding: 5;
-
+    -fx-padding: 20 25 20 25;
 }
 
 .quick-tip-text {
     -fx-text-fill: white;
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
 }
 
-.quick-tip-title {
+.home-tile-title {
     -fx-text-fill: white;
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
+}
+
+.export-data-box {
+    -fx-background-color: #0E6407;
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-padding: 20 25 20 25;
 }
 
 .goal-progress-energy .bar {
@@ -287,4 +340,10 @@
     -fx-border-color: #CCCCCC;
     -fx-border-width: 1;
     -fx-border-radius: 8;
+}
+
+.danger-button {
+    -fx-background-color: #d32f2f;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
 }

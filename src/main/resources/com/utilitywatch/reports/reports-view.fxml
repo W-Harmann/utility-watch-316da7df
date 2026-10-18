@@ -15,6 +15,13 @@
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<?import javafx.scene.control.DatePicker?>
 
 <VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.ReportsController"
@@ -29,11 +36,10 @@
     <HBox alignment="CENTER_LEFT" spacing="10.0">
         <Label text="Detailed Report" styleClass="reports-title"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Generate Report" styleClass="generate-report-button" onAction="#onGenerateReportClick"/>
     </HBox>
 
     <!-- utility toggle and period selector button -->
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
+    <HBox alignment="CENTER_LEFT" fx:id="utilityToggle" spacing="10.0">
         <Label text="Utility:"/>
 
         <fx:define>
@@ -48,6 +54,64 @@
 
         <!-- shows period picker -->
         <fx:include source="period-picker.fxml" fx:id="periodPicker"/>
+    </HBox>
+
+    <!-- trend mode toggle, period view and period selector button -->
+    <HBox alignment="CENTER_LEFT" fx:id="trendmodeToggle" spacing="10.0" visible="false" managed="false">
+<!--        <Label text="Mode:"/>-->
+
+<!--        <fx:define>-->
+<!--            <ToggleGroup fx:id="trendmodeToggleGroup"/>-->
+<!--        </fx:define>-->
+
+<!--        <ToggleButton fx:id="trendmodeTotalToggle" text="Total" styleClass="utility-toggle, both-toggle" toggleGroup="$trendmodeToggleGroup" selected="true"/>-->
+<!--        <ToggleButton fx:id="trendmodeChangeToggle" text="Change" styleClass="utility-toggle, both-toggle" toggleGroup="$trendmodeToggleGroup"/>-->
+
+<!--        <Region HBox.hgrow="ALWAYS"/>-->
+
+        <Label text="View:"/>
+
+        <ComboBox fx:id="trendViewDropdown" promptText="Please Select A Report" onAction="#onTrendsViewSelected" maxWidth="100">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Annual"/>
+                    <String fx:value="Semester"/>
+                    <String fx:value="Trimester"/>
+                    <String fx:value="Quarter"/>
+                    <String fx:value="Month"/>
+                    <String fx:value="This Week"/>
+                </FXCollections>
+            </items>
+        </ComboBox>
+
+<!--        <Region HBox.hgrow="ALWAYS"/>-->
+
+        <Label text="Year:"/>
+
+        <ComboBox fx:id="trendYearDropdown" promptText="Select Year" onAction="#onTrendsPeriodSelected"  maxWidth="100"/>
+
+<!--        <Region HBox.hgrow="ALWAYS"/>-->
+
+        <Label text="Period:"/>
+
+        <ComboBox fx:id="trendPeriodDropdown" promptText="Select Period" onAction="#onTrendsPeriodSelected" maxWidth="100"/>
+    </HBox>
+
+    <!-- trend mode toggle, period view and period selector button -->
+    <HBox alignment="CENTER_LEFT" fx:id="comparisonmodeToggle" spacing="10.0" visible="false" managed="false">
+        <Label text="Comparing:"/>
+
+        <ComboBox fx:id="comparisonModeDropdown" promptText="Please Select A Report" onAction="#onComparisonsViewSelected" maxWidth="300">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Free Choice"/>
+                    <String fx:value="Yesterday"/>
+                    <String fx:value="Last Week"/>
+                    <String fx:value="Last Month"/>
+                    <String fx:value="Last Year"/>
+                </FXCollections>
+            </items>
+        </ComboBox>
     </HBox>
 
     <!-- report tab buttons - uses a toggle group so the active tab stays visually marked -->
@@ -74,8 +138,8 @@
                 <ColumnConstraints percentWidth="60.0"/>
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints percentHeight="55.0"/>
-                <RowConstraints percentHeight="45.0"/>
+                <RowConstraints percentHeight="51.0"/>
+                <RowConstraints percentHeight="49.0"/>
             </rowConstraints>
 
             <!-- comparisons widget (row 1 column 1) -->
@@ -89,9 +153,9 @@
             </VBox>
 
             <!-- consumption chart (row 1 column 2) -->
-            <LineChart fx:id="consumptionChart" title="Consumption over time" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <LineChart fx:id="consumptionChart" animated="false" title="Consumption over time" GridPane.columnIndex="1" GridPane.rowIndex="0">
                 <xAxis>
-                    <CategoryAxis/>
+                    <CategoryAxis fx:id="consumptionXAxis"/>
                 </xAxis>
                 <yAxis>
                     <NumberAxis/>
@@ -138,39 +202,171 @@
                 </GridPane>
             </VBox>
 
-            <!-- unusual patterns table (row 2 column 2) -->
+            <!-- unusual patterns table (row 2 column 2) using real readings -->
             <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1" >
                 <Label text="Unusual Patterns Detected" styleClass="report-info-box-title"/>
 
-                <GridPane hgap="15.0" vgap="12.0">
+                <GridPane fx:id="overviewUnusualGrid" hgap="15.0" vgap="12.0">
                     <columnConstraints>
-                        <ColumnConstraints minWidth="70.0"/>
-                        <ColumnConstraints minWidth="75.0"/>
-                        <ColumnConstraints minWidth="70.0"/>
-                        <ColumnConstraints minWidth="110.0"/>
+                        <ColumnConstraints minWidth="130.0"/>
+                        <ColumnConstraints minWidth="150.0"/>
+                        <ColumnConstraints minWidth="80.0"/>
                     </columnConstraints>
 
                     <!-- table headings -->
                     <Label text="Date/Period" styleClass="report-info-box-subtitle" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <Label text="Type" styleClass="report-info-box-subtitle" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                    <Label text="Severity" styleClass="report-info-box-subtitle" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                    <Label text="Details" styleClass="report-info-box-subtitle" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-
-                    <Label text="Aug 22 (2h)" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <Label text="High Usage" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                    <Label text="Severe" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-                    <Label text="+32% above usual" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-
-                    <Label text="Aug 24 (1h)" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <Label text="Spike" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                    <Label text="Moderate" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                    <Label text="Short spike detected" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-
-                    <Label text="Aug 26 (6h)" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <Label text="Long duration" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                    <Label text="Moderate" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-                    <Label text="Usage for 6+ hours" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                    <Label text="Reason" styleClass="report-info-box-subtitle" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="Utility used" styleClass="report-info-box-subtitle" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
                 </GridPane>
+            </VBox>
+
+        </GridPane>
+    </VBox>
+
+    <!-- TRENDS TAB content -->
+    <VBox fx:id="trendsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS" maxHeight="Infinity">
+        <!-- Scroll Bar -->
+        <ScrollPane style="-fx-background: #FFFFFF; -fx-box-border: transparent;" hbarPolicy="never" vbarPolicy="always" VBox.vgrow="NEVER" fitToWidth="true" prefHeight="1000">
+            <VBox>
+                <!-- Energy Display -->
+                <HBox spacing="15.0" fx:id="trendEnergyMain" styleClass="trends-tab-utility-unactive" alignment="CENTER"  maxHeight="80">
+                    <Label text="Energy" styleClass="stat-value"/>
+                    <Pane HBox.hgrow="ALWAYS" />
+                    <CheckBox fx:id="trendShowEnergyTrendDataPointButton" text="Data-Point" onAction="#onShowEnergyTrendClick"/>
+                    <CheckBox fx:id="trendShowEnergyTrendSumButton" text="Sum" onAction="#onShowEnergyTrendClick"/>
+                    <CheckBox fx:id="trendShowEnergyTrendAvgButton" text="Average" onAction="#onShowEnergyTrendClick"/>
+                    <CheckBox fx:id="trendShowEnergyTrendButton" text="Show" onAction="#onShowEnergyTrendClick"/>
+                </HBox>
+                <!-- Energy Display | Graph -->
+                <HBox spacing="15.0" fx:id="trendEnergyDisplay" styleClass="trends-tab-utility-display" visible="false" managed="false" prefHeight="330">
+                    <!-- Graph -->
+                    <LineChart fx:id="trendEnergyGraph" title="Energy Trend Graph" animated="false" legendVisible="false" VBox.vgrow="ALWAYS" prefWidth="1400">
+                        <xAxis>
+                            <CategoryAxis/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis/>
+                        </yAxis>
+                    </LineChart>
+                </HBox>
+
+                <!-- Water Display-->
+                <HBox spacing="15.0" fx:id="trendWaterMain" styleClass="trends-tab-utility-unactive" alignment="CENTER" maxHeight="80">
+                    <Label text="Water" styleClass="stat-value"/>
+                    <Pane HBox.hgrow="ALWAYS" />
+                    <CheckBox fx:id="trendShowWaterTrendDataPointButton" text="Data-Point" onAction="#onShowWaterTrendClick"/>
+                    <CheckBox fx:id="trendShowWaterTrendSumButton" text="Sum" onAction="#onShowWaterTrendClick"/>
+                    <CheckBox fx:id="trendShowWaterTrendAvgButton" text="Average" onAction="#onShowWaterTrendClick"/>
+                    <CheckBox fx:id="trendShowWaterTrendButton" text="Show" onAction="#onShowWaterTrendClick"/>
+                </HBox>
+                <!-- Water Display | Graph -->
+                <HBox spacing="15.0" fx:id="trendWaterDisplay" styleClass="trends-tab-utility-display" visible="false" managed="false" prefHeight="330">
+                    <!-- Graph -->
+                    <LineChart fx:id="trendWaterGraph" title="Water Trend Graph" animated="false" legendVisible="false" VBox.vgrow="ALWAYS" prefWidth="1400">
+                        <xAxis>
+                            <CategoryAxis/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis/>
+                        </yAxis>
+                    </LineChart>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </VBox>
+
+    <!-- COMPARISONS TAB content -->
+    <!--todo: clean up-->
+    <VBox fx:id="comparisonsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS" maxHeight="Infinity">
+
+        <HBox spacing="15.0" fx:id="comparisonsDatePickers" alignment="BASELINE_RIGHT">
+            <Label text="From:"/>
+            <DatePicker fx:id="fromDate1PickerComparison" promptText="Start Date 1" onAction="#updateComparisons" maxWidth="120"/>
+            <Label text="-"/>
+            <DatePicker fx:id="toDate1PickerComparison" promptText="End Date 1" onAction="#updateComparisons" maxWidth="120"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="To:"/>
+            <DatePicker fx:id="fromDate2PickerComparison" promptText="Start Date 2" onAction="#updateComparisons" maxWidth="120"/>
+            <Label text="-"/>
+            <DatePicker fx:id="toDate2PickerComparison" promptText="End Date 2" onAction="#updateComparisons" maxWidth="120"/>
+        </HBox>
+
+        <HBox spacing="15.0" fx:id="comparisonsDateViewer" alignment="BASELINE_RIGHT">
+            <Label text="Date 1:"/>
+            <Label text="-" fx:id="comparisonsDateTextFrom"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Date 2:"/>
+            <Label text="-" fx:id="comparisonsDateTextTo"/>
+        </HBox>
+
+        <GridPane hgap="15.0" vgap="15.0" VBox.vgrow="ALWAYS">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="70.0"/>
+                <ColumnConstraints percentWidth="30.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints percentHeight="50.0"/>
+                <RowConstraints percentHeight="50.0"/>
+            </rowConstraints>
+
+            <!-- comparisons widget (row 1 column 1) -->
+            <HBox styleClass="report-info-box" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                <BarChart fx:id="comparisonTotalGraph" style="-" title="Total Usage Between Periods" prefWidth="900" animated="false">
+                    <xAxis>
+                        <CategoryAxis tickLabelFill="#FFFFFF"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis tickLabelFill="#FFFFFF"/>
+                    </yAxis>
+                </BarChart>
+            </HBox>
+
+            <!-- consumption chart (row 1 column 2) -->
+            <VBox spacing="14.0" styleClass="report-info-box" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                <Label text="Total" styleClass="report-info-box-title"/>
+
+                <HBox>
+                    <VBox styleClass="comparisons-tab-widget">
+                        <Label text="Change" styleClass="report-info-box-subtitle"/>
+                        <Label fx:id="comparisonTotalChangeEnergyLabel" text="Energy: - kWh"/>
+                        <Label fx:id="comparisonTotalChangeWaterLabel" text="Water: - L"/>
+                    </VBox>
+                    <VBox styleClass="comparisons-tab-widget">
+                        <Label text="\%" styleClass="report-info-box-subtitle"/>
+                        <Label fx:id="comparisonTotalPercentChangeEnergyLabel" text="0%"/>
+                        <Label fx:id="comparisonTotalPercentChangeWaterLabel" text="0%"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- comparisons widget (row 2 column 1) -->
+            <HBox styleClass="report-info-box" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                <BarChart fx:id="comparisonAverageGraph" title="Average Usage Between Periods" prefWidth="900" animated="false">
+                    <xAxis>
+                        <CategoryAxis tickLabelFill="#FFFFFF"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis tickLabelFill="#FFFFFF"/>
+                    </yAxis>
+                </BarChart>
+            </HBox>
+
+            <!-- consumption chart (row 2 column 2) -->
+            <VBox spacing="14.0" styleClass="report-info-box" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                <Label text="Average" styleClass="report-info-box-title"/>
+
+                <HBox>
+                    <VBox styleClass="comparisons-tab-widget">
+                        <Label text="Change" styleClass="report-info-box-subtitle"/>
+                        <Label fx:id="comparisonAvgChangeEnergyLabel" text="Energy: - kWh"/>
+                        <Label fx:id="comparisonAvgChangeWaterLabel" text="Water: - L"/>
+                    </VBox>
+                    <VBox styleClass="comparisons-tab-widget">
+                        <Label text="\%" styleClass="report-info-box-subtitle"/>
+                        <Label fx:id="comparisonAvgPercentChangeEnergyLabel" text="0%"/>
+                        <Label fx:id="comparisonAvgPercentChangeWaterLabel" text="0%"/>
+                    </VBox>
+                </HBox>
             </VBox>
 
         </GridPane>
@@ -180,7 +376,7 @@
     <VBox fx:id="unusualPatternsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
 
         <!-- unusual consumption chart -->
-        <LineChart fx:id="unusualConsumptionChart" title="Utility Consumption" legendVisible="false" VBox.vgrow="ALWAYS" >
+        <LineChart fx:id="unusualConsumptionChart" title="Utility Consumption" legendVisible="false" VBox.vgrow="ALWAYS">
             <xAxis>
                 <CategoryAxis/>
             </xAxis>
@@ -209,7 +405,6 @@
                 <Button fx:id="nextFlag" text="&gt;" styleClass="flag-navigation-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onNextUnusualStatClick"/>
             </VBox>
         </HBox>
-
     </VBox>
 
     <!-- STATISTICS TAB content -->
@@ -231,7 +426,7 @@
             </VBox>
         </HBox>
 
-        <BarChart fx:id="distributionChart" title="Daily usage distribution" legendVisible="false" VBox.vgrow="ALWAYS">
+        <BarChart fx:id="distributionChart" animated="false" title="Daily usage distribution" legendVisible="false" VBox.vgrow="ALWAYS">
             <xAxis>
                 <CategoryAxis/>
             </xAxis>

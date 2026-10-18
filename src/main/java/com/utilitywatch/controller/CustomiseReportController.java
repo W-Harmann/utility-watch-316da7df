@@ -111,7 +111,7 @@ public class CustomiseReportController {
     @FXML
     protected void onCancelClick() {
         if (mainController != null) {
-            mainController.showReportsOverview();
+            mainController.showHome();
         }
     }
 

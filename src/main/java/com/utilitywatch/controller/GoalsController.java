@@ -1,23 +1,15 @@
 package com.utilitywatch.controller;
 
-import com.utilitywatch.goals.Goal;
-import com.utilitywatch.goals.GoalAlertStore;
-import com.utilitywatch.goals.GoalManager;
-import com.utilitywatch.reports.ConsumptionSummaryCalculator;
-import com.utilitywatch.reports.ReportsDataService;
+import com.utilitywatch.goals.*;
+import com.utilitywatch.reports.*;
 import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.fxml.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.*;
+import java.util.*;
 
 public class GoalsController {
     @FXML
@@ -41,16 +33,25 @@ public class GoalsController {
     @FXML
     private Label errorLabel;
 
+    private final GoalProgressCalculator progressCalculator = new GoalProgressCalculator();
+
+    // goals with no previous readings
+    // uses object identity because each progress update creates a new goal object
+    private final Set<Goal> goalsWithoutData = Collections.newSetFromMap(new IdentityHashMap<>());
+
     // provides set period options so users select a valid format instead of entering the period as free text
     private static final List<String> PERIODS = List.of("1 Month", "3 Months", "6 Months", "1 Year");
 
     private final GoalManager goalManager = new GoalManager();
-    private final ReportsDataService dataService = new ReportsDataService();
-    private final ConsumptionSummaryCalculator calculator = new ConsumptionSummaryCalculator();
 
-    // static so goals are kept when the user leaves and returns to this screen
-    // TODO: replace with database persistence
-    private static List<Goal> goals = new ArrayList<>();
+    // shared goal list and progress calculation also used by home dashboard
+    private final GoalRepository goalRepository = GoalRepository.getInstance();
+    private final GoalProgressService goalProgressService = new GoalProgressService();
+
+    // forget all goals, e.g. when an account is deleted
+    public static void clearGoals() {
+        GoalRepository.getInstance().clear();
+    }
 
     // reference to MainController for screen navigation
     private MainController mainController;
@@ -64,7 +65,6 @@ public class GoalsController {
         periodComboBox.getItems().addAll(PERIODS);
         refreshGoalLists();
     }
-
 
     @FXML
     protected void onCreateNewGoalClick() {
@@ -95,7 +95,7 @@ public class GoalsController {
 
         // us8.1 goalManager validates resource type, target, and period and returns a goal only when all checks pass
         try {
-            goals.add(goalManager.createGoal(resourceType, targetReduction, targetPeriod));
+            goalRepository.add(goalManager.createGoal(resourceType, targetReduction, targetPeriod));
         } catch (IllegalArgumentException e) {
             errorLabel.setText(e.getMessage());
             return;
@@ -116,71 +116,43 @@ public class GoalsController {
         return null;
     }
 
-    // us8.4 calculates the percentage reduction between the two most recent periods
-    // returns 0 if either period has no readings
-    private double calculateAchievedReduction(Goal goal) {
-        int days = periodToDays(goal.getTargetPeriod());
-        LocalDate today = LocalDate.now();
-        LocalDate currentStart = today.minusDays(days - 1);
-        LocalDate previousEnd = currentStart.minusDays(1);
-        LocalDate previousStart = previousEnd.minusDays(days - 1);
-
-        List<Double> current = dataService.getReadingQuantities(goal.getResourceType(), currentStart, today);
-        List<Double> previous = dataService.getReadingQuantities(goal.getResourceType(), previousStart, previousEnd);
-
-        if (current.isEmpty() || previous.isEmpty()) {
-            return 0.0;
-        }
-
-        double previousTotal = calculator.calculateTotal(previous);
-        if (previousTotal <= 0) {
-            return 0.0;
-        }
-
-        double currentTotal = calculator.calculateTotal(current);
-        return Math.max(0.0, (previousTotal - currentTotal) / previousTotal * 100);
-    }
-
-    private int periodToDays(String period) {
-        return switch (period) {
-            case "1 Month" -> 30;
-            case "3 Months" -> 90;
-            case "6 Months" -> 180;
-            case "1 Year" -> 365;
-            default -> 30;
-        };
-    }
-
     // us8.4 updates goal progress from readings, sends alerts for newly completed goals, and refreshes both lists
     private void refreshGoalLists() {
         List<Goal> newlyCompletedGoals = new ArrayList<>();
+        goalsWithoutData.clear();
+
+        List<Goal> goals = goalRepository.getAll();
 
         for (int goalIndex = 0; goalIndex < goals.size(); goalIndex++) {
             Goal goal = goals.get(goalIndex);
-            double achievedReduction = calculateAchievedReduction(goal);
+            // us8.3 compares the latest period with the previous one if available
+            OptionalDouble achieved = goalProgressService.achievedReduction(goal);
+            double achievedReduction = achieved.orElse(0.0);
 
             if (goalManager.justCompleted(goal, achievedReduction)) {
                 newlyCompletedGoals.add(goal);
-
-                // also saved as an alert so it appears on the alerts screen (us8.4)
-                String resource = "energy".equals(goal.getResourceType()) ? "Energy" : "Water";
-                GoalAlertStore.add(new GoalAlertStore.GoalAlert(
-                        LocalDateTime.now(),
-                        "Goal Completed: Reduced " + resource + " Usage",
-                        resource + " successfully reduced by " + (int) goal.getTargetReduction()
-                                + "% (" + goal.getTargetPeriod() + ")"));
+                saveCompletionAlert(goal);
             }
-            goals.set(goalIndex, goalManager.updateProgress(goal, achievedReduction));
+
+            // update progress and track goals without readings
+            Goal updatedGoal = goalManager.updateProgress(goal, achievedReduction);
+            goalRepository.set(goalIndex, updatedGoal);
+            if (achieved.isEmpty()) {
+                goalsWithoutData.add(updatedGoal);
+            }
         }
+
+        // reads the list again so the screen shows the updated goals
+        List<Goal> updatedGoals = goalRepository.getAll();
 
         goalContainer.getChildren().clear();
         completedGoalContainer.getChildren().clear();
 
-        for (Goal activeGoal : goalManager.filterActiveGoals(goals)) {
+        for (Goal activeGoal : goalManager.filterActiveGoals(updatedGoals)) {
             addGoalEntry(activeGoal, goalContainer);
         }
 
-        for (Goal completedGoal : goalManager.filterCompletedGoals(goals)) {
+        for (Goal completedGoal : goalManager.filterCompletedGoals(updatedGoals)) {
             addGoalEntry(completedGoal, completedGoalContainer);
         }
 
@@ -190,7 +162,17 @@ public class GoalsController {
         }
     }
 
-    // displays a message showing the details of each goal that has been compelted
+    // saves a completion alert so it appears on the notifications screen (us8.4)
+    private void saveCompletionAlert(Goal goal) {
+        String resource = "energy".equals(goal.getResourceType()) ? "Energy" : "Water";
+        GoalAlertStore.add(new GoalAlertStore.GoalAlert(
+                LocalDateTime.now(),
+                "Goal Completed: Reduced " + resource + " Usage",
+                resource + " successfully reduced by " + (int) goal.getTargetReduction()
+                        + "% (" + goal.getTargetPeriod() + ")"));
+    }
+
+    // displays a message showing the details of each goal that has been completed
     private void showCompletionAlert(List<Goal> completedGoals) {
         StringBuilder message = new StringBuilder();
         for (Goal goal : completedGoals) {
@@ -213,7 +195,7 @@ public class GoalsController {
             VBox goalEntry = loader.load();
 
             GoalEntryController controller = loader.getController();
-            controller.setData(goal, () -> onEditGoal(goal), () -> onDeleteGoal(goal));
+            controller.setData(goal, !goalsWithoutData.contains(goal), () -> onEditGoal(goal), () -> onDeleteGoal(goal));
 
             container.getChildren().add(goalEntry);
 
@@ -226,7 +208,7 @@ public class GoalsController {
     private void onEditGoal(Goal goal) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Edit Goal");
-        dialog.setHeaderText("Edit your " + goal.getResourceType() + " goal");
+        dialog.setHeaderText("Edit your " + goal.getResourceType() + " goal (resource type can't be changed)");
 
         TextField targetInput = new TextField(String.valueOf((int) goal.getTargetReduction()));
         ComboBox<String> periodInput = new ComboBox<>();
@@ -250,9 +232,21 @@ public class GoalsController {
         try {
             double newTarget = Double.parseDouble(targetInput.getText().trim());
             Goal edited = goalManager.editGoal(goal, newTarget, periodInput.getValue());
-            goals.set(goals.indexOf(goal), edited);
+
+            // check if the goal was completed by the edit
+            boolean newlyCompleted = !goal.isCompleted() && edited.isCompleted();
+            goalRepository.replace(goal, edited);
             errorLabel.setText("");
+
+            if (newlyCompleted) {
+                saveCompletionAlert(edited);
+            }
+
             refreshGoalLists(); // updates progress using the new goal target and period
+
+            if (newlyCompleted) {
+                Platform.runLater(() -> showCompletionAlert(List.of(edited)));
+            }
         } catch (NumberFormatException e) {
             errorLabel.setText("Target reduction must be a number, e.g. 15");
         } catch (IllegalArgumentException e) {
@@ -269,7 +263,7 @@ public class GoalsController {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            goals = goalManager.deleteGoal(goals, goal);
+            goalRepository.remove(goal);
             refreshGoalLists();
         }
     }

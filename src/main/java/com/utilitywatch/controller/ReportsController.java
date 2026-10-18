@@ -1,28 +1,19 @@
 package com.utilitywatch.controller;
 
-import com.utilitywatch.consumptionDetector.ActiveHoursDetector;
-import com.utilitywatch.consumptionDetector.LongDurationDetector;
-import com.utilitywatch.consumptionDetector.SpikeDetector;
-import com.utilitywatch.consumptionDetector.UnusualConsumptionDetector;
-import com.utilitywatch.reports.ConsumptionSummaryCalculator;
+import com.utilitywatch.consumptionDetector.*;
+import com.utilitywatch.reports.*;
 import com.utilitywatch.Reading;
-import com.utilitywatch.reports.DistributionCalculator;
-import com.utilitywatch.reports.ReportsDataService;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.XYChart;
-
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.time.*;
-import javafx.scene.chart.BarChart;
 import javafx.application.Platform;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.IntStream;
@@ -40,6 +31,7 @@ public class ReportsController {
     @FXML private VBox statisticsContentBox;
     @FXML private Label comingSoonLabel;
     @FXML private PeriodPickerController periodPickerController;
+    @FXML private GridPane overviewUnusualGrid;
 
     // utility toggle buttons
     @FXML private HBox utilityToggle;
@@ -50,6 +42,7 @@ public class ReportsController {
 
     // utility consumption charts
     @FXML private LineChart<String, Number> consumptionChart;
+    @FXML private CategoryAxis consumptionXAxis;
     @FXML private BarChart<String, Number> distributionChart;
     @FXML private LineChart<String, Number> unusualConsumptionChart;
 
@@ -129,6 +122,9 @@ public class ReportsController {
     // reference to MainController for screen navigation
     private MainController mainController;
 
+    // reports overview tab maximum unusual patterns shown
+    private static final int MAX_OVERVIEW_UNUSUAL_SHOWN = 3;
+
     private final ConsumptionSummaryCalculator calculator = new ConsumptionSummaryCalculator();
     private final DistributionCalculator distributionCalculator = new DistributionCalculator();
     private final ReportsDataService dataService = new ReportsDataService();
@@ -188,15 +184,21 @@ public class ReportsController {
 
     // loads the user's energy and water readings for the selected period and then updates the chart and summary statistics
     private void updateOverviewData() {
-        List<Double> energyReadings = dataService.getReadingQuantities("energy", periodStart, periodEnd);
-        List<Double> waterReadings = dataService.getReadingQuantities("water", periodStart, periodEnd);
+        // full readings are needed for the chart so each point can be labelled with its date
+        List<Reading> energyReadings = dataService.getReadings("energy", periodStart, periodEnd);
+        List<Reading> waterReadings = dataService.getReadings("water", periodStart, periodEnd);
+
+        // the stat labels only need the quantities
+        List<Double> energyValues = energyReadings.stream().map(Reading::getQuantity).toList();
+        List<Double> waterValues = waterReadings.stream().map(Reading::getQuantity).toList();
 
         updateChart(energyReadings, waterReadings);
-        updateStatLabels(energyReadings, waterReadings);
+        updateStatLabels(energyValues, waterValues);
+        updateOverviewUnusualTable();
     }
 
     // clears the chart and adds the selected energy and/or water readings as series
-    private void updateChart(List<Double> energyReadings, List<Double> waterReadings) {
+    private void updateChart(List<Reading> energyReadings, List<Reading> waterReadings) {
         // remove any existing data before displaying the updated readings
         consumptionChart.getData().clear();
 
@@ -204,29 +206,74 @@ public class ReportsController {
         boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
         boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
 
-        // add the energy readings to the chart if energy is selected and data is available
-        if (showEnergy && !energyReadings.isEmpty()) {
-            XYChart.Series<String, Number> energySeries = new XYChart.Series<>();
-            energySeries.setName("Energy (kWh)");
-            // add each energy reading as a separate data point
-            for (int energyReadingIndex = 0; energyReadingIndex < energyReadings.size(); energyReadingIndex++) {
-                energySeries.getData().add(new XYChart.Data<>("Reading " + (energyReadingIndex + 1), energyReadings.get(energyReadingIndex)));
-            }
-            consumptionChart.getData().add(energySeries);
+        List<Reading> energyToShow = showEnergy ? energyReadings : List.of();
+        List<Reading> waterToShow = showWater ? waterReadings : List.of();
+
+        // use the same label format for both series
+        DateTimeFormatter labelFormat = chooseLabelFormat(energyToShow, waterToShow);
+
+        // every date label from both series, oldest first, so the x axis is always in date order
+        List<Reading> allShown = new ArrayList<>(energyToShow);
+        allShown.addAll(waterToShow);
+        allShown.sort(Comparator.comparing(Reading::getDateTime));
+        Set<String> orderedLabels = new LinkedHashSet<>();
+        for (Reading reading : allShown) {
+            orderedLabels.add(reading.getDateTime().format(labelFormat));
         }
 
-        // add the water readings to the chart if water is selected and data is available
+        // fixes the axis order instead of letting it follow the order that series were added
+        consumptionXAxis.setAutoRanging(false);
+        consumptionXAxis.setCategories(FXCollections.observableArrayList(orderedLabels));
+
+        // add the energy and water readings to the chart if energy/water is selected and data is available
+        if (showEnergy && !energyReadings.isEmpty()) {
+            consumptionChart.getData().add(buildSeries("Energy (kWh)", energyReadings));
+        }
         if (showWater && !waterReadings.isEmpty()) {
-            XYChart.Series<String, Number> waterSeries = new XYChart.Series<>();
-            waterSeries.setName("Water (L)");
-            // add each water reading as a separate data point
-            for (int waterReadingIndex = 0; waterReadingIndex < waterReadings.size(); waterReadingIndex++) {
-                waterSeries.getData().add(new XYChart.Data<>("Reading " + (waterReadingIndex + 1), waterReadings.get(waterReadingIndex)));
-            }
-            consumptionChart.getData().add(waterSeries);
+            consumptionChart.getData().add(buildSeries("Water (L)", waterReadings));
         }
 
         Platform.runLater(consumptionChart::requestLayout);
+    }
+
+    // uses date only, or date and time if any series has several readings on the same day
+    // (category labels must be unique or points merge together)
+    private DateTimeFormatter chooseLabelFormat(List<Reading> energyReadings, List<Reading> waterReadings) {
+        boolean sharedDays = hasSeveralReadingsPerDay(energyReadings) || hasSeveralReadingsPerDay(waterReadings);
+        return DateTimeFormatter.ofPattern(sharedDays ? "MMM d yyyy h:mma" : "MMM d yyyy");
+    }
+
+    private boolean hasSeveralReadingsPerDay(List<Reading> readings) {
+        long distinctDays = readings.stream().map(reading -> reading.getDateTime().toLocalDate()).distinct().count();
+        return distinctDays < readings.size();
+    }
+
+    // builds a series with one point per reading, labelled with the given format
+    private XYChart.Series<String, Number> buildReadingSeries(String name, List<Reading> readings, DateTimeFormatter labelFormat) {
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName(name);
+
+        for (Reading reading : readings) {
+            series.getData().add(new XYChart.Data<>(reading.getDateTime().format(labelFormat), reading.getQuantity()));
+        }
+        return series;
+    }
+
+    // builds a series with one point per reading, labelled by date and sorted oldest first
+    private XYChart.Series<String, Number> buildSeries(String name, List<Reading> readings) {
+        List<Reading> sorted = new ArrayList<>(readings);
+        sorted.sort(Comparator.comparing(Reading::getDateTime));
+
+        // category labels must be unique, so the time is added when several readings share a day
+        boolean sharedDays = sorted.stream().map(r -> r.getDateTime().toLocalDate()).distinct().count() < sorted.size();
+        DateTimeFormatter labelFormat = DateTimeFormatter.ofPattern(sharedDays ? "MMM d yyyy h:mma" : "MMM d yyyy");
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName(name);
+        for (Reading reading : sorted) {
+            series.getData().add(new XYChart.Data<>(reading.getDateTime().format(labelFormat), reading.getQuantity()));
+        }
+        return series;
     }
 
     // calculates the total, average, minimum, and maximum values and updates the lables
@@ -930,15 +977,11 @@ public class ReportsController {
     private int selectedIndex = 0;
 
     // loads sample unusual consumption data
-    private void updateUnusualConsumptionData() {
-        // prevents duplicate data from being added to the chart
-        unusualConsumptionChart.getData().clear();
-
+    // finds the flagged readings for the selected utility and period, oldest first
+    private LinkedHashMap<List<Reading>, String> findFlaggedReadings() {
         // check which resource toggles are currently selected
         boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
         boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
-
-
 
         List<Reading> energyReadings = new ArrayList<>(dataService.getReadings("energy", periodStart, periodEnd));
         List<Reading> waterReadings = new ArrayList<>(dataService.getReadings("water", periodStart, periodEnd));
@@ -953,8 +996,6 @@ public class ReportsController {
             utilityFlags.putAll(energyFlags);
         }
 
-
-
         if (showWater && !waterReadings.isEmpty()) {
             waterReadings.sort(Comparator.comparing(Reading::getDateTime));
 
@@ -962,16 +1003,64 @@ public class ReportsController {
             utilityFlags.putAll(waterFlags);
         }
 
+        return sortFlaggedReadings(utilityFlags);
+    }
 
+    // loads sample unusual consumption data - lookup moved to findFlaggedReadings()
+    private void updateUnusualConsumptionData() {
+        // prevents duplicate data from being added to the chart
+        unusualConsumptionChart.getData().clear();
 
-        this.flaggedReadingsMap = sortFlaggedReadings(utilityFlags);
-
+        this.flaggedReadingsMap = findFlaggedReadings();
 
         selectedIndex = 0;
         showSelectedUnusualStats();
 
         // adds both data series to the consumption chart
         ///unusualConsumptionChart.getData().addAll(series, flaggedSeries);
+    }
+
+    // fills the overview's unusual patterns table with the most recent flagged readings
+    private void updateOverviewUnusualTable() {
+        // removes old rows but keeps the heading row (row 0)
+        overviewUnusualGrid.getChildren().removeIf(node -> {
+            Integer row = GridPane.getRowIndex(node);
+            return row != null && row > 0;
+        });
+
+        List<Map.Entry<List<Reading>, String>> flagged = new ArrayList<>(findFlaggedReadings().entrySet());
+
+        if (flagged.isEmpty()) {
+            overviewUnusualGrid.add(new Label("No unusual patterns found for this period."), 0, 1, 3, 1);
+            return;
+        }
+
+        DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("MMM d h:mma");
+        int rowsToShow = Math.min(flagged.size(), MAX_OVERVIEW_UNUSUAL_SHOWN);
+
+        // flagged is oldest first, so read from the end to show the newest first
+        for (int row = 0; row < rowsToShow; row++) {
+            Map.Entry<List<Reading>, String> entry = flagged.get(flagged.size() - 1 - row);
+            List<Reading> readings = entry.getKey();
+
+            String when = readings.getFirst().getDateTime().format(timeFormat);
+            if (readings.size() > 1) {
+                when += " - " + readings.getLast().getDateTime().format(timeFormat);
+            }
+
+            double totalUsage = readings.stream().mapToDouble(Reading::getQuantity).sum();
+            String used = String.format("%.1f %s", totalUsage, readings.getFirst().getUnit());
+
+            Label reasonLabel = new Label(entry.getValue());
+            reasonLabel.setWrapText(true);
+
+            Label whenLabel = new Label(when);
+            whenLabel.setWrapText(true);
+            whenLabel.setMaxWidth(150.0); // wraps instead of running off the column
+            overviewUnusualGrid.add(whenLabel, 0, row + 1);
+            overviewUnusualGrid.add(reasonLabel, 1, row + 1);
+            overviewUnusualGrid.add(new Label(used), 2, row + 1);
+        }
     }
 
     private LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
@@ -1230,13 +1319,6 @@ public class ReportsController {
 
     // ---------- NAVIGATION ----------
     @FXML
-    protected void onGenerateReportClick() {
-        if (mainController != null) {
-            mainController.showCustomiseReport();
-        }
-    }
-
-    @FXML
     protected void onOverviewTabClick() {
         showOverview();
     }
@@ -1318,7 +1400,7 @@ public class ReportsController {
 
     // updates the chart colour based on the selected utility toggle
     private void updateChartColour() {
-        List<XYChart<String, Number>> allCharts = List.of(distributionChart, unusualConsumptionChart);
+        List<XYChart<String, Number>> allCharts = List.of(consumptionChart, distributionChart, unusualConsumptionChart);
 
         for(XYChart<String, Number> chart: allCharts) {
 

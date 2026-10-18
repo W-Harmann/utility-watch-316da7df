@@ -8,6 +8,18 @@ public class Goal {
     private final boolean completed;
     private final double currentProgress;
 
+    private int id; // assigned by the database on insert, 0 until then
+
+    /** @return the database id, or 0 if the goal has not been saved yet */
+    public int getId() {
+        return id;
+    }
+
+    /** sets the database id, called by the DAO and GoalRepository */
+    public void setId(int id) {
+        this.id = id;
+    }
+
     // keep original constructor for existing tests
     public Goal(String resourceType, double targetReduction, String targetPeriod, boolean completed) {
         this(resourceType, targetReduction, targetPeriod, completed, 0.0);

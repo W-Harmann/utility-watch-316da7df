@@ -16,6 +16,20 @@ public class InMemoryUserDAO implements IUserDAO {
     }
 
     @Override
+    public void update(User user) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getId() == user.getId()) {
+                users.set(i, user);
+            }
+        }
+    }
+
+    @Override
+    public void delete(int userId) {
+        users.removeIf(user -> user.getId() == userId);
+    }
+
+    @Override
     public User findByEmail(String email) {
         for (User user : users) {
             if (user.getEmail().equals(email)) {

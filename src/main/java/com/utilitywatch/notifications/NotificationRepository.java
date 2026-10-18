@@ -2,6 +2,7 @@ package com.utilitywatch.notifications;
 
 import com.utilitywatch.database.NotificationDAO;
 import com.utilitywatch.database.INotificationDAO;
+import com.utilitywatch.goals.Goal;
 import com.utilitywatch.login.Session;
 import com.utilitywatch.login.User;
 
@@ -48,6 +49,12 @@ public class NotificationRepository {
     public void ignore(Notification notification) {
         loadNotificationsIfUserChanged();
         notificationDAO.update(notification);
+    }
+
+    /** removes the given goal from the list */
+    public void remove(Notification notification) {
+        loadNotificationsIfUserChanged();
+        notificationDAO.delete(notification.getId());
     }
 
     /** removes every notification, e.g. when an account is deleted */

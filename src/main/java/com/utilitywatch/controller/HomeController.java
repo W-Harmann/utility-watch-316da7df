@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +40,8 @@ public class HomeController {
 
     private static final int MAX_NOTIFICATIONS_SHOWN = 2;
     private static final int MAX_GOALS_SHOWN = 2;
+
+    private static final int RECENT_NOTIFICATIONS_THRESHOLD = 1;
 
     private final DashboardSummaryService summaryService = new DashboardSummaryService();
     private final GoalProgressService goalProgressService = new GoalProgressService();
@@ -151,7 +154,11 @@ public class HomeController {
 
     private void loadNotifications() {
         notificationsContainer.getChildren().clear();
-        List<Notification> notifications = notificationRepository.getAll();
+        // ensures notifications are not ignored and within the last month
+        List<Notification> notifications = notificationRepository.getAll()
+                .stream()
+                .filter(notification -> !notification.getIgnoredStatus() && !notification.getDateTime().isBefore(LocalDateTime.now().minusMonths(RECENT_NOTIFICATIONS_THRESHOLD)))
+                .toList();
 
         if (notifications.isEmpty()) {
             Label emptyNotificationsLabel = new Label("No recent notifications.");
@@ -162,9 +169,9 @@ public class HomeController {
 
         int minNotification = Math.min(notifications.size(), MAX_NOTIFICATIONS_SHOWN);
 
-        // goes from the newest notification backwards, up to the maximum allowed to be shown
+        // shows the newest notification, up to the maximum allowed to be shown
         for (int notificationIndex = 0; notificationIndex < minNotification; notificationIndex++) {
-            addAlertRow(notifications.get(notificationIndex));
+            addNotificationRow(notifications.get(notificationIndex));
         }
     }
 
@@ -184,7 +191,7 @@ public class HomeController {
     }
 
     // loads one notification row from fxml, fills it in, and adds itto the notifications container
-    private void addAlertRow(Notification notification) {
+    private void addNotificationRow(Notification notification) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/utilitywatch/dashboard-notification-row.fxml"));
             VBox row = loader.load();

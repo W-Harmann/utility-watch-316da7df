@@ -8,14 +8,25 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 public class NotificationsController {
 
 
+
     @FXML
-    private VBox recentNotificationsContainer;
+    private  VBox monthlyNotificationsContainer;
     @FXML
-    private VBox recentNotificationsPage;
+    private VBox monthlyNotificationsPage;
+    @FXML
+    private Label monthlyNotificationsLabel;
+
+    @FXML
+    private VBox allNotificationsContainer;
+    @FXML
+    private VBox allNotificationsPage;
+    @FXML
+    private Label allNotificationsLabel;
 
     @FXML
     private VBox ignoredNotificationsContainer;
@@ -27,22 +38,22 @@ public class NotificationsController {
 
     private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
 
-    // adds completed goal notifications to the top of the recent notifications list (us8.4)
+    // adds completed goal notifications to the top of the all notifications list (us8.4)
     @FXML
     public void initialize() {
-        recentNotificationsPage.setVisible(true);
-        recentNotificationsPage.setManaged(true);
+        monthlyNotificationsPage.setVisible(true);
+        monthlyNotificationsPage.setManaged(true);
 
         updateNotificationsContainer();
     }
 
     // returns each notification as a node so it can be displayed as an individual entry in the notifications list
-    private Node createNotificationEntryNode(Notification notification, VBox notificationsContainer, Label ignoredNotificationsLabel) {
+    private Node createNotificationEntryNode(Notification notification, VBox notificationsContainer, Label monthlyNotificationsLabel, Label allNotificationsLabel,  Label ignoredNotificationsLabel) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/utilitywatch/notification-entry.fxml"));
             Node notificationEntry = loader.load();
             NotificationsEntryController controller = loader.getController();
-            controller.setNotification(notification, notificationsContainer, ignoredNotificationsLabel);
+            controller.setNotification(notification, notificationsContainer, monthlyNotificationsLabel, allNotificationsLabel, ignoredNotificationsLabel);
             return notificationEntry;
         } catch (IOException e) {
             return new Label("Failed to load notification");
@@ -51,28 +62,64 @@ public class NotificationsController {
 
     private void updateNotificationsContainer() {
 
+        int monthlyCount = 0;
+        int allCount = 0;
         int ignoreCount = 0;
 
         for (Notification notification : notificationRepository.getAll()) {
             // newest notifications are the first in the list
             if (!notification.getIgnoredStatus()) {
-                recentNotificationsContainer.getChildren().addLast(createNotificationEntryNode(notification, recentNotificationsContainer, ignoredNotificationsLabel));
+                allNotificationsContainer.getChildren().addLast(createNotificationEntryNode(notification, allNotificationsContainer, monthlyNotificationsLabel, allNotificationsLabel, ignoredNotificationsLabel));
+                allCount++;
+                if (!notification.getDateTime().isBefore(LocalDateTime.now().minusMonths(1))) {
+                    monthlyNotificationsContainer.getChildren().addLast(createNotificationEntryNode(notification, monthlyNotificationsContainer, monthlyNotificationsLabel, allNotificationsLabel, ignoredNotificationsLabel));
+                    monthlyCount++;
+                }
             }
             else {
-                ignoredNotificationsContainer.getChildren().addLast(createNotificationEntryNode(notification, ignoredNotificationsContainer, ignoredNotificationsLabel));
+                ignoredNotificationsContainer.getChildren().addLast(createNotificationEntryNode(notification, ignoredNotificationsContainer, monthlyNotificationsLabel, allNotificationsLabel, ignoredNotificationsLabel));
                 ignoreCount++;
             }
         }
 
+        monthlyNotificationsLabel.setText(String.valueOf(monthlyCount));
+        allNotificationsLabel.setText(String.valueOf(allCount));
         ignoredNotificationsLabel.setText(String.valueOf(ignoreCount));
     }
 
     private void hideNotificationContainers() {
-        recentNotificationsPage.setVisible(false);
-        recentNotificationsPage.setManaged(false);
+        monthlyNotificationsPage.setVisible(false);
+        monthlyNotificationsPage.setManaged(false);
+
+        allNotificationsPage.setVisible(false);
+        allNotificationsPage.setManaged(false);
 
         ignoredNotificationsPage.setVisible(false);
         ignoredNotificationsPage.setManaged(false);
+    }
+
+    @FXML
+    protected void onViewMonthlyNotifications() {
+        hideNotificationContainers();
+
+        monthlyNotificationsPage.setVisible(true);
+        monthlyNotificationsPage.setManaged(true);
+
+        monthlyNotificationsContainer.getChildren().clear();
+
+        updateNotificationsContainer();
+    }
+
+    @FXML
+    protected void onViewAllNotifications() {
+        hideNotificationContainers();
+
+        allNotificationsPage.setVisible(true);
+        allNotificationsPage.setManaged(true);
+
+        allNotificationsContainer.getChildren().clear();
+
+        updateNotificationsContainer();
     }
 
     @FXML
@@ -83,18 +130,6 @@ public class NotificationsController {
         ignoredNotificationsPage.setManaged(true);
 
         ignoredNotificationsContainer.getChildren().clear();
-
-        updateNotificationsContainer();
-    }
-
-    @FXML
-    protected void onViewAllNotifications() {
-        hideNotificationContainers();
-
-        recentNotificationsPage.setVisible(true);
-        recentNotificationsPage.setManaged(true);
-
-        recentNotificationsContainer.getChildren().clear();
 
         updateNotificationsContainer();
     }

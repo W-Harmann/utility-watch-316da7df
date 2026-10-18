@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class NotificationsEntryController {
@@ -35,11 +36,13 @@ public class NotificationsEntryController {
 
     private VBox notificationsContainer;
 
+    private Label monthlyNotificationsLabel;
+    private Label allNotificationsLabel;
     private Label ignoredNotificationsLabel;
 
 
 
-    public void setNotification(Notification notification, VBox notificationsContainer, Label ignoredNotificationsLabel) {
+    public void setNotification(Notification notification, VBox notificationsContainer, Label monthlyNotificationsLabel, Label allNotificationsLabel, Label ignoredNotificationsLabel) {
         notificationTitleLabel.setText(notification.getTitle());
         notificationTimeLabel.setText(notification.getDateTime().format(FORMATTER));
         notificationMessageLabel.setText(notification.getMessage());
@@ -50,6 +53,8 @@ public class NotificationsEntryController {
         }
         this.notification = notification;
         this.notificationsContainer = notificationsContainer;
+        this.monthlyNotificationsLabel = monthlyNotificationsLabel;
+        this.allNotificationsLabel = allNotificationsLabel;
         this.ignoredNotificationsLabel = ignoredNotificationsLabel;
     }
 
@@ -62,9 +67,17 @@ public class NotificationsEntryController {
 
         if (notification.getIgnoredStatus()) {
             ignoredNotificationsLabel.setText(String.valueOf(Integer.parseInt( ignoredNotificationsLabel.getText()) - 1));
+            allNotificationsLabel.setText(String.valueOf(Integer.parseInt( allNotificationsLabel.getText()) + 1));
+            if (!notification.getDateTime().isBefore(LocalDateTime.now().minusMonths(1))) {
+                monthlyNotificationsLabel.setText(String.valueOf(Integer.parseInt( monthlyNotificationsLabel.getText()) + 1));
+            }
         }
         else {
             ignoredNotificationsLabel.setText(String.valueOf(Integer.parseInt( ignoredNotificationsLabel.getText()) + 1));
+            allNotificationsLabel.setText(String.valueOf(Integer.parseInt( allNotificationsLabel.getText()) - 1));
+            if (!notification.getDateTime().isBefore(LocalDateTime.now().minusMonths(1))) {
+                monthlyNotificationsLabel.setText(String.valueOf(Integer.parseInt( monthlyNotificationsLabel.getText()) - 1));
+            }
         }
 
 

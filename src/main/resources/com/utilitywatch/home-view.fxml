@@ -73,16 +73,16 @@
         </VBox>
     </HBox>
 
-    <!-- recent alerts, export data, and quick tip tiles -->
+    <!-- recent notifications, export data, and quick tip tiles -->
     <HBox spacing="15.0" minHeight="170.0" VBox.vgrow="ALWAYS">
-        <!-- clickable view all button that navigates to alerts screen -->
+        <!-- clickable view all button that navigates to notifications screen -->
         <VBox spacing="10.0" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" prefWidth="0">
             <HBox alignment="CENTER_LEFT">
                 <Label text="Recent Notifications" styleClass="home-tile-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button styleClass="stat-tile-button" text="View All" onAction="#onViewAllAlertsClick"/>
+                <Button styleClass="stat-tile-button" text="View All" onAction="#onViewAllNotificationsClick"/>
             </HBox>
-            <VBox fx:id="alertsContainer" spacing="8.0"/>
+            <VBox fx:id="notificationsContainer" spacing="8.0"/>
         </VBox>
 
         <!-- export data tile - opens the customise report screen so the user can export any of their data -->

@@ -20,80 +20,254 @@
         <Button text="X" styleClass="cancel-button" onAction="#onCancelClick"/>
     </HBox>
 
-    <HBox spacing="15.0" VBox.vgrow="ALWAYS" prefHeight="200">
-        <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
-            <Button styleClass="report-info-box, stat-tile-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onAverageEnergyClick">
-                <graphic>
-                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                        <Label alignment="CENTER" maxWidth="150.0" text="Average Energy" styleClass="form-title"/>
-                        <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
-                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
-                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                                <Label fx:id="averageEnergyLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
-                            </VBox>
-                        </HBox>
-                    </VBox>
-                </graphic>
-            </Button>
-        </VBox>
-        <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
-            <Button styleClass="report-info-box, stat-tile-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onAverageWaterClick">
-                <graphic>
-                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                        <Label alignment="CENTER" maxWidth="150.0" text="Average Water" styleClass="form-title"/>
-                        <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
-                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
-                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                                <Label fx:id="averageWaterLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
-                            </VBox>
-                        </HBox>
-                    </VBox>
-                </graphic>
-            </Button>
-        </VBox>
-    </HBox>
 
-    <HBox spacing="15.0" VBox.vgrow="ALWAYS" prefHeight="200">
-        <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
-            <Button styleClass="report-info-box, stat-tile-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onCommonPatternsClick">
-                <graphic>
-                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                        <Label alignment="CENTER" maxWidth="150.0" text="Common Patterns" styleClass="form-title"/>
-                        <Label alignment="CENTER" maxWidth="150.0" text="Peak day usage:" styleClass="report-info-box-title"/>
-                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
-                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                                <Label alignment="CENTER" maxWidth="150.0" text="Energy:" styleClass="report-info-box-title"/>
-                                <Label fx:id="commonPatternsEnergyLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
-                            </VBox>
-                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                                <Label alignment="CENTER" maxWidth="150.0" text="Water:" styleClass="report-info-box-title"/>
-                                <Label fx:id="commonPatternsWaterLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
-                            </VBox>
-                        </HBox>
-                    </VBox>
-                </graphic>
-            </Button>
+    <VBox fx:id="conservationMenu" spacing="15.0">
+        <HBox spacing="15.0" VBox.vgrow="ALWAYS" prefHeight="200">
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                <Button styleClass="report-info-box, stat-tile-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onAverageEnergyClick">
+                    <graphic>
+                        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                            <HBox alignment="CENTER">
+                                <Label text="i" visible="false"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label alignment="CENTER" maxWidth="150.0" text="Average Energy" styleClass="form-title"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="i" styleClass="info-icon-text"/>
+                            </HBox>
+                            <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
+                            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                                <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                    <Label fx:id="averageEnergyLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </graphic>
+                </Button>
+            </VBox>
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                <Button styleClass="report-info-box, stat-tile-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onAverageWaterClick">
+                    <graphic>
+                        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                            <HBox alignment="CENTER">
+                                <Label text="i" visible="false"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label alignment="CENTER" maxWidth="150.0" text="Average Water" styleClass="form-title"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="i" styleClass="info-icon-text"/>
+                            </HBox>
+                            <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
+                            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                                <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                    <Label fx:id="averageWaterLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </graphic>
+                </Button>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="15.0" VBox.vgrow="ALWAYS" prefHeight="200">
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                <Button styleClass="report-info-box, stat-tile-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onCommonPatternsClick">
+                    <graphic>
+                        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                            <HBox alignment="CENTER">
+                                <Label text="i" visible="false"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label alignment="CENTER" maxWidth="180.0" text="Common Pattern" styleClass="form-title"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="i" styleClass="info-icon-text"/>
+                            </HBox>
+                            <Label alignment="CENTER" maxWidth="150.0" text="Peak day usage:" styleClass="report-info-box-title"/>
+                            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                                <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                    <Label alignment="CENTER" maxWidth="150.0" text="Energy:" styleClass="report-info-box-title"/>
+                                    <Label fx:id="commonPatternsEnergyLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
+                                </VBox>
+                                <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                    <Label alignment="CENTER" maxWidth="150.0" text="Water:" styleClass="report-info-box-title"/>
+                                    <Label fx:id="commonPatternsWaterLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </graphic>
+                </Button>
+            </VBox>
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                <Button styleClass="report-info-box, stat-tile-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onSeasonalClick">
+                    <graphic>
+                        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                            <HBox alignment="CENTER">
+                                <Label text="i" visible="false"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label alignment="CENTER" maxWidth="150.0" text="Seasonal Usage" styleClass="form-title"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="i" styleClass="info-icon-text"/>
+                            </HBox>
+                            <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
+                            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                                <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                    <Label alignment="CENTER" maxWidth="150.0" text="Energy:" styleClass="report-info-box-title"/>
+                                    <Label fx:id="seasonalEnergyLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
+                                </VBox>
+                                <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+                                    <Label alignment="CENTER" maxWidth="150.0" text="Water:" styleClass="report-info-box-title"/>
+                                    <Label fx:id="seasonalWaterLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </graphic>
+                </Button>
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <VBox fx:id="energyConservationPage" alignment="CENTER" HBox.hgrow="ALWAYS" visible="false" managed="false" styleClass="report-info-box">
+
+        <HBox alignment="CENTER" spacing="15.0">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Energy Conservation Tips" styleClass="reports-title" alignment="CENTER"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="&lt;-" alignment="CENTER_RIGHT" styleClass="back-button" onAction="#onCancelConservationClick"/>
+        </HBox>
+
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+
+                    <Label alignment="CENTER" wrapText="true" text="Heating and Cooling" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Ceiling fans should be your first choice in keeping cool. They are cheap to run and use less energy than evaporative coolers or air-conditioners." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Set your thermostat correctly to save on running costs. Each extra degree of heating or cooling increases the system’s energy use by about 5 to 10 per cent. Set the thermostat to 18 to 20 °C in winter and 25 to 27 °C in summer." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Label alignment="CENTER" wrapText="true" text="Appliances" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Appliances and equipment – including your kitchen and laundry appliances, television, home entertainment, and office equipment – are key factors in the energy use of your home. Home appliances and equipment use an average of 30 percent of household energy." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; New appliances are far more efficient than older designs and upgrading your appliances and technology will reduce your energy use." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Label alignment="CENTER" wrapText="true" text="Hot water" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; About a quarter of a typical household’s energy is used to heat water for the bathroom, kitchen and laundry. In some homes, it may be much more." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; You can save significant energy and money by choosing an efficient model that suits your household size and climate." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; You can also save energy and money by reducing how much hot water you use. For example, choose low-flow showerheads and water-efficient appliances, take shorter showers and use eco settings on appliances." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Region VBox.vgrow="ALWAYS"/>
+                    <Label alignment="CENTER" text="More conservation tips can be found at yourhome.gov.au" styleClass="report-info-box-title"/>
+                </VBox>
+            </HBox>
         </VBox>
-        <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
-            <Button styleClass="report-info-box, stat-tile-button" VBox.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" onAction="#onSeasonalClick">
-                <graphic>
-                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                        <Label alignment="CENTER" maxWidth="150.0" text="Seasonal Usage" styleClass="form-title"/>
-                        <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
-                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
-                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                                <Label alignment="CENTER" maxWidth="150.0" text="Energy:" styleClass="report-info-box-title"/>
-                                <Label fx:id="seasonalEnergyLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
-                            </VBox>
-                            <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-                                <Label alignment="CENTER" maxWidth="150.0" text="Water:" styleClass="report-info-box-title"/>
-                                <Label fx:id="seasonalWaterLabel" alignment="CENTER" maxWidth="150.0" text="" styleClass="stat-value"/>
-                            </VBox>
-                        </HBox>
-                    </VBox>
-                </graphic>
-            </Button>
+    </VBox>
+
+    <VBox fx:id="waterConservationPage" alignment="CENTER" HBox.hgrow="ALWAYS" visible="false" managed="false" styleClass="report-info-box">
+
+        <HBox alignment="CENTER" spacing="15.0">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Water Conservation Tips" styleClass="reports-title" alignment="CENTER"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="&lt;-" alignment="CENTER_RIGHT" styleClass="back-button" onAction="#onCancelConservationClick"/>
+        </HBox>
+
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+
+                    <Label alignment="CENTER" wrapText="true" text="Appliances" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; New water-efficient taps, showerheads, toilets, and appliances can significantly reduce your water use with no change to your lifestyle." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Investing in new appliances may save you money in the long run because of reduced water and energy costs." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; The Water Efficiency Labelling and Standards scheme allows you to compare the water efficiency of similar products. Check the label to choose the most efficient product you can afford that suits your needs." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Label alignment="CENTER" wrapText="true" text="Issues" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Dripping taps and leaks can rapidly use a lot of water. Ensure drips and leaks are fixed promptly." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Label alignment="CENTER" wrapText="true" text="Habits" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Take shorter showers and not leave taps running unnecessarily" styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Only use the washing machine or dishwasher when they are full, or adjust your load settings for smaller loads" styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Use eco cycles on machines where possible" styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Scrape dishes before washing, instead of rinsing." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Region VBox.vgrow="ALWAYS"/>
+                    <Label alignment="CENTER" text="More conservation tips can be found at yourhome.gov.au" styleClass="report-info-box-title"/>
+                </VBox>
+            </HBox>
         </VBox>
-    </HBox>
+    </VBox>
+
+    <VBox fx:id="commonPatternsConservationPage" alignment="CENTER" HBox.hgrow="ALWAYS" visible="false" managed="false" styleClass="report-info-box">
+
+        <HBox alignment="CENTER" spacing="15.0">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Common Conservation Tips" styleClass="reports-title" alignment="CENTER"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="&lt;-" alignment="CENTER_RIGHT" styleClass="back-button" onAction="#onCancelConservationClick"/>
+        </HBox>
+
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+
+                    <Label alignment="CENTER" wrapText="true" text="Applicance Habits" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; 'Standby power' used by products like microwaves, televisions and gaming consoles can account for 10% of your electricity bill. If it's got a little light or clock, it's using power." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Turning off appliances at the wall when they are not in use" styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Getting rid of any additional fridges and freezers that are not needed" styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Drying clothes on the line rather than the dryer" styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Label alignment="CENTER" wrapText="true" text="Heating and Cooling" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; You can make the most of the energy you're using by closing internal doors and only heating or cooling the rooms you're using." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Switch off your heater and air conditioner before you leave the house or go to bed." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Label alignment="CENTER" wrapText="true" text="Hot water" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Washing clothes in cold water and waiting until there is a full load" styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Only running the dishwasher when it's full and on energy-saving mode" styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Fitting a low-flow showerhead (it will pay for itself in no time)" styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Keeping showers short." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Region VBox.vgrow="ALWAYS"/>
+                    <Label alignment="CENTER" text="More conservation tips can be found at energy.gov.au" styleClass="report-info-box-title"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <VBox fx:id="seasonalConservationPage" alignment="CENTER" HBox.hgrow="ALWAYS" visible="false" managed="false" styleClass="report-info-box">
+
+        <HBox alignment="CENTER" spacing="15.0">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Seasonal Conservation Tips" styleClass="reports-title" alignment="CENTER"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="&lt;-" alignment="CENTER_RIGHT" styleClass="back-button" onAction="#onCancelConservationClick"/>
+        </HBox>
+
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+            <HBox spacing="15.0" VBox.vgrow="ALWAYS">
+                <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
+
+                    <Label alignment="CENTER" wrapText="true" text="Summer" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Adjust your air conditioner (set between 25°C and 27°C) and only cool the rooms you are using. Every degree higher can save 5 to 10% in cooling costs." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Even better, use a fan first. Fans are cheap to run, costing 2 cents per hour.  " styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Close blinds during the day and open windows at night. Ideal curtains have a close fit around the window, are thick and/or insulated and covered at the top." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Draught proof your home. Filling gaps to stop cool air escaping can save 25% in cooling costs." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Label alignment="CENTER" wrapText="true" text="Winter" styleClass="stat-value"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Turn down your heater (set between 18°C and 20°C). Every degree lower can save 5 to 10% in heating costs." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Only heat the room you are using by closing off vents and doors of rooms not in use." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="&#8226; Use curtains to trap heat in. Up to 40% of heating can be lost through windows. Ideal curtains have a close fit around the window, are thick and/or insulated and covered at the top." styleClass="conservation-tip-text"/>
+                    <Label alignment="CENTER" wrapText="true" text="" styleClass="stat-value"/>
+
+                    <Region VBox.vgrow="ALWAYS"/>
+                    <Label alignment="CENTER" text="More conservation tips can be found at energy.gov.au" styleClass="report-info-box-title"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </VBox>
+
+
 
 </VBox>

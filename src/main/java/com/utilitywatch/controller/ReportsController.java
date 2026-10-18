@@ -818,10 +818,10 @@ public class ReportsController {
 //            return;
 //        }
 
-        System.out.println(fromDate1);
-        System.out.println(toDate1);
-        System.out.println(fromDate2);
-        System.out.println(toDate2);
+//        System.out.println(fromDate1);
+//        System.out.println(toDate1);
+//        System.out.println(fromDate2);
+//        System.out.println(toDate2);
 
         // Clear Both Graphs of Data
         comparisonTotalGraph.getData().clear();

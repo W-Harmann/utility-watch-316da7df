@@ -1,7 +1,6 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.consumptionDetector.*;
-import com.utilitywatch.notifications.NotificationRepository;
 import com.utilitywatch.reports.*;
 import com.utilitywatch.Reading;
 import javafx.collections.FXCollections;
@@ -980,10 +979,8 @@ public class ReportsController {
     private LinkedHashMap<List<Reading>, String> flaggedReadingsMap = new LinkedHashMap<>();
     private int selectedIndex = 0;
 
-    private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
-
     // loads sample unusual consumption data
-    private void updateUnusualConsumptionData() {
+    private LinkedHashMap<List<Reading>, String> updateUnusualConsumptionData() {
         // prevents duplicate data from being added to the chart
         unusualConsumptionChart.getData().clear();
 
@@ -1042,6 +1039,8 @@ public class ReportsController {
 
         showSelectedUnusualStats();
 
+        return this.flaggedReadingsMap;
+
     }
 
     // fills the overview's unusual patterns table with the most recent flagged readings
@@ -1052,7 +1051,7 @@ public class ReportsController {
             return row != null && row > 0;
         });
 
-        List<Map.Entry<List<Reading>, String>> flagged = new ArrayList<>(findFlaggedReadings().entrySet());
+        List<Map.Entry<List<Reading>, String>> flagged = new ArrayList<>(updateUnusualConsumptionData().entrySet());
 
         if (flagged.isEmpty()) {
             overviewUnusualGrid.add(new Label("No unusual patterns found for this period."), 0, 1, 3, 1);
@@ -1503,12 +1502,15 @@ public class ReportsController {
     }
 
     // shows the unusual patterns tab content and hides everything else
+    // currently defaults the utility toggle to 'energy'
     private void showUnusualPatterns() {
         hideAllTabContent();
         unusualPatternsContentBox.setVisible(true);
         unusualPatternsContentBox.setManaged(true);
 
         updateUnusualConsumptionData();
+
+        // refreshes the unusual consumption chart layout after the content becomes visible
         Platform.runLater(unusualConsumptionChart::requestLayout);
     }
 
@@ -1562,9 +1564,6 @@ public class ReportsController {
 
         trendmodeToggle.setVisible(false);
         trendmodeToggle.setManaged(false);
-
-        comparisonmodeToggle.setVisible(false);
-        comparisonmodeToggle.setManaged(false);
 
         overviewContentBox.setVisible(false);
         overviewContentBox.setManaged(false);

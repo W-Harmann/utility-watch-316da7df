@@ -171,7 +171,7 @@ public class GoalsController {
     // saves a completion alert so it appears on the notifications screen (us8.4)
     private void saveCompletionAlert(Goal goal) {
         String resource = "energy".equals(goal.getResourceType()) ? "Energy" : "Water";
-        GoalAlertStore.add(new GoalAlertStore.GoalAlert(
+        notificationRepository.add(new Notification(
                 LocalDateTime.now(),
                 "Goal Completed: Reduced " + resource + " Usage",
                 resource + " successfully reduced by " + (int) goal.getTargetReduction()

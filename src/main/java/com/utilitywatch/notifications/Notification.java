@@ -22,7 +22,6 @@ public class Notification {
         this.id = id;
     }
 
-    // full constructor that includes progress tracking for us8.4 and us8.5
     public Notification(LocalDateTime time, String title, String message, boolean ignored, Type type) {
         this.time = time;
         this.title = title;

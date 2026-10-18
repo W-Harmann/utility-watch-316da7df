@@ -44,9 +44,10 @@ public class NotificationRepository {
         notificationDAO.insert(notification, loadedUserId);
     }
 
-    /** updates the notification at the given position (e.g. when its progress changes) */
-    public void set(int notificationIndex, Notification notification) {
+    /** updates the notification at the given position (e.g. when ignored) */
+    public void ignore(Notification notification) {
         loadNotificationsIfUserChanged();
+        notificationDAO.update(notification);
     }
 
     /** removes every notification, e.g. when an account is deleted */

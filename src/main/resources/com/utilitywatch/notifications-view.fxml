@@ -25,20 +25,37 @@
             <Label text="This Month" styleClass="report-info-box-title"/>
         </VBox>
 
-        <VBox alignment="CENTER" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
-            <Label text="12" styleClass="stat-value"/>
-            <Label text="Exemptions" styleClass="report-info-box-title"/>
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0" onMouseClicked="#onViewIgnoredNotifications" spacing="12.0" styleClass="report-info-box, stat-tile-button">
+            <Label fx:id="ignoredNotificationsLabel" text="0" styleClass="stat-value"/>
+            <Label text="Ignored" styleClass="report-info-box-title"/>
         </VBox>
     </HBox>
 
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <Label text="Recent Notifications" styleClass="reports-title"/>
-    </HBox>
+    <VBox fx:id="recentNotificationsPage">
 
-    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
-        <VBox fx:id="recentNotificationsContainer" spacing="10.0">
-        </VBox>
-    </ScrollPane>
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label text="Recent Notifications" styleClass="reports-title"/>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
+            <VBox fx:id="recentNotificationsContainer" spacing="10.0">
+            </VBox>
+        </ScrollPane>
+
+    </VBox>
+
+    <VBox fx:id="ignoredNotificationsPage" visible="false" managed="false">
+
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label text="Ignored Notifications" styleClass="reports-title"/>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
+            <VBox fx:id="ignoredNotificationsContainer" spacing="10.0">
+            </VBox>
+        </ScrollPane>
+
+    </VBox>
 
     <HBox alignment="CENTER_RIGHT" spacing="10.0">
         <Button text="View All Notifications" styleClass="generate-report-button" onAction="#onViewAllNotifications"/>

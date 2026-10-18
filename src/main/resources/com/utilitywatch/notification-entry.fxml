@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<HBox alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml"
+<HBox fx:id="notificationHBox" alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.NotificationsEntryController"
       styleClass="report-info-box">
     <VBox>
@@ -12,7 +12,6 @@
         <Label fx:id="notificationMessageLabel" text="Message"/>
     </VBox>
     <VBox alignment="CENTER">
-        <Button text="View Details"/>
-        <Button text="Non-Issue"/>
+        <Button fx:id="notificationIgnoreButton" text="Ignore" onAction="#onIgnore"/>
     </VBox>
 </HBox>

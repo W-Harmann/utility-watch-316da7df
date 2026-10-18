@@ -83,9 +83,8 @@ public class NotificationDAO implements INotificationDAO {
     @Override
     public void update(Notification notification) {
         try (PreparedStatement statement = connection.prepareStatement(
-                "UPDATE goals SET ignoredStatus = ? WHERE id = ?")) {
-            statement.setBoolean(1, notification.getIgnoredStatus());
-            statement.setInt(2, notification.getId());;
+                "UPDATE notifications SET ignoredStatus = NOT ignoredStatus WHERE id = ?")) {
+            statement.setInt(1, notification.getId());;
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);

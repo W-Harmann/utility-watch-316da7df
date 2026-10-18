@@ -58,16 +58,16 @@
 
     <!-- trend mode toggle, period view and period selector button -->
     <HBox alignment="CENTER_LEFT" fx:id="trendmodeToggle" spacing="10.0" visible="false" managed="false">
-        <Label text="Mode:"/>
+<!--        <Label text="Mode:"/>-->
 
-        <fx:define>
-            <ToggleGroup fx:id="trendmodeToggleGroup"/>
-        </fx:define>
+<!--        <fx:define>-->
+<!--            <ToggleGroup fx:id="trendmodeToggleGroup"/>-->
+<!--        </fx:define>-->
 
-        <ToggleButton fx:id="trendmodeTotalToggle" text="Total" styleClass="utility-toggle, both-toggle" toggleGroup="$trendmodeToggleGroup" selected="true"/>
-        <ToggleButton fx:id="trendmodeChangeToggle" text="Change" styleClass="utility-toggle, both-toggle" toggleGroup="$trendmodeToggleGroup"/>
+<!--        <ToggleButton fx:id="trendmodeTotalToggle" text="Total" styleClass="utility-toggle, both-toggle" toggleGroup="$trendmodeToggleGroup" selected="true"/>-->
+<!--        <ToggleButton fx:id="trendmodeChangeToggle" text="Change" styleClass="utility-toggle, both-toggle" toggleGroup="$trendmodeToggleGroup"/>-->
 
-        <Region HBox.hgrow="ALWAYS"/>
+<!--        <Region HBox.hgrow="ALWAYS"/>-->
 
         <Label text="View:"/>
 
@@ -84,17 +84,34 @@
             </items>
         </ComboBox>
 
-        <Region HBox.hgrow="ALWAYS"/>
+<!--        <Region HBox.hgrow="ALWAYS"/>-->
 
         <Label text="Year:"/>
 
         <ComboBox fx:id="trendYearDropdown" promptText="Select Year" onAction="#onTrendsPeriodSelected"  maxWidth="100"/>
 
-        <Region HBox.hgrow="ALWAYS"/>
+<!--        <Region HBox.hgrow="ALWAYS"/>-->
 
         <Label text="Period:"/>
 
         <ComboBox fx:id="trendPeriodDropdown" promptText="Select Period" onAction="#onTrendsPeriodSelected" maxWidth="100"/>
+    </HBox>
+
+    <!-- trend mode toggle, period view and period selector button -->
+    <HBox alignment="CENTER_LEFT" fx:id="comparisonmodeToggle" spacing="10.0" visible="false" managed="false">
+        <Label text="Comparing:"/>
+
+        <ComboBox fx:id="comparisonModeDropdown" promptText="Please Select A Report" onAction="#onComparisonsViewSelected" maxWidth="300">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Free Choice"/>
+                    <String fx:value="Yesterday"/>
+                    <String fx:value="Last Week"/>
+                    <String fx:value="Last Month"/>
+                    <String fx:value="Last Year"/>
+                </FXCollections>
+            </items>
+        </ComboBox>
     </HBox>
 
     <!-- report tab buttons - uses a toggle group so the active tab stays visually marked -->
@@ -121,8 +138,8 @@
                 <ColumnConstraints percentWidth="60.0"/>
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints percentHeight="55.0"/>
-                <RowConstraints percentHeight="45.0"/>
+                <RowConstraints percentHeight="51.0"/>
+                <RowConstraints percentHeight="49.0"/>
             </rowConstraints>
 
             <!-- comparisons widget (row 1 column 1) -->
@@ -185,38 +202,21 @@
                 </GridPane>
             </VBox>
 
-            <!-- unusual patterns table (row 2 column 2) -->
+            <!-- unusual patterns table (row 2 column 2) using real readings -->
             <VBox spacing="14.0" styleClass="report-info-box" GridPane.columnIndex="1" GridPane.rowIndex="1" >
                 <Label text="Unusual Patterns Detected" styleClass="report-info-box-title"/>
 
-                <GridPane hgap="15.0" vgap="12.0">
+                <GridPane fx:id="overviewUnusualGrid" hgap="15.0" vgap="12.0">
                     <columnConstraints>
-                        <ColumnConstraints minWidth="70.0"/>
-                        <ColumnConstraints minWidth="75.0"/>
-                        <ColumnConstraints minWidth="70.0"/>
-                        <ColumnConstraints minWidth="110.0"/>
+                        <ColumnConstraints minWidth="130.0"/>
+                        <ColumnConstraints minWidth="150.0"/>
+                        <ColumnConstraints minWidth="80.0"/>
                     </columnConstraints>
 
                     <!-- table headings -->
                     <Label text="Date/Period" styleClass="report-info-box-subtitle" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <Label text="Type" styleClass="report-info-box-subtitle" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                    <Label text="Severity" styleClass="report-info-box-subtitle" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                    <Label text="Details" styleClass="report-info-box-subtitle" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-
-                    <Label text="Aug 22 (2h)" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <Label text="High Usage" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                    <Label text="Severe" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-                    <Label text="+32% above usual" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-
-                    <Label text="Aug 24 (1h)" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <Label text="Spike" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                    <Label text="Moderate" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                    <Label text="Short spike detected" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-
-                    <Label text="Aug 26 (6h)" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <Label text="Long duration" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                    <Label text="Moderate" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-                    <Label text="Usage for 6+ hours" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                    <Label text="Reason" styleClass="report-info-box-subtitle" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="Utility used" styleClass="report-info-box-subtitle" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
                 </GridPane>
             </VBox>
 
@@ -224,9 +224,6 @@
     </VBox>
 
     <!-- TRENDS TAB content -->
-    <!--todo: add button for SUM, AVERAGE and Data-Point-->
-    <!--todo: add other visuals-->
-    <!--todo: clean up-->
     <VBox fx:id="trendsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS" maxHeight="Infinity">
         <!-- Scroll Bar -->
         <ScrollPane style="-fx-background: #FFFFFF; -fx-box-border: transparent;" hbarPolicy="never" vbarPolicy="always" VBox.vgrow="NEVER" fitToWidth="true" prefHeight="1000">
@@ -282,12 +279,24 @@
     <!--todo: clean up-->
     <VBox fx:id="comparisonsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS" maxHeight="Infinity">
 
-        <HBox spacing="15.0" alignment="BASELINE_RIGHT">
-            <Label text="Compare to => "/>
+        <HBox spacing="15.0" fx:id="comparisonsDatePickers" alignment="BASELINE_RIGHT">
             <Label text="From:"/>
-            <DatePicker fx:id="fromDatePickerComparison" promptText="Start date 2" onAction="#updateComparisons"/>
+            <DatePicker fx:id="fromDate1PickerComparison" promptText="Start Date 1" onAction="#updateComparisons" maxWidth="120"/>
+            <Label text="-"/>
+            <DatePicker fx:id="toDate1PickerComparison" promptText="End Date 1" onAction="#updateComparisons" maxWidth="120"/>
+            <Region HBox.hgrow="ALWAYS"/>
             <Label text="To:"/>
-            <DatePicker fx:id="toDatePickerComparison" promptText="End date 2" onAction="#updateComparisons"/>
+            <DatePicker fx:id="fromDate2PickerComparison" promptText="Start Date 2" onAction="#updateComparisons" maxWidth="120"/>
+            <Label text="-"/>
+            <DatePicker fx:id="toDate2PickerComparison" promptText="End Date 2" onAction="#updateComparisons" maxWidth="120"/>
+        </HBox>
+
+        <HBox spacing="15.0" fx:id="comparisonsDateViewer" alignment="BASELINE_RIGHT">
+            <Label text="Date 1:"/>
+            <Label text="-" fx:id="comparisonsDateTextFrom"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Date 2:"/>
+            <Label text="-" fx:id="comparisonsDateTextTo"/>
         </HBox>
 
         <GridPane hgap="15.0" vgap="15.0" VBox.vgrow="ALWAYS">

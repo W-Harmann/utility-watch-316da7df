@@ -1,7 +1,6 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.consumptionDetector.*;
-import com.utilitywatch.notifications.NotificationRepository;
 import com.utilitywatch.reports.*;
 import com.utilitywatch.Reading;
 import javafx.collections.FXCollections;
@@ -35,6 +34,7 @@ public class ReportsController {
     @FXML private VBox statisticsContentBox;
     @FXML private Label comingSoonLabel;
     @FXML private PeriodPickerController periodPickerController;
+    @FXML private GridPane overviewUnusualGrid;
 
     // utility toggle buttons
     @FXML private HBox utilityToggle;
@@ -51,8 +51,8 @@ public class ReportsController {
 
     // trend mode toggle buttons
     @FXML private HBox trendmodeToggle;
-    @FXML private ToggleButton trendmodeTotalToggle;
-    @FXML private ToggleButton trendmodeChangeToggle;
+//    @FXML private ToggleButton trendmodeTotalToggle;
+//    @FXML private ToggleButton trendmodeChangeToggle;
     @FXML private ComboBox<String> trendViewDropdown;
     @FXML private ComboBox<String> trendYearDropdown;
     @FXML private ComboBox<String> trendPeriodDropdown;
@@ -77,8 +77,19 @@ public class ReportsController {
     @FXML private CheckBox trendShowWaterTrendDataPointButton;
 
     // comparisons tab elements
-    @FXML private DatePicker fromDatePickerComparison;
-    @FXML private DatePicker toDatePickerComparison;
+    @FXML private HBox comparisonmodeToggle;
+    @FXML private ComboBox<String> comparisonModeDropdown;
+
+    @FXML private HBox comparisonsDatePickers;
+    @FXML private HBox comparisonsDateViewer;
+
+    @FXML private DatePicker fromDate1PickerComparison;
+    @FXML private DatePicker toDate1PickerComparison;
+    @FXML private DatePicker fromDate2PickerComparison;
+    @FXML private DatePicker toDate2PickerComparison;
+
+    @FXML private Label comparisonsDateTextFrom;
+    @FXML private Label comparisonsDateTextTo;
 
     @FXML private BarChart<String, Number> comparisonTotalGraph;
     @FXML private BarChart<String, Number> comparisonAverageGraph;
@@ -114,6 +125,9 @@ public class ReportsController {
     // reference to MainController for screen navigation
     private MainController mainController;
 
+    // reports overview tab maximum unusual patterns shown
+    private static final int MAX_OVERVIEW_UNUSUAL_SHOWN = 3;
+
     private final ConsumptionSummaryCalculator calculator = new ConsumptionSummaryCalculator();
     private final DistributionCalculator distributionCalculator = new DistributionCalculator();
     private final ReportsDataService dataService = new ReportsDataService();
@@ -148,8 +162,10 @@ public class ReportsController {
         periodPickerController.setOnPeriodChanged(this::handlePeriodChanged);
 
         // comparisons tab defaults to the month before the main period
-        fromDatePickerComparison.setValue(periodStart.minusMonths(1));
-        toDatePickerComparison.setValue(periodEnd.minusMonths(1));
+        toDate2PickerComparison.setValue(LocalDate.now());
+        fromDate2PickerComparison.setValue(LocalDate.now().minusMonths(1));
+        toDate1PickerComparison.setValue(fromDate2PickerComparison.getValue().minusMonths(1));
+        fromDate1PickerComparison.setValue(toDate1PickerComparison.getValue().minusMonths(1));
 
         updateOverviewData();
     }
@@ -159,9 +175,6 @@ public class ReportsController {
         periodStart = periodPickerController.getStart();
         periodEnd = periodPickerController.getEnd();
         updateOverviewData();
-        if (comparisonsContentBox.isVisible()) {
-            updateComparisons();
-        }
         if (statisticsContentBox.isVisible()) {
             updateStatisticsData();
         }
@@ -184,6 +197,7 @@ public class ReportsController {
 
         updateChart(energyReadings, waterReadings);
         updateStatLabels(energyValues, waterValues);
+        updateOverviewUnusualTable();
     }
 
     // clears the chart and adds the selected energy and/or water readings as series
@@ -305,7 +319,7 @@ public class ReportsController {
 
         trendsContentBox.setVisible(true);
         trendsContentBox.setManaged(true);
-        trendmodeTotalToggle.setSelected(true);
+//        trendmodeTotalToggle.setSelected(true);
 
         // Dropdown Initialization
         trendViewDropdown.setValue("Annual"); // Default Selection
@@ -691,11 +705,76 @@ public class ReportsController {
     // ---------- COMPARISONS TAB ----------
     private void showComparisons() {
         hideAllTabContent();
+        utilityToggle.setVisible(false);
+        utilityToggle.setManaged(false);
+
+        comparisonmodeToggle.setVisible(true);
+        comparisonmodeToggle.setManaged(true);
+
         comparisonsContentBox.setVisible(true);
         comparisonsContentBox.setManaged(true);
-        bothToggle.setSelected(true);
+
+        comparisonModeDropdown.setValue("Free Choice"); // Default Selection
 
         updateComparisons();
+    }
+
+    private void setComparisonsDateViewing(String from, String to) {
+        comparisonsDateTextFrom.setText(from);
+        comparisonsDateTextTo.setText(to);
+    }
+
+    @FXML
+    private void onComparisonsViewSelected() {
+        String mode = comparisonModeDropdown.getValue();
+
+        comparisonsDatePickers.setVisible(mode.equals("Free Choice"));
+        comparisonsDatePickers.setManaged(mode.equals("Free Choice"));
+
+        comparisonsDateViewer.setVisible(!mode.equals("Free Choice"));
+        comparisonsDateViewer.setManaged(!mode.equals("Free Choice"));
+
+        LocalDate fromDate1 = null, toDate1 = null, fromDate2 = null, toDate2 = null;
+        switch (mode) {
+            case "Yesterday" -> {
+                setComparisonsDateViewing("Yesterday","Today");
+
+                fromDate1 = LocalDate.now().minusDays(1);
+                toDate1 = LocalDate.now().minusDays(1);
+                fromDate2 = LocalDate.now();
+                toDate2 = LocalDate.now();
+            }
+            case "Last Week" -> {
+                setComparisonsDateViewing("Last Week","This Week");
+
+                fromDate2 = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                toDate2 = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+                fromDate1 = fromDate2.minusWeeks(1);
+                toDate1 = toDate2.minusWeeks(1);
+            }
+            case "Last Month" -> {
+                setComparisonsDateViewing("Last Month","This Month");
+
+                fromDate2 = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+                toDate2 = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+                fromDate1 = fromDate2.minusMonths(1);
+                toDate1 = toDate2.minusMonths(1);
+            }
+            case "Last Year" -> {
+                setComparisonsDateViewing("Last Year","This Year");
+
+                fromDate2 = LocalDate.now().with(TemporalAdjusters.firstDayOfYear());
+                toDate2 = LocalDate.now().with(TemporalAdjusters.lastDayOfYear());
+                fromDate1 = fromDate2.minusYears(1);
+                toDate1 = toDate2.minusYears(1);
+            }
+            default -> {
+                updateComparisons();
+                return;
+            }
+        }
+
+        updateComparisons(fromDate1, toDate1, fromDate2, toDate2);
     }
 
     // todo: Trends page has a similar function, maybe these two can be modulated.
@@ -724,20 +803,28 @@ public class ReportsController {
         }
     }
 
-    //fixme: remove the top-right "periodButton" visual (irrelevant to tab)
+    @FXML
+    private void updateComparisons() {
+        LocalDate fromDate1 = fromDate1PickerComparison.getValue();
+        LocalDate toDate1 = toDate1PickerComparison.getValue();
+        LocalDate fromDate2 = fromDate2PickerComparison.getValue();
+        LocalDate toDate2 = toDate2PickerComparison.getValue();
+        updateComparisons(fromDate1, toDate1, fromDate2, toDate2);
+    }
+
     // fixme: kinda hard to navigate
     //  legend is also styled bad (text should not be white on white)
     @FXML
-    private void updateComparisons() {
-        LocalDate fromDate1 = periodStart;
-        LocalDate toDate1 = periodEnd;
-        LocalDate fromDate2 = fromDatePickerComparison.getValue();
-        LocalDate toDate2 = toDatePickerComparison.getValue();
-
+    private void updateComparisons(LocalDate fromDate1, LocalDate toDate1, LocalDate fromDate2, LocalDate toDate2) {
         // both comparison dates are needed
-        if (fromDate2 == null || toDate2 == null) {
-            return;
-        }
+//        if (fromDate2 == null || toDate2 == null) {
+//            return;
+//        }
+
+//        System.out.println(fromDate1);
+//        System.out.println(toDate1);
+//        System.out.println(fromDate2);
+//        System.out.println(toDate2);
 
         // Clear Both Graphs of Data
         comparisonTotalGraph.getData().clear();
@@ -892,10 +979,8 @@ public class ReportsController {
     private LinkedHashMap<List<Reading>, String> flaggedReadingsMap = new LinkedHashMap<>();
     private int selectedIndex = 0;
 
-    private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
-
     // loads sample unusual consumption data
-    private void updateUnusualConsumptionData() {
+    private LinkedHashMap<List<Reading>, String> updateUnusualConsumptionData() {
         // prevents duplicate data from being added to the chart
         unusualConsumptionChart.getData().clear();
 
@@ -954,6 +1039,51 @@ public class ReportsController {
 
         showSelectedUnusualStats();
 
+        return this.flaggedReadingsMap;
+
+    }
+
+    // fills the overview's unusual patterns table with the most recent flagged readings
+    private void updateOverviewUnusualTable() {
+        // removes old rows but keeps the heading row (row 0)
+        overviewUnusualGrid.getChildren().removeIf(node -> {
+            Integer row = GridPane.getRowIndex(node);
+            return row != null && row > 0;
+        });
+
+        List<Map.Entry<List<Reading>, String>> flagged = new ArrayList<>(updateUnusualConsumptionData().entrySet());
+
+        if (flagged.isEmpty()) {
+            overviewUnusualGrid.add(new Label("No unusual patterns found for this period."), 0, 1, 3, 1);
+            return;
+        }
+
+        DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("MMM d h:mma");
+        int rowsToShow = Math.min(flagged.size(), MAX_OVERVIEW_UNUSUAL_SHOWN);
+
+        // flagged is oldest first, so read from the end to show the newest first
+        for (int row = 0; row < rowsToShow; row++) {
+            Map.Entry<List<Reading>, String> entry = flagged.get(flagged.size() - 1 - row);
+            List<Reading> readings = entry.getKey();
+
+            String when = readings.getFirst().getDateTime().format(timeFormat);
+            if (readings.size() > 1) {
+                when += " - " + readings.getLast().getDateTime().format(timeFormat);
+            }
+
+            double totalUsage = readings.stream().mapToDouble(Reading::getQuantity).sum();
+            String used = String.format("%.1f %s", totalUsage, readings.getFirst().getUnit());
+
+            Label reasonLabel = new Label(entry.getValue());
+            reasonLabel.setWrapText(true);
+
+            Label whenLabel = new Label(when);
+            whenLabel.setWrapText(true);
+            whenLabel.setMaxWidth(150.0); // wraps instead of running off the column
+            overviewUnusualGrid.add(whenLabel, 0, row + 1);
+            overviewUnusualGrid.add(reasonLabel, 1, row + 1);
+            overviewUnusualGrid.add(new Label(used), 2, row + 1);
+        }
     }
 
     public static LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
@@ -1372,12 +1502,15 @@ public class ReportsController {
     }
 
     // shows the unusual patterns tab content and hides everything else
+    // currently defaults the utility toggle to 'energy'
     private void showUnusualPatterns() {
         hideAllTabContent();
         unusualPatternsContentBox.setVisible(true);
         unusualPatternsContentBox.setManaged(true);
 
         updateUnusualConsumptionData();
+
+        // refreshes the unusual consumption chart layout after the content becomes visible
         Platform.runLater(unusualConsumptionChart::requestLayout);
     }
 

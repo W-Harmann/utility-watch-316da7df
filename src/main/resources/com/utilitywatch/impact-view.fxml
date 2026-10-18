@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- US10.1 - Environmental Impacts page -->
+<!-- US10.1 - Environmental Impacts page; US10.3 - footprint over time chart -->
 <ScrollPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.utilitywatch.controller.ImpactController"
@@ -23,6 +23,7 @@
 
             <fx:define>
                 <ToggleGroup fx:id="utilityGroup"/>
+                <ToggleGroup fx:id="groupingGroup"/>
             </fx:define>
 
             <Label text="Environmental Impacts" styleClass="form-title"/>
@@ -75,6 +76,25 @@
                     </VBox>
                 </VBox>
             </HBox>
+
+            <!-- Footprint over time (US10.3): the chart itself is added by ImpactController -->
+            <VBox styleClass="trends-tab-utility-display" spacing="8">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Footprint Over Time" styleClass="report-info-box-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="Group by:"/>
+                    <HBox>
+                        <ToggleButton fx:id="weeklyToggle" text="Weekly" userData="WEEKLY" toggleGroup="$groupingGroup" styleClass="utility-toggle, both-toggle"/>
+                        <ToggleButton fx:id="monthlyToggle" text="Monthly" userData="MONTHLY" toggleGroup="$groupingGroup" styleClass="utility-toggle, both-toggle"/>
+                    </HBox>
+                </HBox>
+                <VBox fx:id="trendChartBox" prefHeight="300" minHeight="260"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Label fx:id="trendSummaryLabel"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="Grey band = no readings  •  A point on 0 = readings with no footprint"/>
+                </HBox>
+            </VBox>
 
             <!-- Comparison with the QLD average -->
             <VBox styleClass="report-info-box" spacing="10">

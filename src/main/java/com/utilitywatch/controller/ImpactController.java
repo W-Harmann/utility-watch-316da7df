@@ -2,6 +2,9 @@ package com.utilitywatch.controller;
 
 import com.utilitywatch.EnvironmentalEvaluator;
 import com.utilitywatch.EnvironmentalEvaluator.ChangeDirection;
+import com.utilitywatch.EnvironmentalEvaluator.FootprintPoint;
+import com.utilitywatch.EnvironmentalEvaluator.Grouping;
+import com.utilitywatch.FootprintTrendFormatter;
 import com.utilitywatch.Reading;
 import com.utilitywatch.database.ReadingDAO;
 import com.utilitywatch.login.Session;
@@ -16,6 +19,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.math.BigDecimal;
@@ -31,6 +35,7 @@ import static com.utilitywatch.ReadingEvaluator.ENERGY;
 import static com.utilitywatch.ReadingEvaluator.WATER;
 
 // US10.1 - the Environmental Impacts page
+// US10.3 - footprint over time chart (weekly or monthly)
 public class ImpactController {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMM d, yyyy");
@@ -54,6 +59,14 @@ public class ImpactController {
     @FXML private Label waterImpactLabel;
     @FXML private ProgressBar energyBar;
     @FXML private ProgressBar waterBar;
+
+    // Footprint over time card (US10.3)
+    @FXML private ToggleGroup groupingGroup;
+    @FXML private ToggleButton weeklyToggle;
+    @FXML private ToggleButton monthlyToggle;
+    @FXML private VBox trendChartBox;
+    @FXML private Label trendSummaryLabel;
+    private final FootprintTrendChart trendChart = new FootprintTrendChart();
 
     // QLD comparison card
     @FXML private Label userTotalLabel;
@@ -94,6 +107,18 @@ public class ImpactController {
         fromDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> onPeriodChanged());
         toDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> onPeriodChanged());
 
+        // footprint over time: starts weekly for periods up to about 3 months, monthly for longer ones; the user can switch
+        trendChartBox.getChildren().add(trendChart);
+        VBox.setVgrow(trendChart, Priority.ALWAYS);
+        selectDefaultGrouping();
+        groupingGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+            if (newToggle == null) {
+                groupingGroup.selectToggle(oldToggle);   // always keep one grouping selected
+            } else {
+                refresh();
+            }
+        });
+
         showFactorsEditor(false);
         refresh();
     }
@@ -133,6 +158,7 @@ public class ImpactController {
         refreshFootprintCard(evaluator, selection, from, to);
         refreshByUtilityCard(evaluator, selection);
         refreshStateCard(evaluator);
+        refreshTrendCard(evaluator, selection);
     }
 
     private void refreshFootprintCard(EnvironmentalEvaluator evaluator, String selection, LocalDate from, LocalDate to) {
@@ -199,6 +225,22 @@ public class ImpactController {
         }
     }
 
+    // US10.3 - one point per week or month across the period, following the utility selection.
+    // Periods with no readings are shown as "No data" bands rather than as 0 kg.
+    private void refreshTrendCard(EnvironmentalEvaluator evaluator, String selection) {
+        Grouping grouping = selectedGrouping();
+        List<FootprintPoint> points = evaluator.getFootprintTrend(selection, grouping);
+        trendChart.show(points, grouping, lineColour(selection));
+        trendSummaryLabel.setText(FootprintTrendFormatter.noDataSummary(points, grouping));
+    }
+
+    private void selectDefaultGrouping() {
+        LocalDate from = SharedDateRange.getFrom();
+        LocalDate to = SharedDateRange.getTo();
+        boolean longPeriod = from != null && to != null && ChronoUnit.DAYS.between(from, to) > 92;
+        groupingGroup.selectToggle(longPeriod ? monthlyToggle : weeklyToggle);
+    }
+
     private void showFactors() {
         energyFactorLabel.setText("■ Electricity: " + plain(SharedUtilitySettings.getEnergyEmission()) + " kg/kWh");
         waterFactorLabel.setText("■ Water: " + plain(SharedUtilitySettings.getWaterEmission()) + " kg/L");
@@ -217,6 +259,8 @@ public class ImpactController {
         userBar.setProgress(0);
         stateBar.setProgress(0);
         stateComparisonLabel.setText("");
+        trendChart.clearChart();
+        trendSummaryLabel.setText("");
     }
 
     // ---- Button handlers ----
@@ -252,6 +296,19 @@ public class ImpactController {
 
     private String selectedUtility() {
         return (String) utilityGroup.getSelectedToggle().getUserData();
+    }
+
+    private Grouping selectedGrouping() {
+        return Grouping.valueOf((String) groupingGroup.getSelectedToggle().getUserData());
+    }
+
+    // same colours as the utility toggles: energy yellow, water blue, both dark
+    private static String lineColour(String selection) {
+        return switch (selection) {
+            case ENERGY -> "#FFBA4A";
+            case WATER -> "#5FB2F5";
+            default -> "#263238";
+        };
     }
 
     private static boolean includes(String selection, String utility) {

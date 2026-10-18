@@ -362,3 +362,19 @@
     -fx-text-fill: white;
     -fx-background-radius: 6;
 }
+
+.info-icon-text {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.conservation-tip-text {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.back-button {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+}

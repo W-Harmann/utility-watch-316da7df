@@ -119,6 +119,20 @@ public class FootprintTrendFormatterTest {
         assertEquals("Dec 28, 2026 – Jan 3, 2027: 1.00 kg CO₂e", FootprintTrendFormatter.describe(week));
     }
 
+    @Test
+    void shouldNameTheUtilityWhenBothLinesAreShown() {
+        FootprintPoint week = point(date(2026, 7, 6), date(2026, 7, 12), 12.345);
+
+        assertEquals("Energy, Jul 6 – Jul 12, 2026: 12.35 kg CO₂e", FootprintTrendFormatter.describe("Energy", week));
+    }
+
+    @Test
+    void shouldNameTheUtilityForPeriodWithNoReadingsOfIt() {
+        FootprintPoint week = point(date(2026, 7, 6), date(2026, 7, 12), null);
+
+        assertEquals("Water, Jul 6 – Jul 12, 2026: no data (no readings)", FootprintTrendFormatter.describe("Water", week));
+    }
+
     //
     // Line segments: the chart line stops at a period with no data instead of joining across it.
     //

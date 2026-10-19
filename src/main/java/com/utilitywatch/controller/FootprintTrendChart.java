@@ -4,7 +4,6 @@ import com.utilitywatch.EnvironmentalEvaluator.FootprintPoint;
 import com.utilitywatch.EnvironmentalEvaluator.Grouping;
 import com.utilitywatch.FootprintTrendFormatter;
 
-import javafx.collections.FXCollections;
 import javafx.scene.Node;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
@@ -19,10 +18,11 @@ import javafx.scene.shape.StrokeType;
 import java.util.ArrayList;
 import java.util.List;
 
-// US10.3 - Line chart of the footprint per week or month.
+// US10.3 - Line chart of the footprint per week or month, with one line per utility shown
+// (energy or water alone, or both as two separate lines).
 // Periods with readings are joined by a line (a genuine 0 kg is a point on the zero line).
-// Periods with no readings get no point, break the line, and are covered by a grey "No data" band,
-// so they can't be mistaken for a 0 kg footprint.
+// A period with no readings for a utility gets no point on that line, so the line breaks there.
+// A period with no readings at all is also covered by a grey "No data" band, so it can't be mistaken for 0 kg.
 public class FootprintTrendChart extends LineChart<String, Number> {
 
     private final CategoryAxis xAxis;
@@ -45,28 +45,39 @@ public class FootprintTrendChart extends LineChart<String, Number> {
         setLegendVisible(false);
     }
 
-    // Replaces what the chart shows. colour is the line colour for the selected utility, e.g. "#FFBA4A".
-    public void show(List<FootprintPoint> points, Grouping grouping, String colour) {
+    // One line to draw: its name (used in tooltips when there are several lines), colour (e.g. "#FFBA4A")
+    // and footprint per period, covering the same periods as the chart.
+    public record Line(String name, String colour, List<FootprintPoint> points) {
+    }
+
+    // Replaces what the chart shows. periods is the footprint for the whole selection: it sets the axis,
+    // and its periods with no data get the "No data" band. lines are drawn on top, one line each.
+    public void show(List<FootprintPoint> periods, Grouping grouping, List<Line> lines) {
         clearChart();
 
-        List<String> labels = FootprintTrendFormatter.labels(points, grouping);
-        // set the categories first, including periods with no data, so every period has its place on the axis in order
+        List<String> labels = FootprintTrendFormatter.labels(periods, grouping);
+        // set the categories first, including periods with no data, so every period has its place on the axis in order.
+        // Change the axis's own list rather than calling setCategories(newList): with auto-ranging off, a new list
+        // doesn't make the axis redraw its tick labels, so switching Weekly -> Monthly kept showing the week labels.
         xAxis.setAutoRanging(false);
-        xAxis.setCategories(FXCollections.observableArrayList(labels));
+        xAxis.getCategories().setAll(labels);
 
-        // one series per run of periods with data, so the line stops at gaps
-        for (List<Integer> run : FootprintTrendFormatter.runsWithData(points)) {
-            XYChart.Series<String, Number> series = new XYChart.Series<>();
-            for (int i : run) {
-                series.getData().add(new XYChart.Data<>(labels.get(i), points.get(i).kg()));
+        boolean nameInTooltips = lines.size() > 1;
+        for (Line line : lines) {
+            // one series per run of periods with data, so the line stops at gaps
+            for (List<Integer> run : FootprintTrendFormatter.runsWithData(line.points())) {
+                XYChart.Series<String, Number> series = new XYChart.Series<>();
+                for (int i : run) {
+                    series.getData().add(new XYChart.Data<>(labels.get(i), line.points().get(i).kg()));
+                }
+                getData().add(series);
+                styleSeries(series, line, run, nameInTooltips);
             }
-            getData().add(series);
-            styleSeries(series, colour, run, points);
         }
 
-        for (int i = 0; i < points.size(); i++) {
-            if (!points.get(i).hasData()) {
-                addNoDataBand(labels.get(i), FootprintTrendFormatter.describe(points.get(i)));
+        for (int i = 0; i < periods.size(); i++) {
+            if (!periods.get(i).hasData()) {
+                addNoDataBand(labels.get(i), FootprintTrendFormatter.describe(periods.get(i)));
             }
         }
         requestChartLayout();
@@ -79,21 +90,24 @@ public class FootprintTrendChart extends LineChart<String, Number> {
         noDataBands.clear();
         noDataLabels.clear();
         noDataCategories.clear();
-        xAxis.setCategories(FXCollections.observableArrayList());
+        xAxis.getCategories().clear();
     }
 
     // Series nodes only exist once the series is on the chart, so this runs after getData().add(...)
-    private void styleSeries(XYChart.Series<String, Number> series, String colour, List<Integer> run,
-                             List<FootprintPoint> points) {
-        Node line = series.getNode();
-        if (line != null) {
-            line.setStyle("-fx-stroke: " + colour + "; -fx-stroke-width: 2px;");
+    private void styleSeries(XYChart.Series<String, Number> series, Line line, List<Integer> run, boolean nameInTooltips) {
+        Node path = series.getNode();
+        if (path != null) {
+            path.setStyle("-fx-stroke: " + line.colour() + "; -fx-stroke-width: 2px;");
         }
         for (int j = 0; j < series.getData().size(); j++) {
             Node symbol = series.getData().get(j).getNode();
             if (symbol != null) {
-                symbol.setStyle("-fx-background-color: " + colour + ", white;");
-                Tooltip.install(symbol, new Tooltip(FootprintTrendFormatter.describe(points.get(run.get(j)))));
+                symbol.setStyle("-fx-background-color: " + line.colour() + ", white;");
+                FootprintPoint point = line.points().get(run.get(j));
+                String text = nameInTooltips
+                        ? FootprintTrendFormatter.describe(line.name(), point)
+                        : FootprintTrendFormatter.describe(point);
+                Tooltip.install(symbol, new Tooltip(text));
             }
         }
     }

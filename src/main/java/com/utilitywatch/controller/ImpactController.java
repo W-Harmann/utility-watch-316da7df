@@ -41,6 +41,10 @@ public class ImpactController {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMM d, yyyy");
     private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("MMM d");
 
+    // chart line colours, the same as the Energy and Water toggles
+    private static final String ENERGY_COLOUR = "#FFBA4A";
+    private static final String WATER_COLOUR = "#5FB2F5";
+
     // Utility and period
     @FXML private ToggleGroup utilityGroup;
     @FXML private ToggleButton bothToggle;
@@ -66,6 +70,7 @@ public class ImpactController {
     @FXML private ToggleButton monthlyToggle;
     @FXML private VBox trendChartBox;
     @FXML private Label trendSummaryLabel;
+    @FXML private HBox trendLegend;
     private final FootprintTrendChart trendChart = new FootprintTrendChart();
 
     // QLD comparison card
@@ -227,11 +232,25 @@ public class ImpactController {
 
     // US10.3 - one point per week or month across the period, following the utility selection.
     // Periods with no readings are shown as "No data" bands rather than as 0 kg.
+    // With "Both" selected, energy and water are drawn as two lines; otherwise just the selected utility.
     private void refreshTrendCard(EnvironmentalEvaluator evaluator, String selection) {
         Grouping grouping = selectedGrouping();
-        List<FootprintPoint> points = evaluator.getFootprintTrend(selection, grouping);
-        trendChart.show(points, grouping, lineColour(selection));
-        trendSummaryLabel.setText(FootprintTrendFormatter.noDataSummary(points, grouping));
+        // footprint for the whole selection: a period with no readings at all is shown as "No data"
+        List<FootprintPoint> periods = evaluator.getFootprintTrend(selection, grouping);
+
+        List<FootprintTrendChart.Line> lines;
+        if (BOTH.equals(selection)) {
+            lines = List.of(
+                    new FootprintTrendChart.Line("Energy", ENERGY_COLOUR, evaluator.getFootprintTrend(ENERGY, grouping)),
+                    new FootprintTrendChart.Line("Water", WATER_COLOUR, evaluator.getFootprintTrend(WATER, grouping)));
+        } else {
+            String colour = ENERGY.equals(selection) ? ENERGY_COLOUR : WATER_COLOUR;
+            lines = List.of(new FootprintTrendChart.Line(selection, colour, periods));
+        }
+
+        trendChart.show(periods, grouping, lines);
+        setShown(trendLegend, BOTH.equals(selection));
+        trendSummaryLabel.setText(FootprintTrendFormatter.noDataSummary(periods, grouping));
     }
 
     private void selectDefaultGrouping() {
@@ -300,15 +319,6 @@ public class ImpactController {
 
     private Grouping selectedGrouping() {
         return Grouping.valueOf((String) groupingGroup.getSelectedToggle().getUserData());
-    }
-
-    // same colours as the utility toggles: energy yellow, water blue, both dark
-    private static String lineColour(String selection) {
-        return switch (selection) {
-            case ENERGY -> "#FFBA4A";
-            case WATER -> "#5FB2F5";
-            default -> "#263238";
-        };
     }
 
     private static boolean includes(String selection, String utility) {

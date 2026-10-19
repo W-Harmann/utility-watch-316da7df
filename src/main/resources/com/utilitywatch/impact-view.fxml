@@ -11,13 +11,15 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 
 <!-- US10.1 - Environmental Impacts page; US10.3 - footprint over time chart -->
 <ScrollPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.utilitywatch.controller.ImpactController"
             fitToWidth="true" hbarPolicy="NEVER"
-            styleClass="page-scroll">
+            styleClass="page-scroll"
+            style="-fx-background-color: transparent; -fx-background: #FFFFFF;">
     <content>
         <VBox spacing="14">
 
@@ -81,6 +83,15 @@
             <VBox styleClass="trends-tab-utility-display" spacing="8">
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Label text="Footprint Over Time" styleClass="report-info-box-title"/>
+                    <!-- legend, only shown when both utilities are drawn as separate lines -->
+                    <HBox fx:id="trendLegend" spacing="12" alignment="CENTER_LEFT">
+                        <Label text="Energy">
+                            <graphic><Circle radius="5" fill="#FFBA4A"/></graphic>
+                        </Label>
+                        <Label text="Water">
+                            <graphic><Circle radius="5" fill="#5FB2F5"/></graphic>
+                        </Label>
+                    </HBox>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label text="Group by:"/>
                     <HBox>
@@ -92,7 +103,7 @@
                 <HBox spacing="12" alignment="CENTER_LEFT">
                     <Label fx:id="trendSummaryLabel"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="Grey band = no readings  •  A point on 0 = readings with no footprint"/>
+                    <Label text="Grey band = no readings  •  Gap in a line = no readings for that utility  •  A point on 0 = readings with no footprint"/>
                 </HBox>
             </VBox>
 

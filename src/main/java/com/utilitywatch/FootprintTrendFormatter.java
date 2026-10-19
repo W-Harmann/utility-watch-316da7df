@@ -47,6 +47,11 @@ public final class FootprintTrendFormatter {
         return dates(point.periodStart(), point.periodEnd()) + ": " + value;
     }
 
+    /** Tooltip text for one line when energy and water are drawn separately, e.g. "Energy, Jul 6 – Jul 12, 2026: 12.35 kg CO₂e". */
+    public static String describe(String utility, FootprintPoint point) {
+        return utility + ", " + describe(point);
+    }
+
     /**
      * Index lists of consecutive points that have data. The chart draws each run as its own line,
      * so the line stops at a period with no data instead of joining across it.

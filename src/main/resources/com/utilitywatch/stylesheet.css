@@ -378,3 +378,75 @@
     -fx-background-color: white;
     -fx-text-fill: black;
 }
+
+/* ---- US9.3 monthly budget card states (Costs page) ---- */
+.budget-stat-value {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.budget-bar .bar {
+    -fx-background-color: #9E9E9E;
+}
+
+.budget-bar.on-track-budget .bar {
+    -fx-background-color: #139907;
+}
+
+.budget-bar.at-risk-budget .bar {
+    -fx-background-color: #F57C00;
+}
+
+.budget-bar.over-budget .bar {
+    -fx-background-color: #CB0E11;
+}
+
+.report-info-box .label.on-track-text {
+    -fx-text-fill: #81C784;
+}
+
+.report-info-box .label.at-risk-text {
+    -fx-text-fill: #FFB74D;
+}
+
+.report-info-box .label.over-text {
+    -fx-text-fill: #FF6B6B;
+}
+
+/* ---- US7.3 / US11.2 customise report screen ---- */
+.period-preset-button {
+    -fx-background-color: #eeeeee;
+    -fx-text-fill: #333333;
+    -fx-background-radius: 12;
+    -fx-padding: 3 10 3 10;
+}
+
+.period-preset-button:hover {
+    -fx-background-color: #556671;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.period-summary {
+    -fx-text-fill: #556671;
+    -fx-font-size: 11px;
+}
+
+.report-info-box .label.preview-section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 0 0 0;
+}
+
+.report-info-box .label.preview-column-header {
+    -fx-font-weight: bold;
+    -fx-text-fill: #B0BEC5;
+}
+
+.report-info-box .label.warning-note {
+    -fx-text-fill: #FFB74D;
+}
+
+.success-label {
+    -fx-text-fill: #139907;
+}

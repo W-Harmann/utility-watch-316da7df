@@ -1,7 +1,7 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.CostBudgetEvaluator;
-import com.utilitywatch.Exporter;
+import com.utilitywatch.MonthlyBudgetTracker;
 import com.utilitywatch.Reading;
 import com.utilitywatch.database.ReadingDAO;
 import com.utilitywatch.login.Session;
@@ -17,9 +17,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -33,11 +31,13 @@ import static com.utilitywatch.ReadingEvaluator.BOTH;
 import static com.utilitywatch.ReadingEvaluator.ENERGY;
 import static com.utilitywatch.ReadingEvaluator.WATER;
 
-// US9.1 (costs and budget) and US11.1 (export) - the Costs page
+// US9.1 (costs and budget) and US9.3 (budget warning) - the Costs page.
+// Exporting (US11.1) is now done from the home screen's Export Data tile (US7.3 / US11.2).
 public class CostsController {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMM d, yyyy");
     private static final DateTimeFormatter MONTH_FORMAT = DateTimeFormatter.ofPattern("MMMM yyyy");
+    private static final DateTimeFormatter MONTH_END_FORMAT = DateTimeFormatter.ofPattern("MMM d");
 
     // Utility and period
     @FXML private ToggleGroup utilityGroup;
@@ -45,7 +45,6 @@ public class CostsController {
     @FXML private DatePicker fromDatePicker;
     @FXML private DatePicker toDatePicker;
     @FXML private Label errorLabel;
-    @FXML private Label exportResultLabel;
 
     // Estimated cost card
     @FXML private Label totalCostLabel;
@@ -62,8 +61,15 @@ public class CostsController {
     // Monthly budget card
     @FXML private Label budgetSubtitleLabel;
     @FXML private Label budgetSpentLabel;
+    @FXML private HBox budgetStatsRow;
+    @FXML private Label budgetSpentValue;
+    @FXML private Label budgetLimitValue;
+    @FXML private Label budgetUsedValue;
+    @FXML private Label budgetRemainingCaption;
+    @FXML private Label budgetRemainingValue;
     @FXML private ProgressBar budgetBar;
     @FXML private Label budgetStatusLabel;
+    @FXML private Label budgetProjectionLabel;
     @FXML private TextField budgetField;
 
     // Current rates bar
@@ -152,37 +158,107 @@ public class CostsController {
         waterBar.setProgress(share(water, total));
     }
 
-    // The budget card always tracks the current calendar month (both utilities), whatever period is selected above.
+    // US9.3 - the budget card always tracks the current calendar month (both utilities), whatever period is
+    // selected above. It shows spent so far, budget, % used and remaining, and warns when the month-end
+    // projection is heading over budget (or spending already is), so the user can adjust in time.
     private void refreshBudgetCard() {
-        YearMonth month = YearMonth.now();
-        CostBudgetEvaluator evaluator = configure(new CostBudgetEvaluator(),
-                month.atDay(1).atStartOfDay(), month.atEndOfMonth().atTime(LocalTime.MAX));
-        String spent = evaluator.formatUtilityCost(BOTH);
-        double budget = SharedUtilitySettings.getMonthlyBudget();
+        MonthlyBudgetTracker tracker = new MonthlyBudgetTracker(readings,
+                SharedUtilitySettings.getEnergyRate(), SharedUtilitySettings.getWaterRate(),
+                SharedUtilitySettings.getMonthlyBudget(), LocalDate.now());
+        YearMonth month = tracker.getMonth();
+        String spent = "$" + tracker.getSpentSoFar().toPlainString();
+        String monthEnd = MONTH_END_FORMAT.format(month.atEndOfMonth());
 
-        budgetBar.getStyleClass().remove("over-budget");
-        budgetStatusLabel.getStyleClass().remove("over-text");
+        setBudgetState(null);
+        budgetSpentValue.setText(spent);
+        budgetRemainingCaption.setText("REMAINING");
 
-        if (budget <= 0) {
+        if (!tracker.hasBudget()) {
+            // no budget: no warning, just what has been spent
             budgetSubtitleLabel.setText("No budget set • " + MONTH_FORMAT.format(month));
             budgetSpentLabel.setText(spent + " spent this month");
+            budgetLimitValue.setText("–");
+            budgetUsedValue.setText("–");
+            budgetRemainingValue.setText("–");
             budgetBar.setProgress(0);
             budgetStatusLabel.setText("Enter a monthly budget below to track your spending");
+            budgetProjectionLabel.setText("");
             return;
         }
 
-        budgetSubtitleLabel.setText("Limit: " + money(budget) + " • " + MONTH_FORMAT.format(month));
-        budgetSpentLabel.setText(spent + " out of " + money(budget));
-        double percentage = evaluator.getBudgetUsedPercentage();
-        budgetBar.setProgress(Math.min(percentage / 100, 1.0)); // the bar stops at full; the text shows the true figure
+        String budget = "$" + tracker.getBudget().toPlainString();
+        budgetSubtitleLabel.setText("Limit: " + budget + " • " + MONTH_FORMAT.format(month)
+                + " • day " + tracker.getDaysElapsed() + " of " + tracker.getDaysInMonth());
+        budgetSpentLabel.setText(spent + " out of " + budget);
+        budgetLimitValue.setText(budget);
+        budgetUsedValue.setText(percent(tracker.getPercentUsed()));
+        budgetRemainingValue.setText("$" + tracker.getRemaining().toPlainString());
+        budgetBar.setProgress(Math.min(tracker.getPercentUsed() / 100, 1.0)); // the bar stops at full; the text shows the true figure
 
-        if (evaluator.isOverBudget()) {
-            budgetBar.getStyleClass().add("over-budget");
-            budgetStatusLabel.getStyleClass().add("over-text");
-            budgetStatusLabel.setText("Over budget • " + percent(percentage) + " of your budget used");
-        } else {
-            budgetStatusLabel.setText(percent(percentage) + " used • " + money(evaluator.getBudgetRemaining()) + " remaining");
+        String projected = "$" + tracker.getProjectedMonthTotal().toPlainString();
+        switch (tracker.getStatus()) {
+            case NO_READINGS -> {
+                // budget set but nothing to project from yet: no warning
+                budgetStatusLabel.setText("No readings yet this month");
+                budgetProjectionLabel.setText("Add readings for " + MONTH_FORMAT.format(month)
+                        + " to see how your spending is tracking against your budget.");
+            }
+            case OVER_BUDGET -> {
+                setBudgetState("over");
+                budgetRemainingCaption.setText("OVER BY");
+                budgetRemainingValue.setText("$" + tracker.getAmountOver().toPlainString());
+                budgetStatusLabel.setText("⚠ Over budget • you have spent " + percent(tracker.getPercentUsed())
+                        + " of your budget");
+                budgetProjectionLabel.setText("At this rate you'll spend about " + projected + " by " + monthEnd + ".");
+            }
+            case AT_RISK -> {
+                setBudgetState("at-risk");
+                budgetStatusLabel.setText("⚠ On track to exceed your budget • projected " + projected + " by " + monthEnd
+                        + " (" + percent(tracker.getProjectedPercent()) + " of budget)");
+                budgetProjectionLabel.setText(tracker.getDaysRemaining() > 0
+                        ? "To stay within budget, keep spending under $" + tracker.getDailyAllowance().toPlainString()
+                        + " a day for the remaining " + days(tracker.getDaysRemaining()) + "."
+                        : "This is the last day of the month.");
+            }
+            case ON_TRACK -> {
+                setBudgetState("on-track");
+                budgetStatusLabel.setText("On track • projected " + projected + " by " + monthEnd
+                        + " (" + percent(tracker.getProjectedPercent()) + " of budget)");
+                budgetProjectionLabel.setText("Projection assumes you keep spending at your current daily rate.");
+            }
+            default -> {
+                // NO_BUDGET is handled above
+            }
         }
+    }
+
+    // colours the bar and status text for the budget state: "on-track", "at-risk", "over", or null for neutral
+    private void setBudgetState(String state) {
+        budgetBar.getStyleClass().removeAll("over-budget", "at-risk-budget", "on-track-budget");
+        budgetStatusLabel.getStyleClass().removeAll("over-text", "at-risk-text", "on-track-text");
+        budgetRemainingValue.getStyleClass().remove("over-text");
+        if (state == null) {
+            return;
+        }
+        switch (state) {
+            case "over" -> {
+                budgetBar.getStyleClass().add("over-budget");
+                budgetStatusLabel.getStyleClass().add("over-text");
+                budgetRemainingValue.getStyleClass().add("over-text");
+            }
+            case "at-risk" -> {
+                budgetBar.getStyleClass().add("at-risk-budget");
+                budgetStatusLabel.getStyleClass().add("at-risk-text");
+            }
+            default -> {
+                budgetBar.getStyleClass().add("on-track-budget");
+                budgetStatusLabel.getStyleClass().add("on-track-text");
+            }
+        }
+    }
+
+    private static String days(int count) {
+        return count + (count == 1 ? " day" : " days");
     }
 
     private void showRates() {
@@ -238,34 +314,9 @@ public class CostsController {
         errorLabel.setText("");
     }
 
-    @FXML
-    private void onExportClick() {
-        setExportMessage("", false);
-        String selection = selectedUtility();
-        LocalDate from = fromDatePicker.getValue();
-        LocalDate to = toDatePicker.getValue();
-        if (from == null || to == null || to.isBefore(from)) {
-            showError("Choose a valid period before exporting");
-            return;
-        }
-
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Export usage report");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files", "*.csv"));
-        chooser.setInitialFileName("utilitywatch-" + selection + "-" + from + "-to-" + to + ".csv");
-        File file = chooser.showSaveDialog(totalCostLabel.getScene().getWindow());
-        if (file == null) {
-            return; // user cancelled
-        }
-
-        Exporter exporter = configure(new Exporter(), from.atStartOfDay(), to.atTime(LocalTime.MAX));
-        Exporter.ExportResult result = exporter.export(selection, file.toPath());
-        setExportMessage(result.message(), !result.success());
-    }
-
     // ---- Helpers ----
 
-    /** Gives an evaluator (or the exporter) the readings, period, rates and budget. */
+    /** Gives an evaluator the readings, period, rates and budget. */
     private <T extends CostBudgetEvaluator> T configure(T evaluator, LocalDateTime from, LocalDateTime to) {
         evaluator.setReadings(readings);
         evaluator.setTimeRange(from, to);
@@ -308,10 +359,6 @@ public class CostsController {
         return total.signum() == 0 ? 0 : part.divide(total, 4, RoundingMode.HALF_UP).doubleValue();
     }
 
-    private static String money(double amount) {
-        return "$" + BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_UP).toPlainString();
-    }
-
     private static String percent(double value) {
         return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toPlainString() + "%";
     }
@@ -332,13 +379,5 @@ public class CostsController {
 
     private void showError(String message) {
         errorLabel.setText(message);
-    }
-
-    private void setExportMessage(String message, boolean isError) {
-        exportResultLabel.setText(message);
-        exportResultLabel.getStyleClass().remove("error-label");
-        if (isError) {
-            exportResultLabel.getStyleClass().add("error-label");
-        }
     }
 }

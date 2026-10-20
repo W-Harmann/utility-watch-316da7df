@@ -88,7 +88,7 @@
         <!-- export data tile - opens the customise report screen so the user can export any of their data -->
         <VBox spacing="10.0" alignment="CENTER" styleClass="export-data-box" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
             <Label text="Export your data" styleClass="home-tile-title"/>
-            <Label text="Choose a utility, a period and what to include, then save your report as a file."
+            <Label text="Choose energy, water or both, any date range and what to include, then save your report as a CSV or text file."
                    styleClass="quick-tip-text" wrapText="true" textAlignment="CENTER" maxWidth="250.0"/>
             <Button fx:id="exportDataButton" text="Export Data" styleClass="stat-tile-button" onAction="#onExportDataClick"/>
         </VBox>

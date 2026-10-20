@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.utilitywatch.controller.NotificationsController"
+      styleClass="reports-root"
+      VBox.vgrow="ALWAYS"
+      maxHeight="Infinity">
+
+
+    <HBox alignment="CENTER_LEFT" spacing="10.0">
+        <Label text="Notifications" styleClass="reports-title"/>
+    </HBox>
+
+    <fx:define>
+        <ToggleGroup fx:id="notificationToggleGroup"/>
+    </fx:define>
+
+    <HBox spacing="15.0">
+        <ToggleButton toggleGroup="$notificationToggleGroup" onAction="#onViewMonthlyNotifications" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0" styleClass="report-info-box, stat-tile-button">
+            <graphic>
+                <VBox alignment="CENTER" spacing="5">
+                    <Label fx:id="monthlyNotificationsLabel" text="0" styleClass="stat-value"/>
+                    <Label text="This Month" styleClass="report-info-box-title"/>
+                </VBox>
+            </graphic>
+        </ToggleButton>
+
+        <ToggleButton toggleGroup="$notificationToggleGroup" onAction="#onViewAllNotifications" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0" styleClass="report-info-box, stat-tile-button">
+            <graphic>
+                <VBox alignment="CENTER" spacing="5">
+                    <Label fx:id="allNotificationsLabel" text="0" styleClass="stat-value"/>
+                    <Label text="All Notifications" styleClass="report-info-box-title"/>
+                </VBox>
+            </graphic>
+        </ToggleButton>
+
+        <ToggleButton toggleGroup="$notificationToggleGroup" onAction="#onViewIgnoredNotifications" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0" styleClass="report-info-box, stat-tile-button">
+            <graphic>
+                <VBox alignment="CENTER" spacing="5">
+                    <Label fx:id="ignoredNotificationsLabel" text="0" styleClass="stat-value"/>
+                    <Label text="Ignored" styleClass="report-info-box-title"/>
+                </VBox>
+            </graphic>
+        </ToggleButton>
+    </HBox>
+
+    <VBox fx:id="monthlyNotificationsPage">
+
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label text="Recent Notifications" styleClass="reports-title"/>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
+            <VBox fx:id="monthlyNotificationsContainer" spacing="10.0">
+            </VBox>
+        </ScrollPane>
+
+    </VBox>
+
+    <VBox fx:id="allNotificationsPage" visible="false" managed="false">
+
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label text="All Notifications" styleClass="reports-title"/>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
+            <VBox fx:id="allNotificationsContainer" spacing="10.0">
+            </VBox>
+        </ScrollPane>
+
+    </VBox>
+
+    <VBox fx:id="ignoredNotificationsPage" visible="false" managed="false">
+
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label text="Ignored Notifications" styleClass="reports-title"/>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
+            <VBox fx:id="ignoredNotificationsContainer" spacing="10.0">
+            </VBox>
+        </ScrollPane>
+
+    </VBox>
+
+</VBox>

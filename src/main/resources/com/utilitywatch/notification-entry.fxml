@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox fx:id="notificationHBox" alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.utilitywatch.controller.NotificationsEntryController"
+      styleClass="report-info-box">
+    <VBox>
+        <Label fx:id="notificationTitleLabel" text="Notification title" styleClass="reports-title"/>
+        <Label fx:id="notificationTimeLabel" text="Date"/>
+        <Label fx:id="notificationMessageLabel" text="Message"/>
+    </VBox>
+    <VBox alignment="CENTER">
+        <Button fx:id="notificationIgnoreButton" text="Ignore" onAction="#onIgnore"/>
+    </VBox>
+</HBox>

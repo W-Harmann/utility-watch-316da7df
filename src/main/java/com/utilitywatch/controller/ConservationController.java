@@ -5,6 +5,7 @@ import com.utilitywatch.conservationAdvisor.ConservationAdvisor;
 import com.utilitywatch.reports.ReportsDataService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -28,6 +29,17 @@ public class ConservationController {
     private Label seasonalEnergyLabel;
     @FXML
     private Label seasonalWaterLabel;
+
+    @FXML
+    private VBox conservationMenu;
+    @FXML
+    private VBox energyConservationPage;
+    @FXML
+    private VBox waterConservationPage;
+    @FXML
+    private VBox commonPatternsConservationPage;
+    @FXML
+    private VBox seasonalConservationPage;
 
 
     // reference back to MainController to navigate to other screens
@@ -158,21 +170,59 @@ public class ConservationController {
 
     @FXML
     protected void onAverageEnergyClick() {
+        hideConservations();
 
+        energyConservationPage.setVisible(true);
+        energyConservationPage.setManaged(true);
     }
 
     @FXML
     protected void onAverageWaterClick() {
+        hideConservations();
 
+        waterConservationPage.setVisible(true);
+        waterConservationPage.setManaged(true);
     }
 
     @FXML
     protected void onCommonPatternsClick() {
+        hideConservations();
 
+        commonPatternsConservationPage.setVisible(true);
+        commonPatternsConservationPage.setManaged(true);
     }
 
     @FXML
     protected void onSeasonalClick() {
+        hideConservations();
 
+        seasonalConservationPage.setVisible(true);
+        seasonalConservationPage.setManaged(true);
     }
+
+    @FXML
+    protected void onCancelConservationClick() {
+        hideConservations();
+        conservationMenu.setVisible(true);
+        conservationMenu.setManaged(true);
+    }
+
+    private void hideConservations() {
+        conservationMenu.setVisible(false);
+        conservationMenu.setManaged(false);
+
+        energyConservationPage.setVisible(false);
+        energyConservationPage.setManaged(false);
+
+        waterConservationPage.setVisible(false);
+        waterConservationPage.setManaged(false);
+
+        commonPatternsConservationPage.setVisible(false);
+        commonPatternsConservationPage.setManaged(false);
+
+        seasonalConservationPage.setVisible(false);
+        seasonalConservationPage.setManaged(false);
+    }
+
+
 }

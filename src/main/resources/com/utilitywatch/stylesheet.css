@@ -219,6 +219,10 @@
     -fx-opacity: 0.85;
 }
 
+.stat-tile-button:selected {
+    -fx-opacity: 0.85;
+}
+
 .chart-title {
     -fx-font-size: 13px;
     -fx-font-weight: bold;
@@ -249,27 +253,38 @@
     -fx-background-color: #5FB2F5, white;
 }
 
-/* ---- unusual patterns chart: dark line for both, red for flagged readings ---- */
-#unusualConsumptionChart.both-selected .default-color0.chart-series-line {
-    -fx-stroke: #263238;
-}
-#unusualConsumptionChart.both-selected .default-color0.chart-line-symbol {
-    -fx-background-color: #263238, white;
-}
-#unusualConsumptionChart .default-color1.chart-series-line {
+/* ---- unusual patterns chart: red for flagged readings ---- */
+#unusualConsumptionChart .default-color2.chart-series-line {
     -fx-stroke: #CB0E11
 }
-#unusualConsumptionChart .default-color1.chart-line-symbol {
-    -fx-background-color: #CB0E11, #CB0E11;
+#unusualConsumptionChart .default-color3.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color4.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color5.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color6.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color7.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .chart-line-symbol {
+    -fx-background-color: #CB0E11, white;
 }
 
 /* ---- bar charts: colour by selected utility ---- */
 .energy-selected .chart-bar {
     -fx-bar-fill: #FFBA4A;
 }
+
 .water-selected .chart-bar {
     -fx-bar-fill: #5FB2F5;
 }
+
 .both-selected .chart-bar {
     -fx-bar-fill: #263238;
 }
@@ -347,6 +362,23 @@
     -fx-text-fill: white;
     -fx-background-radius: 6;
 }
+
+.info-icon-text {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.conservation-tip-text {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.back-button {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+}
+
 /* ---- US9.3 monthly budget card states (Costs page) ---- */
 .budget-stat-value {
     -fx-font-size: 15px;

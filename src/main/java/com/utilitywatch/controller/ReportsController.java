@@ -15,7 +15,10 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.time.*;
 import javafx.application.Platform;
+import javafx.util.StringConverter;
+
 import java.time.temporal.ChronoUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
@@ -44,7 +47,7 @@ public class ReportsController {
     @FXML private LineChart<String, Number> consumptionChart;
     @FXML private CategoryAxis consumptionXAxis;
     @FXML private BarChart<String, Number> distributionChart;
-    @FXML private LineChart<String, Number> unusualConsumptionChart;
+    @FXML private LineChart<Number, Number> unusualConsumptionChart;
 
     // trend mode toggle buttons
     @FXML private HBox trendmodeToggle;
@@ -977,11 +980,32 @@ public class ReportsController {
     private int selectedIndex = 0;
 
     // loads sample unusual consumption data
-    // finds the flagged readings for the selected utility and period, oldest first
-    private LinkedHashMap<List<Reading>, String> findFlaggedReadings() {
+    private LinkedHashMap<List<Reading>, String> updateUnusualConsumptionData() {
+        // prevents duplicate data from being added to the chart
+        unusualConsumptionChart.getData().clear();
+
+        NumberAxis xAxis = (NumberAxis) unusualConsumptionChart.getXAxis();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+
+        xAxis.setTickLabelFormatter(new StringConverter<Number>() {
+            @Override
+            public String toString(Number epochMilliSeconds) {
+                LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMilliSeconds.longValue()), ZoneId.systemDefault());
+                return dateTime.format(formatter);
+            }
+
+            @Override
+            public Number fromString(String string) {
+                return null;
+            }
+        });
+
         // check which resource toggles are currently selected
         boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
         boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
+
+
 
         List<Reading> energyReadings = new ArrayList<>(dataService.getReadings("energy", periodStart, periodEnd));
         List<Reading> waterReadings = new ArrayList<>(dataService.getReadings("water", periodStart, periodEnd));
@@ -996,6 +1020,8 @@ public class ReportsController {
             utilityFlags.putAll(energyFlags);
         }
 
+
+
         if (showWater && !waterReadings.isEmpty()) {
             waterReadings.sort(Comparator.comparing(Reading::getDateTime));
 
@@ -1003,21 +1029,18 @@ public class ReportsController {
             utilityFlags.putAll(waterFlags);
         }
 
-        return sortFlaggedReadings(utilityFlags);
-    }
 
-    // loads sample unusual consumption data - lookup moved to findFlaggedReadings()
-    private void updateUnusualConsumptionData() {
-        // prevents duplicate data from being added to the chart
-        unusualConsumptionChart.getData().clear();
 
-        this.flaggedReadingsMap = findFlaggedReadings();
+        this.flaggedReadingsMap = sortFlaggedReadings(utilityFlags);
 
         selectedIndex = 0;
+
+        updateUnusualChart(energyReadings, waterReadings);
+
         showSelectedUnusualStats();
 
-        // adds both data series to the consumption chart
-        ///unusualConsumptionChart.getData().addAll(series, flaggedSeries);
+        return this.flaggedReadingsMap;
+
     }
 
     // fills the overview's unusual patterns table with the most recent flagged readings
@@ -1028,7 +1051,7 @@ public class ReportsController {
             return row != null && row > 0;
         });
 
-        List<Map.Entry<List<Reading>, String>> flagged = new ArrayList<>(findFlaggedReadings().entrySet());
+        List<Map.Entry<List<Reading>, String>> flagged = new ArrayList<>(updateUnusualConsumptionData().entrySet());
 
         if (flagged.isEmpty()) {
             overviewUnusualGrid.add(new Label("No unusual patterns found for this period."), 0, 1, 3, 1);
@@ -1063,7 +1086,7 @@ public class ReportsController {
         }
     }
 
-    private LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
+    public static LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
 
         // For the dates to be in ascending order
         readings.sort(Comparator.comparing(Reading::getDateTime));
@@ -1179,12 +1202,117 @@ public class ReportsController {
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(list ->
                         list.stream()
                                 .map(Reading::getDateTime)
-                                .min(LocalDateTime::compareTo)
+                                .max(LocalDateTime::compareTo)
                                 .orElse(LocalDateTime.MAX)
                 )))
                 .forEachOrdered(entry -> sortedFlaggedReadings.put(entry.getKey(), entry.getValue()));
 
         return sortedFlaggedReadings;
+    }
+
+    private void updateUnusualChart(List<Reading> energyReadings, List<Reading> waterReadings) {
+        // remove any existing data before displaying the updated readings
+        unusualConsumptionChart.getData().clear();
+
+        // check which resource toggles are currently selected
+        boolean showEnergy = bothToggle.isSelected() || energyToggle.isSelected();
+        boolean showWater = bothToggle.isSelected() || waterToggle.isSelected();
+
+        // add the energy readings to the chart if energy is selected and data is available
+        XYChart.Series<Number, Number> energySeries = new XYChart.Series<>();
+        energySeries.setName("Energy (kWh)");
+
+        if (showEnergy && !energyReadings.isEmpty()) {
+            // add each energy reading as a separate data point
+            for (Reading reading : energyReadings) {
+                energySeries.getData().add(new XYChart.Data<>(reading.getDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), reading.getQuantity()));
+            }
+            unusualConsumptionChart.getData().add(energySeries);
+            energySeries.getData().forEach(data -> {
+                data.getNode().setStyle("-fx-stroke: #FFBA4A; -fx-background-color: #FFBA4A, white;");
+            });
+        }
+        else {
+            unusualConsumptionChart.getData().add(energySeries);
+        }
+
+        // add the water readings to the chart if water is selected and data is available
+        XYChart.Series<Number, Number> waterSeries = new XYChart.Series<>();
+        waterSeries.setName("Water (L)");
+
+        if (showWater && !waterReadings.isEmpty()) {
+            // add each water reading as a separate data point
+            for (Reading reading : waterReadings) {
+                waterSeries.getData().add(new XYChart.Data<>(reading.getDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), reading.getQuantity()));
+            }
+            unusualConsumptionChart.getData().add(waterSeries);
+            waterSeries.getData().forEach(data -> {
+                data.getNode().setStyle("-fx-stroke: #5FB2F5; -fx-background-color: #5FB2F5, white;");
+            });
+        }
+        else {
+            unusualConsumptionChart.getData().add(waterSeries);
+        }
+
+        List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
+
+        if(!flaggedReadingsList.isEmpty()) {
+            for (int i = 0; i < flaggedReadingsList.size(); i++) {
+
+                XYChart.Series<Number, Number> flaggedSeries = new XYChart.Series<>();
+                for (Reading reading : flaggedReadingsList.get(i)) {
+                    flaggedSeries.getData().add(new XYChart.Data<>(reading.getDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), reading.getQuantity()));
+                }
+                unusualConsumptionChart.getData().add(flaggedSeries);
+                if (i == selectedIndex) {
+                    flaggedSeries.getData().forEach(data -> {
+                        data.getNode().setStyle("-fx-stroke: #CB0E11; -fx-background-color: #CB0E11, #CB0E11;");
+                    });
+                } else {
+                    flaggedSeries.getData().forEach(data -> {
+                        data.getNode().setStyle("-fx-stroke: #CB0E11; -fx-background-color: #CB0E11, white;");
+                    });
+                }
+            }
+        }
+
+        updateUnusualFlaggedChart(selectedIndex, selectedIndex);
+
+    }
+
+    private void updateUnusualFlaggedChart(int selected, int prevSelected) {
+        List<List<Reading>> flaggedReadingsList = new ArrayList<>(flaggedReadingsMap.sequencedKeySet());
+
+        NumberAxis xAxis = (NumberAxis) unusualConsumptionChart.getXAxis();
+
+        if(!flaggedReadingsList.isEmpty()) {
+            List<XYChart.Series<Number, Number>> flaggedSeries = unusualConsumptionChart.getData()
+                    .stream()
+                    .filter(series -> series.getName() == null)
+                    .toList();
+
+            flaggedSeries.get(prevSelected).getData().forEach(data -> {
+                data.getNode().setStyle("-fx-background-color: #CB0E11, white");
+            });
+
+            flaggedSeries.get(selected).getData().forEach(data -> {
+                data.getNode().setStyle("-fx-background-color: #CB0E11, #CB0E11;");
+                data.getNode().toFront();
+            });
+
+            long monthRange = 30L * 24 * 60 * 60 * 1000;
+            long tickUnit = monthRange / 30;
+
+            xAxis.setAutoRanging(false);
+
+            xAxis.setLowerBound((long) flaggedSeries.get(selected).getData().getFirst().getXValue() - monthRange / 2);
+            xAxis.setUpperBound((long) flaggedSeries.get(selected).getData().getLast().getXValue() + monthRange / 2);
+            xAxis.setTickUnit(tickUnit);
+
+        }
+        else {
+            xAxis.setAutoRanging(true);
+        }
     }
 
     // calculates and displays statistics for flagged reading
@@ -1212,7 +1340,7 @@ public class ReportsController {
 
             String formattedTotal = String.format("%.1f", totalUsage);
 
-            selectedUtilityUsed.setText("Utility used: " + formattedTotal + flaggedReadings.getFirst().getUnit());
+            selectedUtilityUsed.setText("Utility used: " + formattedTotal + " " + flaggedReadings.getFirst().getUnit());
 
             selectedUnusualReason.setText("Reason: " + flaggedReadingsReasons.get(selectedIndex));
         }
@@ -1343,6 +1471,7 @@ public class ReportsController {
         if (selectedIndex > 0) {
             selectedIndex--;
             showSelectedUnusualStats();
+            updateUnusualFlaggedChart(selectedIndex, selectedIndex + 1);
         }
     }
 
@@ -1351,6 +1480,7 @@ public class ReportsController {
         if (selectedIndex < flaggedReadingsMap.size() - 1) {
             selectedIndex++;
             showSelectedUnusualStats();
+            updateUnusualFlaggedChart(selectedIndex, selectedIndex - 1);
         }
     }
 
@@ -1400,7 +1530,7 @@ public class ReportsController {
 
     // updates the chart colour based on the selected utility toggle
     private void updateChartColour() {
-        List<XYChart<String, Number>> allCharts = List.of(consumptionChart, distributionChart, unusualConsumptionChart);
+        List<XYChart<String, Number>> allCharts = List.of(consumptionChart, distributionChart);
 
         for(XYChart<String, Number> chart: allCharts) {
 
@@ -1434,9 +1564,6 @@ public class ReportsController {
 
         trendmodeToggle.setVisible(false);
         trendmodeToggle.setManaged(false);
-
-        comparisonmodeToggle.setVisible(false);
-        comparisonmodeToggle.setManaged(false);
 
         overviewContentBox.setVisible(false);
         overviewContentBox.setManaged(false);

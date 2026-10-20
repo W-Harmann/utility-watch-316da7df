@@ -376,9 +376,9 @@
     <VBox fx:id="unusualPatternsContentBox" spacing="15.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
 
         <!-- unusual consumption chart -->
-        <LineChart fx:id="unusualConsumptionChart" title="Utility Consumption" legendVisible="false" VBox.vgrow="ALWAYS">
+        <LineChart fx:id="unusualConsumptionChart" title="Utility Consumption" legendVisible="false" animated="false" VBox.vgrow="ALWAYS">
             <xAxis>
-                <CategoryAxis/>
+                <NumberAxis forceZeroInRange="false" autoRanging="false"/>
             </xAxis>
             <yAxis>
                 <NumberAxis/>

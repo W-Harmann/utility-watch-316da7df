@@ -6,7 +6,11 @@ import com.utilitywatch.database.ReadingDAO;
 import com.utilitywatch.login.Session;
 import com.utilitywatch.login.User;
 
+import com.utilitywatch.notifications.Notification;
+import com.utilitywatch.notifications.NotificationRepository;
+import com.utilitywatch.notifications.Type;
 import javafx.collections.FXCollections;
+import javafx.scene.chart.XYChart;
 import javafx.scene.layout.HBox;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -17,6 +21,11 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 public class ReadingsController {
 
@@ -37,6 +46,8 @@ public class ReadingsController {
     private final CsvReadingImportService csvImportService = new CsvReadingImportService(readingDAO);
     private int currentUserId;
     private Reading readingBeingEdited = null; // null means the form is adding a new reading, not editing one
+
+    private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
 
     @FXML
     public void initialize() {
@@ -141,6 +152,8 @@ public class ReadingsController {
             importResultLabel.setText(report.getSuccessCount() + " imported, "
                     + report.getFailureMessages().size() + " skipped");
             refreshTable();
+            // clears unusual Notifications when data is completely changed
+            notificationRepository.clearUnusual();
         } catch (IOException e) {
             importResultLabel.setText("Could not read file");
         }
@@ -148,5 +161,69 @@ public class ReadingsController {
 
     private void refreshTable() {
         readingsTable.setItems(FXCollections.observableArrayList(readingDAO.getReadingsForUser(currentUserId)));
+        refreshUnusualPatterns();
+    }
+
+    // So that Notifications for unusual patterns are set upon data being changed
+    private void refreshUnusualPatterns() {
+        LinkedHashMap<List<Reading>, String> flaggedReadingsMap = ReportsController.loadUnusualConsumptionData(readingDAO.getReadingsForUser(currentUserId));
+
+        if (!flaggedReadingsMap.isEmpty()) {
+
+            for (Map.Entry<List<Reading>, String> flaggedReadingEntry : flaggedReadingsMap.entrySet()) {
+                notifyUnusualPattern(flaggedReadingEntry);
+            }
+        }
+
+
+    }
+
+    private void notifyUnusualPattern(Map.Entry<List<Reading>, String> flaggedReadingEntry) {
+        List<Reading> flaggedReadings = flaggedReadingEntry.getKey();
+        String flaggedReason = flaggedReadingEntry.getValue();
+
+        double readingDuration = Duration.between(flaggedReadings.getFirst().getDateTime(), flaggedReadings.getLast().getDateTime()).toHours();
+
+        double totalUsage = 0;
+
+        for (Reading reading : flaggedReadings) {
+            totalUsage += reading.getQuantity();
+        }
+
+        String formattedTotal = String.format("%.1f", totalUsage);
+
+        String formattedResourceType = flaggedReadings.getFirst().getResourceType().substring(0, 1).toUpperCase() + flaggedReadings.getFirst().getResourceType().substring(1);
+
+        LocalDateTime dateTime = flaggedReadings.getFirst().getDateTime();
+
+        String title = "Unusual Pattern Detected: " + formattedResourceType + " Usage";
+
+        String message = formattedResourceType + " " + flaggedReason.toLowerCase() + " of " + formattedTotal + " "
+                + flaggedReadings.getFirst().getUnit() + (readingDuration == 0 ? "" : " over " + readingDuration + " hours");
+
+        if (!unusualNotificationChecker(dateTime, title, message)) {
+            notificationRepository.add(new Notification(
+                    dateTime,
+                    title,
+                    message,
+                    false,
+                    Type.UNUSUALPATTERN));
+        }
+
+
+    }
+
+    private boolean unusualNotificationChecker(LocalDateTime dateTime, String title, String message) {
+
+        List<Notification> notifications = notificationRepository.getAll();
+
+        for (Notification notification : notifications) {
+            if (Objects.equals(notification.getDateTime(), dateTime) && Objects.equals(notification.getTitle(), title) && Objects.equals(notification.getMessage(), message)) {
+                return true;
+            }
+        }
+
+        return false;
+
     }
 }

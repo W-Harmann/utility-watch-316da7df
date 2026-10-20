@@ -1,6 +1,9 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.goals.*;
+import com.utilitywatch.notifications.Notification;
+import com.utilitywatch.notifications.NotificationRepository;
+import com.utilitywatch.notifications.Type;
 import com.utilitywatch.reports.*;
 import javafx.application.Platform;
 import javafx.fxml.*;
@@ -47,6 +50,9 @@ public class GoalsController {
     // shared goal list and progress calculation also used by home dashboard
     private final GoalRepository goalRepository = GoalRepository.getInstance();
     private final GoalProgressService goalProgressService = new GoalProgressService();
+
+    // shared notification list
+    private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
 
     // forget all goals, e.g. when an account is deleted
     public static void clearGoals() {
@@ -165,11 +171,13 @@ public class GoalsController {
     // saves a completion alert so it appears on the notifications screen (us8.4)
     private void saveCompletionAlert(Goal goal) {
         String resource = "energy".equals(goal.getResourceType()) ? "Energy" : "Water";
-        GoalAlertStore.add(new GoalAlertStore.GoalAlert(
+        notificationRepository.add(new Notification(
                 LocalDateTime.now(),
                 "Goal Completed: Reduced " + resource + " Usage",
                 resource + " successfully reduced by " + (int) goal.getTargetReduction()
-                        + "% (" + goal.getTargetPeriod() + ")"));
+                        + "% (" + goal.getTargetPeriod() + ")",
+                false,
+                Type.GOAL));
     }
 
     // displays a message showing the details of each goal that has been completed

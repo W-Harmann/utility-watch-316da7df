@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.OptionalDouble;
 
 /**
- * calculates how much the user's resource consumption has decreased towards a goal
+ * Calculates how much the user;s resource consumption has decreased using saved readings.
+ * Used by the goals screen and dashboard to show the same progress (US8.3).
  */
 public class GoalProgressService {
 
@@ -19,7 +20,7 @@ public class GoalProgressService {
 
     /**
      * compares resource consumption in the current goal period with the previous period
-     *
+     * of the same length immediately before it
      * @param goal the goal to check
      * @return the percentage reduction, or empty if either period has no readings
      */

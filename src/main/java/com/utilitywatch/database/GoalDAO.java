@@ -7,11 +7,15 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-// handles saving and retrieving goals from the shared SQLite database
+/**
+ * Saves and retrieves goals from the shared SQLite database.
+ * Stores completed as 1 for yes and 0 for no.
+ */
 public class GoalDAO implements IGoalDAO {
 
     private final Connection connection;
 
+    /** connects to the shared database and creates the goals table if it does not already exist. */
     public GoalDAO() {
         connection = UtilityWatchConnection.getInstance();
         createTable();
@@ -104,7 +108,7 @@ public class GoalDAO implements IGoalDAO {
         }
     }
 
-    // delets a user's goals when their account is deleted
+    // deletes a user's goals when their account is deleted
     @Override
     public void deleteGoalsForUser(int userId) {
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM goals WHERE userId = ?")) {
@@ -115,7 +119,7 @@ public class GoalDAO implements IGoalDAO {
         }
     }
 
-    // creates a goal from a databse row
+    // creates a goal from a database row
     private Goal mapRow(ResultSet resultSet) throws SQLException {
         Goal goal = new Goal(
                 resultSet.getString("resourceType"),

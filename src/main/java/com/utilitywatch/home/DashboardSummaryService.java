@@ -20,19 +20,23 @@ public class DashboardSummaryService {
     private static final int TREND_DAYS = 7;
     private final ReportsDataService dataService;
 
-    // creates a service that loads the user's readings
+    /**
+     * creates a service that loads the user's readings
+     */
     public DashboardSummaryService() {
         this(new ReportsDataService());
     }
 
-    // creates a service using the given data source
+    /**
+     * creates a service using the given data source for testing
+     * @param dataService the source of the user's readings
+     */
     public DashboardSummaryService(ReportsDataService dataService) {
         this.dataService = dataService;
     }
 
     /**
      * builds a summary for the most recent day with readings
-     *
      * @return the summary, or empty if there are no readings
      */
     public Optional<DashboardSummary> buildSummary() {
@@ -62,10 +66,9 @@ public class DashboardSummaryService {
 
     /**
      * estimates the cost of one day's energy and water usage
-     *
      * @param day the day to calculate the cost for
      * @param energyRate cost per kWh
-     * @param waterRate cost per litre
+     * @param waterRate cost per litre (same unit the costs screen uses)
      * @return the estimated cost in dollars
      */
     public double estimateDailyCost(LocalDate day, double energyRate, double waterRate) {

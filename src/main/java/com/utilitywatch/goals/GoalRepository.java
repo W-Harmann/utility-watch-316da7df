@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * manages the logged in user's goals, keeps them in memory, and syncs changes to the database
+ * Manages the logged in user's goals, stores them in memory, and saves changes to the database.
+ * Loads goals once per user and reuses them until a different user logs in.
  */
 public class GoalRepository {
 
@@ -25,7 +26,10 @@ public class GoalRepository {
         this.goalDAO = goalDAO;
     }
 
-    /** @return the shared repository instance */
+    /**
+     * gets the shared repository or creates one if needed
+     * @return the shared repository instance
+     */
     public static GoalRepository getInstance() {
         if (instance == null) {
             instance = new GoalRepository(new GoalDAO());
@@ -33,26 +37,38 @@ public class GoalRepository {
         return instance;
     }
 
-    /** @return a copy of the goal list that can be changed without affecting the original */
+    /** @return a copy of the current user's goals, oldest first, that can be changed without affecting the repository */
     public List<Goal> getAll() {
         loadGoalsIfUserChanged();
         return new ArrayList<>(goals);
     }
 
-    /** saves a new goal for the current user  */
+    /**
+     * saves a new goal for the current user
+     * @param goal the goal to save
+     */
     public void add(Goal goal) {
         loadGoalsIfUserChanged();
         goalDAO.insert(goal, loadedUserId);
         goals.add(goal);
     }
 
-    /** updates the goal at the given position (e.g. when its progress changes) */
+    /**
+     * updates the goal at the given position (e.g. when its progress changes)
+     * @param goalIndex the position of the goal in the list
+     * @param goal the updated goal
+     */
     public void set(int goalIndex, Goal goal) {
         loadGoalsIfUserChanged();
         replaceAt(goalIndex, goal);
     }
 
-    /** replaces an existing goal with its updated version */
+    /**
+     * replaces an existing goal with its updated version and saves the change.
+     * does nothing if the old goal is not in the list.
+     * @param oldGoal the goal to replace
+     * @param newGoal the updated goal
+     */
     public void replace(Goal oldGoal, Goal newGoal) {
         loadGoalsIfUserChanged();
         int goalIndex = goals.indexOf(oldGoal);
@@ -61,7 +77,10 @@ public class GoalRepository {
         }
     }
 
-    /** removes the given goal from the list */
+    /**
+     * removes the given goal from the list and the database
+     * @param goal the goal to remove
+     */
     public void remove(Goal goal) {
         loadGoalsIfUserChanged();
         if (goals.remove(goal)) {
@@ -69,7 +88,7 @@ public class GoalRepository {
         }
     }
 
-    /** removes every goal, e.g. when an account is deleted */
+    /** removes every goal for the current user from memory and the database, e.g. when an account is deleted */
     public void clear() {
         User user = Session.getInstance().getCurrentUser();
         if (user != null) {

@@ -347,3 +347,37 @@
     -fx-text-fill: white;
     -fx-background-radius: 6;
 }
+
+/* ---- US9.3 monthly budget card states (Costs page) ---- */
+.budget-stat-value {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.budget-bar .bar {
+    -fx-background-color: #9E9E9E;
+}
+
+.budget-bar.on-track-budget .bar {
+    -fx-background-color: #139907;
+}
+
+.budget-bar.at-risk-budget .bar {
+    -fx-background-color: #F57C00;
+}
+
+.budget-bar.over-budget .bar {
+    -fx-background-color: #CB0E11;
+}
+
+.report-info-box .label.on-track-text {
+    -fx-text-fill: #81C784;
+}
+
+.report-info-box .label.at-risk-text {
+    -fx-text-fill: #FFB74D;
+}
+
+.report-info-box .label.over-text {
+    -fx-text-fill: #FF6B6B;
+}

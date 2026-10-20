@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- US9.1 / US11.1 - Costs page -->
+<!-- US9.1 / US9.3 / US11.1 - Costs page -->
 <ScrollPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.utilitywatch.controller.CostsController"
@@ -80,8 +80,8 @@
                 </VBox>
             </HBox>
 
-            <!-- Monthly budget card -->
-            <VBox styleClass="report-info-box" spacing="8">
+            <!-- Monthly budget card (US9.3) - always the current calendar month, both utilities -->
+            <VBox fx:id="budgetCard" styleClass="report-info-box" spacing="10">
                 <HBox alignment="CENTER_LEFT">
                     <VBox spacing="2">
                         <Label text="Monthly Budget" styleClass="report-info-box-title"/>
@@ -90,11 +90,34 @@
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label fx:id="budgetSpentLabel" styleClass="report-info-box-title"/>
                 </HBox>
+
+                <!-- spent so far, budget, percentage used and amount remaining -->
+                <HBox fx:id="budgetStatsRow" spacing="14">
+                    <VBox spacing="2" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <Label text="SPENT SO FAR" styleClass="report-note"/>
+                        <Label fx:id="budgetSpentValue" styleClass="budget-stat-value"/>
+                    </VBox>
+                    <VBox spacing="2" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <Label text="BUDGET" styleClass="report-note"/>
+                        <Label fx:id="budgetLimitValue" styleClass="budget-stat-value"/>
+                    </VBox>
+                    <VBox spacing="2" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <Label text="USED" styleClass="report-note"/>
+                        <Label fx:id="budgetUsedValue" styleClass="budget-stat-value"/>
+                    </VBox>
+                    <VBox spacing="2" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <Label fx:id="budgetRemainingCaption" text="REMAINING" styleClass="report-note"/>
+                        <Label fx:id="budgetRemainingValue" styleClass="budget-stat-value"/>
+                    </VBox>
+                </HBox>
+
                 <ProgressBar fx:id="budgetBar" progress="0" maxWidth="Infinity" styleClass="budget-bar"/>
-                <Label fx:id="budgetStatusLabel" styleClass="report-note"/>
+                <Label fx:id="budgetStatusLabel" styleClass="report-info-box-title" wrapText="true"/>
+                <Label fx:id="budgetProjectionLabel" styleClass="report-note" wrapText="true"/>
                 <HBox spacing="8" alignment="CENTER_LEFT">
                     <TextField fx:id="budgetField" promptText="Monthly budget ($)" prefWidth="160"/>
                     <Button text="Set Budget" onAction="#onSetBudgetClick"/>
+                    <Label text="Enter 0 to remove the budget" styleClass="report-note"/>
                 </HBox>
             </VBox>
 

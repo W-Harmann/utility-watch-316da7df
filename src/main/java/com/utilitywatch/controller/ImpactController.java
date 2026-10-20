@@ -73,13 +73,6 @@ public class ImpactController {
     @FXML private HBox trendLegend;
     private final FootprintTrendChart trendChart = new FootprintTrendChart();
 
-    // QLD comparison card
-    @FXML private Label userTotalLabel;
-    @FXML private Label stateTotalLabel;
-    @FXML private ProgressBar userBar;
-    @FXML private ProgressBar stateBar;
-    @FXML private Label stateComparisonLabel;
-
     // Emission factors bar
     @FXML private Label energyFactorLabel;
     @FXML private Label waterFactorLabel;
@@ -162,7 +155,6 @@ public class ImpactController {
 
         refreshFootprintCard(evaluator, selection, from, to);
         refreshByUtilityCard(evaluator, selection);
-        refreshStateCard(evaluator);
         refreshTrendCard(evaluator, selection);
     }
 
@@ -208,28 +200,6 @@ public class ImpactController {
         waterBar.setProgress(share(water, total));
     }
 
-    // Compares the user's total footprint (energy + water) with the QLD average for the same number of days.
-    private void refreshStateCard(EnvironmentalEvaluator evaluator) {
-        BigDecimal user = evaluator.calculateEmissionExact(BOTH);
-        BigDecimal state = evaluator.getStateAverageForPeriodExact();
-        BigDecimal largest = user.max(state);
-
-        userTotalLabel.setText(kg(user) + " kg");
-        stateTotalLabel.setText(kg(state) + " kg");
-        userBar.setProgress(share(user, largest));
-        stateBar.setProgress(share(state, largest));
-
-        double difference = evaluator.getPercentageVsStateAverage();
-        String amount = BigDecimal.valueOf(Math.abs(difference)).setScale(2, RoundingMode.HALF_UP).toPlainString() + "%";
-        if (difference > 0) {
-            stateComparisonLabel.setText("Your footprint is " + amount + " above the QLD average");
-        } else if (difference < 0) {
-            stateComparisonLabel.setText("Your footprint is " + amount + " below the QLD average");
-        } else {
-            stateComparisonLabel.setText("Your footprint is the same as the QLD average");
-        }
-    }
-
     // US10.3 - one point per week or month across the period, following the utility selection.
     // Periods with no readings are shown as "No data" bands rather than as 0 kg.
     // With "Both" selected, energy and water are drawn as two lines; otherwise just the selected utility.
@@ -273,11 +243,6 @@ public class ImpactController {
         waterImpactLabel.setText("");
         energyBar.setProgress(0);
         waterBar.setProgress(0);
-        userTotalLabel.setText("");
-        stateTotalLabel.setText("");
-        userBar.setProgress(0);
-        stateBar.setProgress(0);
-        stateComparisonLabel.setText("");
         trendChart.clearChart();
         trendSummaryLabel.setText("");
     }

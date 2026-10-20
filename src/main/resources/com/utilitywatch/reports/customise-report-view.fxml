@@ -4,13 +4,16 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="15.0" xmlns:fx="http://javafx.com/fxml"
+<!-- US7.3 (customise report) and US11.2 (custom date range export) - opened from the home screen's
+     Export Data tile and the Costs page's Export Report button -->
+<VBox spacing="12.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.utilitywatch.controller.CustomiseReportController"
       styleClass="reports-root">
     <padding>
@@ -27,21 +30,35 @@
             <ToggleGroup fx:id="customiseUtilityToggleGroup"/>
         </fx:define>
 
-        <ToggleButton text="Energy" styleClass="utility-toggle, energy-toggle" toggleGroup="$customiseUtilityToggleGroup"/>
-        <ToggleButton text="Water" styleClass="utility-toggle, water-toggle" toggleGroup="$customiseUtilityToggleGroup"/>
-        <ToggleButton text="Both" styleClass="utility-toggle, both-toggle" toggleGroup="$customiseUtilityToggleGroup" selected="true"/>
+        <HBox>
+            <ToggleButton fx:id="energyToggle" text="Energy" userData="energy" styleClass="utility-toggle, energy-toggle" toggleGroup="$customiseUtilityToggleGroup"/>
+            <ToggleButton fx:id="waterToggle" text="Water" userData="water" styleClass="utility-toggle, water-toggle" toggleGroup="$customiseUtilityToggleGroup"/>
+            <ToggleButton fx:id="bothToggle" text="Both" userData="both" styleClass="utility-toggle, both-toggle" toggleGroup="$customiseUtilityToggleGroup" selected="true"/>
+        </HBox>
 
         <Region HBox.hgrow="ALWAYS"/>
 
-        <!-- shows period picker -->
+        <!-- custom date range (US11.2) -->
         <fx:include source="period-picker.fxml" fx:id="periodPicker"/>
+    </HBox>
+
+    <!-- quick ranges for common needs such as one billing cycle or one year -->
+    <HBox alignment="CENTER_LEFT" spacing="8.0">
+        <Label text="Quick ranges:"/>
+        <Button text="This month" styleClass="period-preset-button" onAction="#onThisMonthClick"/>
+        <Button text="Last month" styleClass="period-preset-button" onAction="#onLastMonthClick"/>
+        <Button text="Last 3 months" styleClass="period-preset-button" onAction="#onLastThreeMonthsClick"/>
+        <Button text="Last 12 months" styleClass="period-preset-button" onAction="#onLastYearClick"/>
+        <Button fx:id="allReadingsButton" text="All readings" styleClass="period-preset-button" onAction="#onAllReadingsClick"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="periodSummaryLabel" styleClass="period-summary"/>
     </HBox>
 
     <!-- two side by side widgets -->
     <HBox spacing="15.0" VBox.vgrow="ALWAYS">
 
         <!-- left widget - report checkbox selection options -->
-        <VBox spacing="8.0" styleClass="report-info-box" HBox.hgrow="ALWAYS">
+        <VBox spacing="8.0" styleClass="report-info-box" minWidth="250.0" prefWidth="260.0">
             <Label text="Select information to include:" styleClass="report-info-box-title"/>
 
             <CheckBox fx:id="selectAllCheckBox" text="Select All" onAction="#onSelectAllClick"/>
@@ -52,26 +69,34 @@
             <CheckBox fx:id="conservationOpportunitiesCheckBox" text="Conservation Opportunities" onAction="#handleCheckboxAction"/>
             <CheckBox fx:id="costSummaryCheckBox" text="Cost Summary" onAction="#handleCheckboxAction"/>
             <CheckBox fx:id="environmentalImpactCheckBox" text="Environmental Impact" onAction="#handleCheckboxAction"/>
+            <CheckBox fx:id="readingsDataCheckBox" text="Readings Data" onAction="#handleCheckboxAction"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
-            <Label text="Note: you must select at least one item to generate a report."
+            <Label fx:id="selectionNoteLabel" text="Note: you must select at least one item to generate a report."
                    wrapText="true" styleClass="report-note"/>
         </VBox>
 
-        <!-- right widget - preview of selected choices (static text for now) -->
-        <!-- TODO: update to add the options based on which checkboxes are checked -->
-        <VBox fx:id="previewContainer" spacing="8.0" styleClass="report-info-box" HBox.hgrow="ALWAYS">
-            <Label text="Your report will include:" styleClass="report-info-box-title"/>
+        <!-- right widget - live preview of exactly what the report will contain -->
+        <VBox spacing="8.0" styleClass="report-info-box" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="Report preview" styleClass="report-info-box-title"/>
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-background: #263238;">
+                <content>
+                    <VBox fx:id="previewContainer" spacing="6.0"/>
+                </content>
+            </ScrollPane>
         </VBox>
 
     </HBox>
 
+    <Label fx:id="statusLabel" wrapText="true"/>
+
     <!-- cancel and generate report buttons -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Button text="Cancel" styleClass="cancel-button" onAction="#onCancelClick"/>
+        <Button fx:id="cancelButton" text="Cancel" styleClass="cancel-button" onAction="#onCancelClick"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Generate Report" styleClass="generate-report-button" onAction="#onGenerateReportClick"/>
+        <Button fx:id="generateReportButton" text="Generate Report" styleClass="generate-report-button" onAction="#onGenerateReportClick"/>
     </HBox>
 
 </VBox>

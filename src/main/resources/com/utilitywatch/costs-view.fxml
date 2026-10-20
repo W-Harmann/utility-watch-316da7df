@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- US9.1 / US9.3 / US11.1 - Costs page -->
+<!-- US9.1 / US9.3 - Costs page (exporting is done from the home screen's Export Data tile) -->
 <ScrollPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.utilitywatch.controller.CostsController"
@@ -26,12 +26,7 @@
                 <ToggleGroup fx:id="utilityGroup"/>
             </fx:define>
 
-            <!-- Title and export -->
-            <HBox alignment="CENTER_LEFT">
-                <Label text="Costs" styleClass="form-title"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Export Report" styleClass="generate-report-button" onAction="#onExportClick"/>
-            </HBox>
+            <Label text="Costs" styleClass="form-title"/>
 
             <!-- Utility and period -->
             <HBox spacing="10" alignment="CENTER_LEFT">
@@ -49,7 +44,6 @@
             </HBox>
 
             <Label fx:id="errorLabel" styleClass="error-label"/>
-            <Label fx:id="exportResultLabel" wrapText="true"/>
 
             <!-- Estimated cost and by-utility cards -->
             <HBox spacing="14">

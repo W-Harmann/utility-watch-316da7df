@@ -107,32 +107,6 @@
                 </HBox>
             </VBox>
 
-            <!-- Comparison with the QLD average -->
-            <VBox styleClass="report-info-box" spacing="10">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Impacts in Comparison" styleClass="report-info-box-title"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="QLD average is mock data • total footprint (energy + water)" styleClass="report-note"/>
-                </HBox>
-                <VBox spacing="4">
-                    <HBox>
-                        <Label text="You"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="userTotalLabel" styleClass="user-column-header"/>
-                    </HBox>
-                    <ProgressBar fx:id="userBar" progress="0" maxWidth="Infinity" styleClass="user-bar"/>
-                </VBox>
-                <VBox spacing="4">
-                    <HBox>
-                        <Label text="QLD average"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="stateTotalLabel" styleClass="state-column-header"/>
-                    </HBox>
-                    <ProgressBar fx:id="stateBar" progress="0" maxWidth="Infinity" styleClass="state-bar"/>
-                </VBox>
-                <Label fx:id="stateComparisonLabel" styleClass="report-info-box-title"/>
-            </VBox>
-
             <!-- Emission factors bar -->
             <VBox styleClass="report-info-box" spacing="8">
                 <HBox spacing="16" alignment="CENTER_LEFT">

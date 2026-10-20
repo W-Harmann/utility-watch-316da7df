@@ -1,7 +1,6 @@
 package com.utilitywatch.controller;
 
 import com.utilitywatch.CostBudgetEvaluator;
-import com.utilitywatch.Exporter;
 import com.utilitywatch.MonthlyBudgetTracker;
 import com.utilitywatch.Reading;
 import com.utilitywatch.database.ReadingDAO;
@@ -18,9 +17,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -34,7 +31,8 @@ import static com.utilitywatch.ReadingEvaluator.BOTH;
 import static com.utilitywatch.ReadingEvaluator.ENERGY;
 import static com.utilitywatch.ReadingEvaluator.WATER;
 
-// US9.1 (costs and budget), US9.3 (budget warning) and US11.1 (export) - the Costs page
+// US9.1 (costs and budget) and US9.3 (budget warning) - the Costs page.
+// Exporting (US11.1) is now done from the home screen's Export Data tile (US7.3 / US11.2).
 public class CostsController {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMM d, yyyy");
@@ -47,7 +45,6 @@ public class CostsController {
     @FXML private DatePicker fromDatePicker;
     @FXML private DatePicker toDatePicker;
     @FXML private Label errorLabel;
-    @FXML private Label exportResultLabel;
 
     // Estimated cost card
     @FXML private Label totalCostLabel;
@@ -317,34 +314,9 @@ public class CostsController {
         errorLabel.setText("");
     }
 
-    @FXML
-    private void onExportClick() {
-        setExportMessage("", false);
-        String selection = selectedUtility();
-        LocalDate from = fromDatePicker.getValue();
-        LocalDate to = toDatePicker.getValue();
-        if (from == null || to == null || to.isBefore(from)) {
-            showError("Choose a valid period before exporting");
-            return;
-        }
-
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Export usage report");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files", "*.csv"));
-        chooser.setInitialFileName("utilitywatch-" + selection + "-" + from + "-to-" + to + ".csv");
-        File file = chooser.showSaveDialog(totalCostLabel.getScene().getWindow());
-        if (file == null) {
-            return; // user cancelled
-        }
-
-        Exporter exporter = configure(new Exporter(), from.atStartOfDay(), to.atTime(LocalTime.MAX));
-        Exporter.ExportResult result = exporter.export(selection, file.toPath());
-        setExportMessage(result.message(), !result.success());
-    }
-
     // ---- Helpers ----
 
-    /** Gives an evaluator (or the exporter) the readings, period, rates and budget. */
+    /** Gives an evaluator the readings, period, rates and budget. */
     private <T extends CostBudgetEvaluator> T configure(T evaluator, LocalDateTime from, LocalDateTime to) {
         evaluator.setReadings(readings);
         evaluator.setTimeRange(from, to);
@@ -407,13 +379,5 @@ public class CostsController {
 
     private void showError(String message) {
         errorLabel.setText(message);
-    }
-
-    private void setExportMessage(String message, boolean isError) {
-        exportResultLabel.setText(message);
-        exportResultLabel.getStyleClass().remove("error-label");
-        if (isError) {
-            exportResultLabel.getStyleClass().add("error-label");
-        }
     }
 }

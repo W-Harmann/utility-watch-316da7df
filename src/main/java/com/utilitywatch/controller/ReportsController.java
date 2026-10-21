@@ -1565,6 +1565,9 @@ public class ReportsController {
         trendmodeToggle.setVisible(false);
         trendmodeToggle.setManaged(false);
 
+        comparisonmodeToggle.setVisible(false);
+        comparisonmodeToggle.setManaged(false);
+
         overviewContentBox.setVisible(false);
         overviewContentBox.setManaged(false);
 

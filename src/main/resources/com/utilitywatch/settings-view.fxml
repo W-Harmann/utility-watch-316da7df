@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.utilitywatch.controller.SettingsController"
+      spacing="10">
+
+    <Label text="Settings" styleClass="form-title"/>
+
+    <Label text="Profile"/>
+    <TextField fx:id="nameField" promptText="Name" maxWidth="300"/>
+    <TextField fx:id="emailField" promptText="Email" maxWidth="300"/>
+    <TextField fx:id="addressField" promptText="Property address (optional)" maxWidth="300"/>
+    <Button text="Save Changes" styleClass="primary-button" onAction="#onSaveClick"/>
+    <Label fx:id="errorLabel" styleClass="error-label"/>
+    <Label fx:id="savedLabel"/>
+
+    <Separator/>
+
+    <Label text="Delete account"/>
+    <Label text="Permanently deletes your account and all of your readings. This can't be undone."/>
+    <Button text="Delete My Account" styleClass="danger-button" onAction="#onDeleteClick"/>
+
+</VBox>

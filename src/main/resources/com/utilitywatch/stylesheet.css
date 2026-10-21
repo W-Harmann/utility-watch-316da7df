@@ -219,37 +219,16 @@
     -fx-opacity: 0.85;
 }
 
+.stat-tile-button:selected {
+    -fx-opacity: 0.85;
+}
+
 .chart-title {
     -fx-font-size: 13px;
     -fx-font-weight: bold;
 }
 
-/* line colour for the unusual consumption chart based on selected utility toggle */
-#unusualConsumptionChart.energy-selected .default-color0.chart-series-line {
-    -fx-stroke: #FFBA4A;
-}
-#unusualConsumptionChart.energy-selected .default-color0.chart-line-symbol {
-    -fx-background-color: #FFBA4A, white;
-}
-#unusualConsumptionChart.water-selected .default-color0.chart-series-line {
-    -fx-stroke: #5FB2F5;
-}
-#unusualConsumptionChart.water-selected .default-color0.chart-line-symbol {
-    -fx-background-color: #5FB2F5, white;
-}
-#unusualConsumptionChart.both-selected .default-color0.chart-series-line {
-    -fx-stroke: #263238;
-}
-#unusualConsumptionChart.both-selected .default-color0.chart-line-symbol {
-    -fx-background-color: #263238, white;
-}
-#unusualConsumptionChart .default-color1.chart-series-line {
-    -fx-stroke: #CB0E11
-}
-#unusualConsumptionChart .default-color1.chart-line-symbol {
-    -fx-background-color: #CB0E11, #CB0E11;
-}
-
+/* ---- line charts default series colours (energy yellow, water blue) ---- */
 /* energy series line and data point for graph */
 .default-color0.chart-series-line {
     -fx-stroke: #FFBA4A;
@@ -257,7 +236,6 @@
 .default-color0.chart-line-symbol {
     -fx-background-color: #FFBA4A, white;
 }
-
 /* water series line and data point for graph */
 .default-color1.chart-series-line {
     -fx-stroke: #5FB2F5;
@@ -266,7 +244,39 @@
     -fx-background-color: #5FB2F5, white;
 }
 
-/* bar colour for the statistics distribution chart based on selected utility toggle */
+/* ---- line charts: water only is the first series so recolour it blue ---- */
+/* consumption chart water utility toggle for reports overview tab */
+.water-selected .default-color0.chart-series-line {
+    -fx-stroke: #5FB2F5;
+}
+.water-selected .default-color0.chart-line-symbol {
+    -fx-background-color: #5FB2F5, white;
+}
+
+/* ---- unusual patterns chart: red for flagged readings ---- */
+#unusualConsumptionChart .default-color2.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color3.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color4.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color5.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color6.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .default-color7.chart-series-line {
+    -fx-stroke: #CB0E11
+}
+#unusualConsumptionChart .chart-line-symbol {
+    -fx-background-color: #CB0E11, white;
+}
+
+/* ---- bar charts: colour by selected utility ---- */
 .energy-selected .chart-bar {
     -fx-bar-fill: #FFBA4A;
 }
@@ -298,19 +308,25 @@
     -fx-background-color: #CB943C;
     -fx-background-radius: 12;
     -fx-text-fill: white;
-    -fx-padding: 5;
-
+    -fx-padding: 20 25 20 25;
 }
 
 .quick-tip-text {
     -fx-text-fill: white;
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
 }
 
-.quick-tip-title {
+.home-tile-title {
     -fx-text-fill: white;
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
+}
+
+.export-data-box {
+    -fx-background-color: #0E6407;
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-padding: 20 25 20 25;
 }
 
 .goal-progress-energy .bar {
@@ -339,4 +355,98 @@
     -fx-border-color: #CCCCCC;
     -fx-border-width: 1;
     -fx-border-radius: 8;
+}
+
+.danger-button {
+    -fx-background-color: #d32f2f;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+}
+
+.info-icon-text {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.conservation-tip-text {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.back-button {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+}
+
+/* ---- US9.3 monthly budget card states (Costs page) ---- */
+.budget-stat-value {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.budget-bar .bar {
+    -fx-background-color: #9E9E9E;
+}
+
+.budget-bar.on-track-budget .bar {
+    -fx-background-color: #139907;
+}
+
+.budget-bar.at-risk-budget .bar {
+    -fx-background-color: #F57C00;
+}
+
+.budget-bar.over-budget .bar {
+    -fx-background-color: #CB0E11;
+}
+
+.report-info-box .label.on-track-text {
+    -fx-text-fill: #81C784;
+}
+
+.report-info-box .label.at-risk-text {
+    -fx-text-fill: #FFB74D;
+}
+
+.report-info-box .label.over-text {
+    -fx-text-fill: #FF6B6B;
+}
+
+/* ---- US7.3 / US11.2 customise report screen ---- */
+.period-preset-button {
+    -fx-background-color: #eeeeee;
+    -fx-text-fill: #333333;
+    -fx-background-radius: 12;
+    -fx-padding: 3 10 3 10;
+}
+
+.period-preset-button:hover {
+    -fx-background-color: #556671;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.period-summary {
+    -fx-text-fill: #556671;
+    -fx-font-size: 11px;
+}
+
+.report-info-box .label.preview-section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 0 0 0;
+}
+
+.report-info-box .label.preview-column-header {
+    -fx-font-weight: bold;
+    -fx-text-fill: #B0BEC5;
+}
+
+.report-info-box .label.warning-note {
+    -fx-text-fill: #FFB74D;
+}
+
+.success-label {
+    -fx-text-fill: #139907;
 }

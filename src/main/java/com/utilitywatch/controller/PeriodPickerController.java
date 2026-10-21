@@ -64,8 +64,16 @@ public class PeriodPickerController {
     }
 
     // sets the start and end dates in the date pickers when the report period is passed from another controller
+    // sets them in an order that never leaves the pickers backwards in between, otherwise the
+    // auto-swap above would kick in (e.g. moving from a January range to an October one)
     public void setPeriod(LocalDate start, LocalDate end) {
-        fromDatePicker.setValue(start);
-        toDatePicker.setValue(end);
+        LocalDate currentEnd = toDatePicker.getValue();
+        if (currentEnd != null && start != null && start.isAfter(currentEnd)) {
+            toDatePicker.setValue(end);
+            fromDatePicker.setValue(start);
+        } else {
+            fromDatePicker.setValue(start);
+            toDatePicker.setValue(end);
+        }
     }
-}
+}

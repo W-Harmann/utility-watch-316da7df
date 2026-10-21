@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="2.0" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.utilitywatch.controller.DashboardNotificationRowController">
+    <Label fx:id="notificationTitleLabel"/>
+    <Label fx:id="notificationMessageLabel" styleClass="report-note" wrapText="true"/>
+</VBox>

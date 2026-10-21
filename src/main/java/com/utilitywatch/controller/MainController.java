@@ -32,7 +32,7 @@ public class MainController {
     @FXML
     private ToggleButton costsNavButton;
     @FXML
-    private ToggleButton alertsNavButton;
+    private ToggleButton notificationsNavButton;
 
     private final AuthenticationService authService = SharedAuth.getService();
 
@@ -46,6 +46,11 @@ public class MainController {
     protected void onHomeClick() {
         homeNavButton.setSelected(true);
         loadScreen("/com/utilitywatch/home-view.fxml");
+    }
+
+    // public so other screens like customise report can return to the dashboard
+    public void showHome() {
+        onHomeClick();
     }
 
     @FXML
@@ -107,18 +112,18 @@ public class MainController {
     }
 
     @FXML
-    protected void onAlertsClick() {
-        showAlerts();
+    protected void onNotificationsClick() {
+        showNotifications();
     }
 
-    public void showAlerts() {
-        alertsNavButton.setSelected(true);
-        loadScreen("/com/utilitywatch/alerts-view.fxml");
+    public void showNotifications() {
+        notificationsNavButton.setSelected(true);
+        loadScreen("/com/utilitywatch/notifications-view.fxml");
     }
 
     @FXML
     protected void onSettingsClick() {
-        showLabel("Settings");
+        loadScreen("/com/utilitywatch/settings-view.fxml");
     }
 
     // shared method for loading screens into the main content area
@@ -169,4 +174,4 @@ public class MainController {
         contentLabel.setText(text);
         contentArea.getChildren().setAll(contentLabel);
     }
-}
+}

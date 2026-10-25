@@ -1086,19 +1086,15 @@ public class ReportsController {
         }
     }
 
+    /**
+     * loads unusual consumption data
+     * @param readings a list of readings used to find unusual readings
+     * @return a map of readings that have been flagged as unusual alongside the reason as a string
+     */
     public static LinkedHashMap<List<Reading>, String> loadUnusualConsumptionData(List<Reading> readings) {
 
         // For the dates to be in ascending order
         readings.sort(Comparator.comparing(Reading::getDateTime));
-
-        ///DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
-
-        // creates the energy consumption data series and adds each energy value to its date
-        ///XYChart.Series<String, Number> series = new XYChart.Series<>();
-
-        ///XYChart.Series<String, Number> flaggedSeries = new XYChart.Series<>();
-
-        //TODO remove magic numbers
 
         ActiveHoursDetector activeHoursDetector = new ActiveHoursDetector(LocalTime.of(6,0), LocalTime.of(0, 0));
         LongDurationDetector longDurationDetector = new LongDurationDetector(15.0, 72);

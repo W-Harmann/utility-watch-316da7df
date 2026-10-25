@@ -9,17 +9,25 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// handles saving and retrieving notifications from the shared SQLite database
+/**
+ * Lets other classes manage notifications without knowing how they are stored.
+ * Defines how notifications are added, retrieved, updated and deleted.
+ */
 public class NotificationDAO implements INotificationDAO {
 
     private final Connection connection;
 
+    /**
+     * connects to the shared database and creates the goals table if it does not already exist.
+     */
     public NotificationDAO() {
         connection = UtilityWatchConnection.getInstance();
         createTable();
     }
 
-    // creates the notifications table if it does not already exist
+    /**
+     * creates the notifications table if it does not already exist.
+     */
     private void createTable() {
         try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS notifications ("
@@ -36,7 +44,11 @@ public class NotificationDAO implements INotificationDAO {
         }
     }
 
-    // saves a new notification for a user and writes the generated id back onto it
+    /**
+     * saves a new notification for a user and writes the generated id back onto it.
+     * @param notification the notification to save.
+     * @param userId the id of the user who owns the notification.
+     */
     @Override
     public void insert(Notification notification, int userId) {
         try (PreparedStatement statement = connection.prepareStatement(
@@ -61,7 +73,11 @@ public class NotificationDAO implements INotificationDAO {
         }
     }
 
-    // gets results of one user, oldest notification first
+    /**
+     * gets results of one user, newest notification first.
+     * @param userId the id of the user.
+     * @return that user's notifications, or an empty list if they have none.
+     */
     @Override
     public List<Notification> getNotificationsForUser(int userId) {
         List<Notification> notifications = new ArrayList<>();
@@ -79,7 +95,10 @@ public class NotificationDAO implements INotificationDAO {
         return notifications;
     }
 
-    // updates notification by its id
+    /**
+     * updates notification by its id.
+     * @param notification the notification with its new values.
+     */
     @Override
     public void update(Notification notification) {
         try (PreparedStatement statement = connection.prepareStatement(
@@ -91,7 +110,10 @@ public class NotificationDAO implements INotificationDAO {
         }
     }
 
-    // removes a notification by id, does nothing if it does not exist
+    /**
+     * removes a notification by id, does nothing if it does not exist.
+     * @param id the id of the notification to remove.
+     */
     @Override
     public void delete(int id) {
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM notifications WHERE id = ?")) {
@@ -102,7 +124,10 @@ public class NotificationDAO implements INotificationDAO {
         }
     }
 
-    // deletes a user's notifications when their account is deleted
+    /**
+     * deletes a user's notifications when their account is deleted.
+     * @param userId the id of the user.
+     */
     @Override
     public void deleteNotificationsForUser(int userId) {
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM notifications WHERE userId = ?")) {
@@ -113,7 +138,10 @@ public class NotificationDAO implements INotificationDAO {
         }
     }
 
-    // deletes a user's unusual notifications to refresh when data is updated.
+    /**
+     * deletes a user's unusual notifications to refresh when data is updated.
+     * @param userId the id of the user.
+     */
     @Override
     public void deleteUnusualNotificationsForUser(int userId) {
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM notifications WHERE userId = ? AND notificationType = ?")) {
@@ -125,7 +153,12 @@ public class NotificationDAO implements INotificationDAO {
         }
     }
 
-    // creates an notification from a database row
+    /**
+     * creates a notification from a database row.
+     * @param resultSet a set of results from each of the notification's stored columns.
+     * @return a notification.
+     * @throws SQLException If an error with the SQLite database occurs.
+     */
     private Notification mapRow(ResultSet resultSet) throws SQLException {
         Notification notification = new Notification(
                 LocalDateTime.parse(resultSet.getString("notificationTime")),

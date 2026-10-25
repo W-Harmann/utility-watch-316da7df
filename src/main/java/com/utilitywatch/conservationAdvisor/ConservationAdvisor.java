@@ -9,7 +9,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A class handling simple calculation comparisons for readings.
+ */
 public class ConservationAdvisor {
+    /**
+     * calculates a percentage change between two averages of readings.
+     * @param previousPeriod The first list used in calculations.
+     * @param currentPeriod The second list used in calculations.
+     * @return The percentage change between two periods of readings as a double.
+     */
     public Optional<Double> calculatePercentChange(Optional<List<Reading>> previousPeriod, List<Reading> currentPeriod) {
 
         if (previousPeriod.isPresent() && !previousPeriod.get().isEmpty() && !currentPeriod.isEmpty()) {
@@ -37,6 +46,12 @@ public class ConservationAdvisor {
 
     }
 
+    /**
+     * calculates the difference of duration of readings between two periods.
+     * @param previousPeriod The first list used in calculations.
+     * @param currentPeriod The second list used in calculations.
+     * @return The difference of seconds between two periods of readings as a long.
+     */
     public long compareDuration(List<Reading> previousPeriod, List<Reading> currentPeriod) {
 
         long previousSecondsPassed = 0;
@@ -65,6 +80,12 @@ public class ConservationAdvisor {
         return currentSecondsPassed - previousSecondsPassed;
     }
 
+    /**
+     * calculates a percentage change between two max of readings.
+     * @param previousPeriod The first list used in calculations.
+     * @param currentPeriod The second list used in calculations.
+     * @return The percentage difference of two max readings between two periods of readings as a double.
+     */
     public double compareConsumptionLevel(List<Reading> previousPeriod, List<Reading> currentPeriod) {
 
 

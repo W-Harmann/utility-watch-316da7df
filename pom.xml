@@ -71,6 +71,7 @@
                     <!-- Don't fail the build on missing or imperfect comments -->
                     <doclint>all,-missing</doclint>
                     <show>public</show>
+                    <bottom>Copyright &#169; 2026 UtilityWatch team</bottom>
                 </configuration>
             </plugin>
         </plugins>

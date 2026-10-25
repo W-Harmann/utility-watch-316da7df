@@ -22,3 +22,33 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn -B package --file pom.xml
+
+      # Javadoc is generated on every run, so broken doc comments are caught in PRs too
+      - name: Generate Javadoc
+        run: mvn -B javadoc:javadoc --file pom.xml
+
+      # Only package the docs for Pages when main is updated
+      - name: Upload Javadoc for GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/reports/apidocs
+
+  # Publishes the Javadoc to GitHub Pages, only after a successful build on main
+  deploy-javadoc:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

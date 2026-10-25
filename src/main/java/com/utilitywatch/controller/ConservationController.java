@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Controller for the Conservation screen ({@code conservation-view.fxml}). Shows the user's average energy and water,
+ * peak day usage compared to the previous month as well as seasonal usage compared to last year's season. Clicking on
+ * any of the stats will show conservation tips associated with the clicked stat.
+ */
 public class ConservationController {
 
     @FXML

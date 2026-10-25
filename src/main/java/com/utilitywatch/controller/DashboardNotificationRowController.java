@@ -5,7 +5,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import java.time.format.DateTimeFormatter;
 
-/** fills in one notification row on the home dashboard using a shortened format */
+/**
+ * Controller for notifications on the home dashboard ({@code dashboard-notification-row.fxml}). Shows the user's
+ * notification on the home dashboard.
+ */
 public class DashboardNotificationRowController {
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("MMM d h:mma");
 

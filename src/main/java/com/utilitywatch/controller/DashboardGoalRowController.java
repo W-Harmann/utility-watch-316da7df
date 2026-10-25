@@ -5,7 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 
-/** fills in one goal's progress on the home dashboard */
+
+/**
+ * Controller for a goal's progress on the home dashboard ({@code dashboard-goal-row.fxml}). Shows the user's goal
+ * progress on the home dashboard.
+ */
 public class DashboardGoalRowController {
     @FXML
     private Label goalNameLabel;

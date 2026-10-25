@@ -33,6 +33,10 @@ import static com.utilitywatch.ReadingEvaluator.WATER;
 
 // US9.1 (costs and budget) and US9.3 (budget warning) - the Costs page.
 // Exporting (US11.1) is now done from the home screen's Export Data tile (US7.3 / US11.2).
+/**
+ * Controller for the Costs screen ({@code costs-view.fxml}). Shows the user's estimated costs and a monthly budget.
+ * The user can change the current rates to change the estimated costs and set a budget.
+ */
 public class CostsController {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMM d, yyyy");

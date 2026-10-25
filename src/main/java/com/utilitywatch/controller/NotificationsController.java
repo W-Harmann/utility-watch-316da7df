@@ -10,6 +10,10 @@ import javafx.scene.layout.VBox;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+/**
+ * Controller for the Notifications screen ({@code notifications-view.fxml}). Allows the user to view recent, all and
+ * ignored notifications. Notifications can be ignored removing notification from the recent and all views.
+ */
 public class NotificationsController {
 
 

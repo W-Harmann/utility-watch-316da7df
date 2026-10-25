@@ -2,6 +2,10 @@ package com.utilitywatch.controller;
 
 // Settings shared by the Costs and Impact pages, so values survive switching between pages.
 // Held in memory only for now: they reset when the app restarts (saving them is a later story).
+
+/**
+ * Settings shared by the Costs and Impact pages, so values survive switching between pages.
+ */
 public final class SharedUtilitySettings {
 
     // MOCK DATA: example prices taken from the design, used until the user enters their own

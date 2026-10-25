@@ -3,14 +3,28 @@ package com.utilitywatch.reports;
 import java.util.ArrayList;
 import java.util.List;
 
-// calculates how readings are grouped into value ranges
+/**
+ * Groups readings into a fixed number of equal-width value ranges, so the Reports screen can show
+ * how often each range of use occurs.
+ */
 public class DistributionCalculator {
 
+    /** One value range and how many readings fall inside it. */
     public static class Range {
+        /** The lowest value in this range. */
         public final double start;
+        /** The upper edge of this range. The last range also includes the maximum reading. */
         public final double end;
+        /** How many readings fall in this range. */
         public final int count;
 
+        /**
+         * Creates a range.
+         *
+         * @param start the lowest value in the range
+         * @param end the upper edge of the range
+         * @param count how many readings fall in the range
+         */
         public Range(double start, double end, int count) {
             this.start = start;
             this.end = end;
@@ -20,7 +34,17 @@ public class DistributionCalculator {
 
     private static final int RANGE_COUNT = 6;
 
-    // groups readings into RANGE_COUNT ranges between the min and max
+    /**
+     * Splits the span from {@code min} to {@code max} into six equal-width ranges and counts how many
+     * readings fall in each. A reading on a range boundary goes in the higher range, and the maximum
+     * stays in the last range. If {@code max - min} is less than 1 the span is treated as 1, so
+     * identical readings do not cause a division by zero.
+     *
+     * @param readings the reading quantities
+     * @param min the smallest reading; no reading may be below it
+     * @param max the largest reading
+     * @return six ranges in order, lowest first, each with its count
+     */
     public List<Range> computeRanges(List<Double> readings, double min, double max) {
         // ensure the range is at least 1 to prevent division by zero when all readings have the same value
         double range = Math.max(max - min, 1);
@@ -50,7 +74,13 @@ public class DistributionCalculator {
         return ranges;
     }
 
-    // fings which range contains the most readings
+    /**
+     * Finds the range that contains the most readings. If several ranges tie, the lowest one is returned.
+     *
+     * @param ranges the ranges to look through; must not be empty
+     * @return the range with the highest count
+     * @throws IndexOutOfBoundsException if the list is empty
+     */
     public Range findMostCommonRange(List<Range> ranges) {
         Range mostCommonRange = ranges.get(0);
 

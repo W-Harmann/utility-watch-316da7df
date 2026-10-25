@@ -24,7 +24,15 @@ public class CustomReportWriter {
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("d MMM yyyy");
     private static final String TITLE = "UtilityWatch Consumption Report";
 
-    /** Writes the report, as CSV unless the file name ends in .txt. */
+    /**
+     * Writes the report to a file, as CSV unless the file name ends in {@code .txt}. An existing file
+     * is replaced.
+     *
+     * @param report the report to save
+     * @param file where to save it
+     * @return a successful result with the saved path, or an unsuccessful one with the reason
+     *         (the report has no readings, or the file could not be written)
+     */
     public ExportResult write(CustomReport report, Path file) {
         if (!report.hasReadings()) {
             return new ExportResult(false, "No readings in the selected period, so there is nothing to export");
@@ -36,6 +44,13 @@ public class CustomReportWriter {
 
     // ---- CSV ----
 
+    /**
+     * Turns the report into CSV text. It starts with a byte order mark so Excel reads it correctly,
+     * then a title and summary lines, then each section with its tables and notes.
+     *
+     * @param report the report to convert
+     * @return the CSV text
+     */
     public String toCsv(CustomReport report) {
         StringBuilder csv = new StringBuilder();
         csv.append('﻿'); // byte order mark so Excel reads the dashes and units correctly
@@ -67,7 +82,12 @@ public class CustomReportWriter {
         return String.join(",", cells.stream().map(CustomReportWriter::cell).toList());
     }
 
-    /** Quotes a CSV cell when it contains a comma, quote or line break. */
+    /**
+     * Quotes a CSV cell when it contains a comma, quote or line break. Quotes inside the cell are doubled.
+     *
+     * @param value the cell text, or null
+     * @return the text ready to put in a CSV row, or an empty string for null
+     */
     static String cell(String value) {
         if (value == null) {
             return "";
@@ -80,6 +100,13 @@ public class CustomReportWriter {
 
     // ---- Plain text ----
 
+    /**
+     * Turns the report into plain text for reading or printing: numbered section headings, with each
+     * table's columns lined up.
+     *
+     * @param report the report to convert
+     * @return the text
+     */
     public String toText(CustomReport report) {
         StringBuilder text = new StringBuilder();
         long days = ChronoUnit.DAYS.between(report.from(), report.to()) + 1;

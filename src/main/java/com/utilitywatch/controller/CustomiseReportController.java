@@ -11,13 +11,17 @@ import com.utilitywatch.reports.ReportSection;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.VPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -261,9 +265,26 @@ public class CustomiseReportController {
         GridPane grid = new GridPane();
         grid.setHgap(18);
         grid.setVgap(3);
-        for (int column = 0; column < table.columns().size(); column++) {
+        int lastColumn = table.columns().size() - 1;
+
+        // Earlier columns hold short labels/values: keep them at their natural width.
+        // Only the last column grows to fill the space and wraps long text (e.g. suggestions).
+        for (int column = 0; column <= lastColumn; column++) {
+            ColumnConstraints constraints = new ColumnConstraints();
+            if (column == lastColumn) {
+                constraints.setHgrow(Priority.ALWAYS);
+                constraints.setFillWidth(true);
+            } else {
+                constraints.setHgrow(Priority.NEVER);
+                constraints.setMinWidth(Region.USE_PREF_SIZE);
+            }
+            grid.getColumnConstraints().add(constraints);
+        }
+
+        for (int column = 0; column <= lastColumn; column++) {
             Label header = new Label(table.columns().get(column));
             header.getStyleClass().add("preview-column-header");
+            header.setMinWidth(Region.USE_PREF_SIZE);
             grid.add(header, column, 0);
         }
         int rowsShown = Math.min(table.rows().size(), PREVIEW_ROW_LIMIT);
@@ -271,7 +292,13 @@ public class CustomiseReportController {
             List<String> cells = table.rows().get(row);
             for (int column = 0; column < cells.size(); column++) {
                 Label cell = new Label(cells.get(column));
-                cell.setWrapText(true);
+                if (column == lastColumn) {
+                    cell.setWrapText(true);
+                    cell.setMaxWidth(Double.MAX_VALUE);
+                } else {
+                    cell.setMinWidth(Region.USE_PREF_SIZE);
+                }
+                GridPane.setValignment(cell, VPos.TOP);
                 grid.add(cell, column, row + 1);
             }
         }

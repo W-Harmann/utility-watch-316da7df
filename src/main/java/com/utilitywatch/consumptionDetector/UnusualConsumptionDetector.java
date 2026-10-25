@@ -2,7 +2,9 @@ package com.utilitywatch.consumptionDetector;
 
 import java.util.Collections;
 import java.util.List;
-
+/**
+ * A class handling simple unusual consumption detection for readings
+ */
 public class UnusualConsumptionDetector {
     /**
      * determines whether current consumption is more than 10%

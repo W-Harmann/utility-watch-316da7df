@@ -46,7 +46,7 @@
 
     <build>
         <plugins>
-            <!-- Lets IntelliJ/Maven run JUnit 5 tests -->
+            <!-- Compiles the project (Java 21) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -60,6 +60,18 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>com.utilitywatch.Main</mainClass>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <configuration>
+                    <!-- Don't fail the build on missing or imperfect comments -->
+                    <doclint>all,-missing</doclint>
+                    <!-- Include private methods/fields too (default is protected) -->
+                    <show>private</show>
                 </configuration>
             </plugin>
         </plugins>

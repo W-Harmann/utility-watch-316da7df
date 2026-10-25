@@ -8,18 +8,30 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// handles saving and retrieving readings from the shared SQLite database
+/**
+ * SQLite implementation of {@link IReadingDAO}. Saves and retrieves readings in the {@code readings}
+ * table of the shared database.
+ * <p>Every method rethrows a {@link java.sql.SQLException} as a {@link RuntimeException}.
+ */
 public class ReadingDAO implements IReadingDAO {
 
     private final Connection connection;
 
+    /**
+     * Creates a DAO that uses the shared database connection. It does not create the table; call
+     * {@link #createTable()} first.
+     */
     public ReadingDAO() {
         connection = UtilityWatchConnection.getInstance();
     }
 
-    // creates the readings table if it doesn't already exist
-    // resourceType is nullable since some inserts (like the original
-    // persistence test) don't set one
+    /**
+     * Creates the {@code readings} table if it does not already exist.
+     * The resource type column allows nulls because some inserts (such as the original persistence
+     * test) do not set one.
+     *
+     * @throws RuntimeException if the table cannot be created
+     */
     public void createTable() {
         try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS readings ("
@@ -34,7 +46,11 @@ public class ReadingDAO implements IReadingDAO {
         }
     }
 
-    // saves a new reading and writes the generated database id back onto it
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException if the reading cannot be saved
+     */
     public void insert(Reading reading) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "INSERT INTO readings (dateTime, quantity, resourceType, userId) VALUES (?, ?, ?, ?)",
@@ -55,7 +71,11 @@ public class ReadingDAO implements IReadingDAO {
         }
     }
 
-    // overwrites an existing reading's values, matched by its id
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException if the update fails
+     */
     public void updateReading(Reading reading) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "UPDATE readings SET dateTime = ?, quantity = ?, resourceType = ? WHERE id = ?")) {
@@ -69,7 +89,11 @@ public class ReadingDAO implements IReadingDAO {
         }
     }
 
-    // removes a reading by id; does nothing if it doesn't exist
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException if the delete fails
+     */
     public void deleteReading(int id) {
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM readings WHERE id = ?")) {
             statement.setInt(1, id);
@@ -79,7 +103,11 @@ public class ReadingDAO implements IReadingDAO {
         }
     }
 
-    // removes every reading belonging to a user (used when their account is deleted)
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException if the delete fails
+     */
     public void deleteReadingsForUser(int userId) {
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM readings WHERE userId = ?")) {
             statement.setInt(1, userId);
@@ -89,6 +117,11 @@ public class ReadingDAO implements IReadingDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException if the query fails
+     */
     public Reading getLastReading() {
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM readings ORDER BY id DESC LIMIT 1")) {
@@ -101,6 +134,11 @@ public class ReadingDAO implements IReadingDAO {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException if the query fails
+     */
     public List<Reading> getAllReadings() {
         List<Reading> readings = new ArrayList<>();
         try (Statement statement = connection.createStatement();
@@ -114,7 +152,11 @@ public class ReadingDAO implements IReadingDAO {
         return readings;
     }
 
-    // scopes results to one user, so accounts never see each other's readings
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException if the query fails
+     */
     public List<Reading> getReadingsForUser(int userId) {
         List<Reading> readings = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(
@@ -146,8 +188,10 @@ public class ReadingDAO implements IReadingDAO {
         return reading;
     }
 
-    // closes the shared connection so a later "new ReadingDAO()" opens a
-    // genuinely fresh one - see UtilityWatchConnection.reset() for the caveat
+    /**
+     * Closes the shared connection so that a later {@code new ReadingDAO()} opens a genuinely fresh
+     * one. See {@link com.utilitywatch.UtilityWatchConnection#reset()} for the caveat.
+     */
     public void close() {
         UtilityWatchConnection.reset();
     }

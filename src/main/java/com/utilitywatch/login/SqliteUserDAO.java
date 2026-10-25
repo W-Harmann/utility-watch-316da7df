@@ -8,10 +8,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * SQLite implementation of {@link IUserDAO}. Stores users in the {@code users} table of the shared
+ * database.
+ * <p>Errors in {@link #register(User)} and {@link #findByEmail(String)} are printed rather than
+ * thrown, so a failed save or lookup is not reported to the caller. {@link #update(User)} and
+ * {@link #delete(int)} throw a {@link RuntimeException} instead.
+ */
 public class SqliteUserDAO implements IUserDAO {
 
     private final Connection connection;
 
+    /**
+     * Creates a DAO that uses the shared database connection. It creates the {@code users} table if
+     * it does not exist, and adds the {@code name} column to databases created before that column existed.
+     */
     public SqliteUserDAO() {
         connection = UtilityWatchConnection.getInstance();
         createTable();
@@ -51,6 +62,7 @@ public class SqliteUserDAO implements IUserDAO {
         }
     }
 
+    /** {@inheritDoc} If the save fails, the error is printed and the user is not saved. */
     @Override
     public void register(User user) {
         try (PreparedStatement statement = connection.prepareStatement(
@@ -71,6 +83,7 @@ public class SqliteUserDAO implements IUserDAO {
         }
     }
 
+    /** {@inheritDoc} If the lookup fails, the error is printed and {@code null} is returned. */
     @Override
     public User findByEmail(String email) {
         try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE email = ?")) {
@@ -91,7 +104,11 @@ public class SqliteUserDAO implements IUserDAO {
         return null;
     }
 
-    // saves the user's current details so they survive an app restart
+    /**
+     * {@inheritDoc} The details are saved to the database, so they survive an app restart.
+     *
+     * @throws RuntimeException if the update fails
+     */
     @Override
     public void update(User user) {
         try (PreparedStatement statement = connection.prepareStatement(
@@ -107,7 +124,11 @@ public class SqliteUserDAO implements IUserDAO {
         }
     }
 
-    // removes the account; does nothing if it doesn't exist
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException if the delete fails
+     */
     @Override
     public void delete(int userId) {
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM users WHERE id = ?")) {

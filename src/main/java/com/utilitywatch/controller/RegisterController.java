@@ -13,6 +13,10 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Controller for the register screen ({@code register-view.fxml}). It creates an account through the
+ * shared {@link com.utilitywatch.login.AuthenticationService} and then returns to the login screen.
+ */
 public class RegisterController {
 
     @FXML private TextField emailField;

@@ -21,7 +21,7 @@ public class SharedAuth {
         // already exists) and crash startup entirely.
         try {
             instance.signUp("test@test.com", "password123");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
             // already registered from a previous run - fine, ignore
         }
     }

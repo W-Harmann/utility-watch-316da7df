@@ -88,6 +88,11 @@ public class ImpactController {
     private final ReadingDAO readingDAO = SharedReadingDAO.getDAO();
     private List<Reading> readings = List.of();
 
+    /**
+     * Loads the logged-in user's readings, selects both utilities, fills the date pickers with the
+     * shared date range and the emission factor fields with the saved settings, then shows the
+     * estimated impact and footprint chart. Called by the FXML loader.
+     */
     @FXML
     public void initialize() {
         int userId = Session.getInstance().getCurrentUser().getId();

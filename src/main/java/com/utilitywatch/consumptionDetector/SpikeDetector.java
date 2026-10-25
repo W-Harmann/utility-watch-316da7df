@@ -11,7 +11,7 @@ import java.util.List;
 public class SpikeDetector {
 
 
-    private double baseline;
+    private final double baseline;
 
     /**
      * Constructs the baseline a reading must exceed to identify spikes for the user.

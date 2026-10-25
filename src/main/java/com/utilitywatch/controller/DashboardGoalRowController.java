@@ -21,6 +21,8 @@ public class DashboardGoalRowController {
     private Label goalTargetLabel;
 
     /**
+     * Fills the row with the goal's name, target and progress, coloured to match its utility.
+     *
      * @param goal the goal to show
      * @param progress progress towards the target from 0 to 1, or null if there is no data yet
      */

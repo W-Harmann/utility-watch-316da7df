@@ -2,11 +2,9 @@ package com.utilitywatch.notifications;
 
 import com.utilitywatch.database.NotificationDAO;
 import com.utilitywatch.database.INotificationDAO;
-import com.utilitywatch.goals.Goal;
 import com.utilitywatch.login.Session;
 import com.utilitywatch.login.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

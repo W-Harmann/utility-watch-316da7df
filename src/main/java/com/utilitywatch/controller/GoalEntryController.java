@@ -28,8 +28,16 @@ public class GoalEntryController {
 
     private final GoalProgressCalculator progressCalculator = new GoalProgressCalculator();
 
-    // displays goal details and connects the edit/delete buttons to their actions (us8.2, us8.4, us8.5)
-    // hasComparisonData is false when the previous period has no readings (us8.3)
+    /**
+     * Displays the goal's details and progress, and connects the edit and delete buttons to their
+     * actions (US8.2, US8.4, US8.5).
+     *
+     * @param goal the goal to show
+     * @param hasComparisonData {@code false} when the previous period has no readings, so progress
+     *                          cannot be measured yet (US8.3)
+     * @param onEdit the action to run when the Edit button is clicked
+     * @param onDelete the action to run when the Delete button is clicked
+     */
     public void setData (Goal goal, boolean hasComparisonData, Runnable onEdit, Runnable onDelete) {
         boolean isEnergy = "energy".equals(goal.getResourceType());
         goalContainerResource.setText(isEnergy ? "Energy" : "Water");

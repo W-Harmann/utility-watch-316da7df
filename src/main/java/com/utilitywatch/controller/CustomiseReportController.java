@@ -9,14 +9,12 @@ import com.utilitywatch.reports.CustomReportWriter;
 import com.utilitywatch.reports.ReportOptions;
 import com.utilitywatch.reports.ReportSection;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.VPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -55,9 +53,6 @@ public class CustomiseReportController {
     private static final int PREVIEW_ROW_LIMIT = 40;
 
     @FXML private ToggleGroup customiseUtilityToggleGroup;
-    @FXML private ToggleButton energyToggle;
-    @FXML private ToggleButton waterToggle;
-    @FXML private ToggleButton bothToggle;
     @FXML private PeriodPickerController periodPickerController;
     @FXML private Button allReadingsButton;
     @FXML private Label periodSummaryLabel;
@@ -85,10 +80,21 @@ public class CustomiseReportController {
     // reference back to MainController to navigate to other screens
     private MainController mainController;
 
+    /**
+     * Gives this controller the {@link MainController}, so it can navigate to other screens. Called by
+     * {@link MainController} when the screen is loaded.
+     *
+     * @param mainController the main controller that holds the navigation bar and content area
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
+    /**
+     * Loads the logged-in user's readings, links each report section to its checkbox and sets up the
+     * utility, period and section controls so the preview refreshes when any of them change. Called by
+     * the FXML loader.
+     */
     @FXML
     public void initialize() {
         int userId = Session.getInstance().getCurrentUser().getId();
@@ -146,10 +152,9 @@ public class CustomiseReportController {
 
     @FXML
     private void onAllReadingsClick() {
-        Optional<LocalDate> first = readings.stream().map(r -> r.getDateTime().toLocalDate()).min(LocalDate::compareTo);
-        Optional<LocalDate> last = readings.stream().map(r -> r.getDateTime().toLocalDate()).max(LocalDate::compareTo);
-        if (first.isPresent()) {
-            applyPeriod(first.get(), last.get());
+        List<LocalDate> dates = readings.stream().map(r -> r.getDateTime().toLocalDate()).sorted().toList();
+        if (!dates.isEmpty()) {
+            applyPeriod(dates.getFirst(), dates.getLast());
         }
     }
 
@@ -162,7 +167,7 @@ public class CustomiseReportController {
 
     // called by any option checkbox when it is clicked
     @FXML
-    private void handleCheckboxAction(ActionEvent checkboxClickEvent) {
+    private void handleCheckboxAction() {
         refreshPreview();
     }
 

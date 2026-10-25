@@ -52,10 +52,20 @@ public class ConservationController {
 
     private final ReportsDataService dataService = new ReportsDataService();
 
+    /**
+     * Gives this controller the {@link MainController}, so it can navigate to other screens. Called by
+     * {@link MainController} when the screen is loaded.
+     *
+     * @param mainController the main controller that holds the navigation bar and content area
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
+    /**
+     * Fills the screen's stats by comparing this month's energy and water readings with last month's,
+     * and this season's with the same season last year. Called by the FXML loader.
+     */
     @FXML
     public void initialize() {
 

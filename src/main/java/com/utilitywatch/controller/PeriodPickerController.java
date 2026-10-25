@@ -18,6 +18,10 @@ public class PeriodPickerController {
 
     private Runnable onPeriodChanged;
 
+    /**
+     * Fills both date pickers with the shared date range (defaulting to the user's first to latest
+     * reading) and starts listening for changes. Called by the FXML loader.
+     */
     @FXML
     public void initialize() {
         // period is shared between pages; by default it runs from the first to the latest reading
@@ -55,21 +59,42 @@ public class PeriodPickerController {
         }
     }
 
+    /**
+     * Sets the action to run whenever the user picks a new, valid period.
+     *
+     * @param onPeriodChanged the action to run, usually the parent controller's refresh
+     */
     public void setOnPeriodChanged(Runnable onPeriodChanged) {
         this.onPeriodChanged = onPeriodChanged;
     }
 
+    /**
+     * Returns the first day of the selected period.
+     *
+     * @return the From date, or {@code null} if none is selected
+     */
     public LocalDate getStart() {
         return fromDatePicker.getValue();
     }
 
+    /**
+     * Returns the last day of the selected period.
+     *
+     * @return the To date, or {@code null} if none is selected
+     */
     public LocalDate getEnd() {
         return toDatePicker.getValue();
     }
 
-    // sets the start and end dates in the date pickers when the report period is passed from another controller
-    // sets them in an order that never leaves the pickers backwards in between, otherwise the
-    // auto-swap above would kick in (e.g. moving from a January range to an October one)
+    /**
+     * Sets the start and end dates in the date pickers, for example when the report period is passed
+     * from another controller. The dates are set in an order that never leaves the pickers backwards in
+     * between, otherwise the automatic swap would kick in (e.g. moving from a January range to an
+     * October one).
+     *
+     * @param start the first day of the period
+     * @param end the last day of the period
+     */
     public void setPeriod(LocalDate start, LocalDate end) {
         LocalDate currentEnd = toDatePicker.getValue();
         if (currentEnd != null && start != null && start.isAfter(currentEnd)) {

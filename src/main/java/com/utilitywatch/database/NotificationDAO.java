@@ -103,7 +103,7 @@ public class NotificationDAO implements INotificationDAO {
     public void update(Notification notification) {
         try (PreparedStatement statement = connection.prepareStatement(
                 "UPDATE notifications SET ignoredStatus = NOT ignoredStatus WHERE id = ?")) {
-            statement.setInt(1, notification.getId());;
+            statement.setInt(1, notification.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);

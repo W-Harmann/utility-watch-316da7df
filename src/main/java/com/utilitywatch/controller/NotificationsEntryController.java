@@ -2,16 +2,12 @@ package com.utilitywatch.controller;
 
 import com.utilitywatch.notifications.Notification;
 import com.utilitywatch.notifications.NotificationRepository;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -45,6 +41,16 @@ public class NotificationsEntryController {
 
 
 
+    /**
+     * Fills the entry with the notification's title, time and message, and keeps references so the
+     * Ignore/Important button can move it between lists and update the counts.
+     *
+     * @param notification the notification to show
+     * @param notificationsContainer the list this entry is shown in, which it is removed from when toggled
+     * @param monthlyNotificationsLabel the label showing the number of recent (past month) notifications
+     * @param allNotificationsLabel the label showing the number of all non-ignored notifications
+     * @param ignoredNotificationsLabel the label showing the number of ignored notifications
+     */
     public void setNotification(Notification notification, VBox notificationsContainer, Label monthlyNotificationsLabel, Label allNotificationsLabel, Label ignoredNotificationsLabel) {
         notificationTitleLabel.setText(notification.getTitle());
         notificationTimeLabel.setText(notification.getDateTime().format(FORMATTER));

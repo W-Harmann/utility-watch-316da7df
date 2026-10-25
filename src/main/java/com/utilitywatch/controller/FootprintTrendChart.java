@@ -33,6 +33,10 @@ public class FootprintTrendChart extends LineChart<String, Number> {
     private final List<Rectangle> noDataBands = new ArrayList<>();
     private final List<Label> noDataLabels = new ArrayList<>();
 
+    /**
+     * Creates an empty footprint chart with a category x-axis for the periods and a kg CO2e y-axis that
+     * always includes zero. Animations and the legend are turned off.
+     */
     public FootprintTrendChart() {
         this(new CategoryAxis(), new NumberAxis());
     }
@@ -48,13 +52,25 @@ public class FootprintTrendChart extends LineChart<String, Number> {
         setLegendVisible(false);
     }
 
-    // One line to draw: its name (used in tooltips when there are several lines), colour (e.g. "#FFBA4A")
-    // and footprint per period, covering the same periods as the chart.
+    /**
+     * One line to draw on the chart.
+     *
+     * @param name the line's name, used in tooltips when there are several lines
+     * @param colour the line's colour as a CSS colour, e.g. {@code "#FFBA4A"}
+     * @param points the footprint per period, covering the same periods as the chart
+     */
     public record Line(String name, String colour, List<FootprintPoint> points) {
     }
 
-    // Replaces what the chart shows. periods is the footprint for the whole selection: it sets the axis,
-    // and its periods with no data get the "No data" band. lines are drawn on top, one line each.
+    /**
+     * Replaces what the chart shows. Each line breaks at periods with no readings for it, and periods
+     * with no readings at all are covered by a grey "No data" band.
+     *
+     * @param periods the footprint for the whole selection; it sets the axis categories, and its periods
+     *                with no data get the "No data" band
+     * @param grouping whether the periods are weeks or months, used to label the axis
+     * @param lines the lines to draw on top, one line each
+     */
     public void show(List<FootprintPoint> periods, Grouping grouping, List<Line> lines) {
         clearChart();
 
@@ -86,6 +102,7 @@ public class FootprintTrendChart extends LineChart<String, Number> {
         requestChartLayout();
     }
 
+    /** Removes every line, "No data" band and axis category from the chart. */
     public void clearChart() {
         getData().clear();
         getPlotChildren().removeAll(noDataBands);

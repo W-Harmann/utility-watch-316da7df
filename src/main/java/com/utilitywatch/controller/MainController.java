@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * The main controller shared on every page for navigation ({@code main-view.fxml}). Shows the navbar on every page. The
@@ -41,7 +42,7 @@ public class MainController {
 
     private final AuthenticationService authService = SharedAuth.getService();
 
-    // automatically loads the home dashboard screen after login
+    /** Loads the home dashboard screen straight after login. Called by the FXML loader. */
     @FXML
     public void initialize() {
         onHomeClick();
@@ -53,19 +54,14 @@ public class MainController {
         loadScreen("/com/utilitywatch/home-view.fxml");
     }
 
-    // public so other screens like customise report can return to the dashboard
+    /** Shows the home dashboard. Public so other screens, like Customise Report, can return to it. */
     public void showHome() {
         onHomeClick();
     }
 
     @FXML
     protected void onReadingsClick() {
-        try {
-            Parent readingsView = FXMLLoader.load(getClass().getResource("/com/utilitywatch/readings-view.fxml"));
-            contentArea.getChildren().setAll(readingsView);
-        } catch (IOException e) {
-            showLabel("Couldn't load Readings");
-        }
+        loadScreen("/com/utilitywatch/readings-view.fxml");
     }
 
     @FXML
@@ -73,14 +69,16 @@ public class MainController {
         showReportsOverview();
     }
 
-    // loads the reports screen into the main content area
-    // public so other screens can call this to navigate back here
+    /**
+     * Loads the Reports screen into the main content area and highlights its navbar button. Public so
+     * other screens can navigate back here.
+     */
     public void showReportsOverview() {
         reportsNavButton.setSelected(true);
         loadScreen("/com/utilitywatch/reports/reports-view.fxml");
     }
 
-    // public so other controllers can use this method to navigate to the customise report screen
+    /** Loads the Customise Report (export) screen into the main content area. */
     public void showCustomiseReport() {
         loadScreen("/com/utilitywatch/reports/customise-report-view.fxml");
     }
@@ -90,11 +88,15 @@ public class MainController {
         showGoals();
     }
 
+    /** Loads the Conservation screen into the main content area. */
     public void showConservation() {
         loadScreen("/com/utilitywatch/conservation-view.fxml");
     }
 
-    // public so home controller's goals tile can navigate here
+    /**
+     * Loads the Goals screen into the main content area and highlights its navbar button. Public so the
+     * home screen's goals tile can navigate here.
+     */
     public void showGoals() {
         goalsNavButton.setSelected(true);
         loadScreen("/com/utilitywatch/goals-view.fxml");
@@ -105,8 +107,11 @@ public class MainController {
         showCosts();
     }
 
+    /**
+     * Loads the Costs screen into the main content area and highlights its navbar button, including when
+     * navigation comes from the home screen's costs tile.
+     */
     public void showCosts() {
-        // highlights its navbar button when navigation comes from the home screen's costs tile
         costsNavButton.setSelected(true);
         loadScreen("/com/utilitywatch/costs-view.fxml");
     }
@@ -121,6 +126,7 @@ public class MainController {
         showNotifications();
     }
 
+    /** Loads the Notifications screen into the main content area and highlights its navbar button. */
     public void showNotifications() {
         notificationsNavButton.setSelected(true);
         loadScreen("/com/utilitywatch/notifications-view.fxml");
@@ -166,17 +172,10 @@ public class MainController {
         SharedDateRange.clear();
         try {
             Stage stage = (Stage) contentArea.getScene().getWindow();
-            Parent root = FXMLLoader.load(getClass().getResource("/com/utilitywatch/login-view.fxml"));
+            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/com/utilitywatch/login-view.fxml")));
             stage.setScene(new Scene(root, 400, 400));
         } catch (IOException e) {
             contentLabel.setText("Couldn't load the login screen");
         }
-    }
-
-    // restores the plain placeholder label as the content area's only child -
-    // needed since Readings replaces it with a real sub-view
-    private void showLabel(String text) {
-        contentLabel.setText(text);
-        contentArea.getChildren().setAll(contentLabel);
     }
 }

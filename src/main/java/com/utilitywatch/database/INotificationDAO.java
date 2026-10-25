@@ -1,7 +1,6 @@
 package com.utilitywatch.database;
 
 import com.utilitywatch.notifications.Notification;
-import com.utilitywatch.notifications.Type;
 
 import java.util.List;
 

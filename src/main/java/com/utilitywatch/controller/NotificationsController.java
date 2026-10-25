@@ -42,7 +42,10 @@ public class NotificationsController {
 
     private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
 
-    // adds completed goal notifications to the top of the all notifications list (us8.4)
+    /**
+     * Opens on the recent notifications page and fills the notification lists, with completed goal
+     * notifications at the top (US8.4). Called by the FXML loader.
+     */
     @FXML
     public void initialize() {
         monthlyNotificationsPage.setVisible(true);

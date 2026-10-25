@@ -12,8 +12,8 @@ import java.util.List;
  */
 public class LongDurationDetector {
 
-    private double baseline;
-    private int consecutiveHours;
+    private final double baseline;
+    private final int consecutiveHours;
 
     /**
      * Constructs the baseline a reading must exceed and the consecutive hours it must last for the user.
@@ -47,7 +47,6 @@ public class LongDurationDetector {
 
                 }
 
-                hoursPassed = (int) secondsPassed / 60 / 60;
 
                 consecutiveReadingsAboveBaseline.add(reading);
             }

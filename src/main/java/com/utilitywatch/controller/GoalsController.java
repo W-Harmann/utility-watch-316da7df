@@ -4,7 +4,6 @@ import com.utilitywatch.goals.*;
 import com.utilitywatch.notifications.Notification;
 import com.utilitywatch.notifications.NotificationRepository;
 import com.utilitywatch.notifications.Type;
-import com.utilitywatch.reports.*;
 import javafx.application.Platform;
 import javafx.fxml.*;
 import javafx.scene.control.*;
@@ -19,6 +18,7 @@ import java.util.*;
  * completed goals. Progress of goals are measured and displayed and goals can be edited and deleted.
  */
 public class GoalsController {
+    /** The Active Goals tab's content, shown when that tab is selected. */
     @FXML
     public VBox activeGoalContentBox;
     @FXML
@@ -40,8 +40,6 @@ public class GoalsController {
     @FXML
     private Label errorLabel;
 
-    private final GoalProgressCalculator progressCalculator = new GoalProgressCalculator();
-
     // goals with no previous readings
     // uses object identity because each progress update creates a new goal object
     private final Set<Goal> goalsWithoutData = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -58,7 +56,7 @@ public class GoalsController {
     // shared notification list
     private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
 
-    // forget all goals, e.g. when an account is deleted
+    /** Forgets all goals in the shared goal repository, for example when an account is deleted. */
     public static void clearGoals() {
         GoalRepository.getInstance().clear();
     }
@@ -66,10 +64,17 @@ public class GoalsController {
     // reference to MainController for screen navigation
     private MainController mainController;
 
+    /**
+     * Gives this controller the {@link MainController}, so it can navigate to other screens. Called by
+     * {@link MainController} when the screen is loaded.
+     *
+     * @param mainController the main controller that holds the navigation bar and content area
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
+    /** Fills the period list and shows the user's active and completed goals. Called by the FXML loader. */
     @FXML
     public void initialize() {
         periodComboBox.getItems().addAll(PERIODS);

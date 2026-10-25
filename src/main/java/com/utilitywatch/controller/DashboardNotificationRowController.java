@@ -17,7 +17,12 @@ public class DashboardNotificationRowController {
     @FXML
     private Label notificationMessageLabel;
 
-    /** @param notification the goal notification to show */
+    /**
+     * Fills the row with a shortened title (e.g. "Water goal completed"), the notification's time and
+     * its message.
+     *
+     * @param notification the goal notification to show
+     */
     public void setData(Notification notification) {
         // for example: 'Goal Completed: Reduced Water Usage' becomes 'Water goal completed'
         notificationTitleLabel.setText(shortTitle(notification.getTitle()));

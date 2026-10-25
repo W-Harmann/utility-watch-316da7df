@@ -4,7 +4,6 @@ import com.utilitywatch.Reading;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The From/To date range shared by every page that has date pickers (Reports, Costs, Impact), so

@@ -10,7 +10,6 @@ import com.utilitywatch.notifications.Notification;
 import com.utilitywatch.notifications.NotificationRepository;
 import com.utilitywatch.notifications.Type;
 import javafx.collections.FXCollections;
-import javafx.scene.chart.XYChart;
 import javafx.scene.layout.HBox;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -23,8 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+
 import java.util.*;
 
 /**
@@ -76,7 +74,7 @@ public class ReadingsController {
 
     // builds the Edit/Delete buttons shown in each row of the table
     private void setUpActionsColumn() {
-        actionsColumn.setCellFactory(col -> new TableCell<Reading, Void>() {
+        actionsColumn.setCellFactory(col -> new TableCell<>() {
             private final Button editButton = new Button("Edit");
             private final Button deleteButton = new Button("Delete");
             private final HBox buttons = new HBox(5, editButton, deleteButton);

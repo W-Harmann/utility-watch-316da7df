@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * {@code "water"}. The same rules apply however a reading is created, whether through the
  * Readings form or the CSV import.
  */
-public class Reading {
+public final class Reading {
 
     private int id; // assigned by the DAO on insert, 0 until then
     private int userId;
@@ -55,10 +55,10 @@ public class Reading {
      * @throws IllegalArgumentException if {@code value} is not a number, is NaN, or is negative
      */
     public void setQuantity(Object value) {
-        if (!(value instanceof Number)) {
+        if (!(value instanceof Number number)) {
             throw new IllegalArgumentException("Quantity must be a number");
         }
-        double doubleValue = ((Number) value).doubleValue();
+        double doubleValue = number.doubleValue();
         if (Double.isNaN(doubleValue)) {
             throw new IllegalArgumentException("Quantity cannot be NaN");
         }

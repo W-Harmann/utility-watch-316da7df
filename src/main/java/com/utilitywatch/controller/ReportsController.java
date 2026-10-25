@@ -18,7 +18,6 @@ import javafx.application.Platform;
 import javafx.util.StringConverter;
 
 import java.time.temporal.ChronoUnit;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -54,7 +53,7 @@ public class ReportsController {
 
     // trend mode toggle buttons
     @FXML private HBox trendmodeToggle;
-//    @FXML private ToggleButton trendmodeTotalToggle;
+    //    @FXML private ToggleButton trendmodeTotalToggle;
 //    @FXML private ToggleButton trendmodeChangeToggle;
     @FXML private ComboBox<String> trendViewDropdown;
     @FXML private ComboBox<String> trendYearDropdown;
@@ -125,7 +124,6 @@ public class ReportsController {
     @FXML private Label selectedUtilityUsed;
     @FXML private Label selectedUnusualReason;
 
-    // reference to MainController for screen navigation
     private MainController mainController;
 
     // reports overview tab maximum unusual patterns shown
@@ -135,6 +133,12 @@ public class ReportsController {
     private final DistributionCalculator distributionCalculator = new DistributionCalculator();
     private final ReportsDataService dataService = new ReportsDataService();
 
+    /**
+     * Gives this controller the {@link MainController}, so it can navigate to other screens. Called by
+     * {@link MainController} when the screen is loaded.
+     *
+     * @param mainController the main controller that holds the navigation bar and content area
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
@@ -144,6 +148,10 @@ public class ReportsController {
         return Math.round(value * 10) / 10.0;
     }
 
+    /**
+     * Sets up the utility toggle and period picker listeners, defaults the comparison periods to the
+     * last two months, and fills the overview tab. Called by the FXML loader.
+     */
     @FXML
     public void initialize() {
         // updates the chart style whenever the utility toggle changes
@@ -233,10 +241,10 @@ public class ReportsController {
 
         // add the energy and water readings to the chart if energy/water is selected and data is available
         if (showEnergy && !energyReadings.isEmpty()) {
-            consumptionChart.getData().add(buildSeries("Energy (kWh)", energyReadings));
+            consumptionChart.getData().add(buildSeries("Energy (kWh)", energyReadings, labelFormat));
         }
         if (showWater && !waterReadings.isEmpty()) {
-            consumptionChart.getData().add(buildSeries("Water (L)", waterReadings));
+            consumptionChart.getData().add(buildSeries("Water (L)", waterReadings, labelFormat));
         }
 
         Platform.runLater(consumptionChart::requestLayout);
@@ -254,25 +262,11 @@ public class ReportsController {
         return distinctDays < readings.size();
     }
 
-    // builds a series with one point per reading, labelled with the given format
-    private XYChart.Series<String, Number> buildReadingSeries(String name, List<Reading> readings, DateTimeFormatter labelFormat) {
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName(name);
-
-        for (Reading reading : readings) {
-            series.getData().add(new XYChart.Data<>(reading.getDateTime().format(labelFormat), reading.getQuantity()));
-        }
-        return series;
-    }
-
-    // builds a series with one point per reading, labelled by date and sorted oldest first
-    private XYChart.Series<String, Number> buildSeries(String name, List<Reading> readings) {
+    // builds a series with one point per reading, sorted oldest first and labelled with the given format
+    // (the same format as the x axis categories, so every point lines up with a category)
+    private XYChart.Series<String, Number> buildSeries(String name, List<Reading> readings, DateTimeFormatter labelFormat) {
         List<Reading> sorted = new ArrayList<>(readings);
         sorted.sort(Comparator.comparing(Reading::getDateTime));
-
-        // category labels must be unique, so the time is added when several readings share a day
-        boolean sharedDays = sorted.stream().map(r -> r.getDateTime().toLocalDate()).distinct().count() < sorted.size();
-        DateTimeFormatter labelFormat = DateTimeFormatter.ofPattern(sharedDays ? "MMM d yyyy h:mma" : "MMM d yyyy");
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName(name);
@@ -374,11 +368,9 @@ public class ReportsController {
         } else {
             UtilityMain.getStyleClass().remove("trends-tab-utility-active");
             UtilityMain.getStyleClass().add("trends-tab-utility-inactive");
-        };
+        }
     }
 
-    //todo: make a method for each: (SUM, AVERAGE, Data-Point)
-    // to show the plot lines for each data sets and show the data dots
 
     @FXML
     private void onTrendsViewSelected() {
@@ -390,18 +382,19 @@ public class ReportsController {
                 trendPeriodDropdown.setPromptText("<No Options>");
             }
             case "Semester" -> {
-                trendPeriodDropdown.getItems().setAll("1","2");
+                trendPeriodDropdown.getItems().setAll("1", "2");
             }
             case "Trimester" -> {
-                trendPeriodDropdown.getItems().setAll("1","2","3");
+                trendPeriodDropdown.getItems().setAll("1", "2", "3");
             }
             case "Quarter" -> {
-                trendPeriodDropdown.getItems().setAll("1","2","3","4");
+                trendPeriodDropdown.getItems().setAll("1", "2", "3", "4");
             }
             case "Month" -> {
-                trendPeriodDropdown.getItems().setAll("January","February","March","April","May","June","July","August","September","October","November","December");
+                trendPeriodDropdown.getItems().setAll("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
             }
-            default -> {}
+            default -> {
+            }
         }
 
         // Set Default Period Selection Value -> View-Selected
@@ -673,8 +666,7 @@ public class ReportsController {
             if (datapoint.getYValue().doubleValue() == 0.0 || !showDataPoint) { continue; }
 
             Runnable customizeNode = () -> {
-                if (node instanceof StackPane) {
-                    StackPane pane = (StackPane) node;
+                if (node instanceof StackPane pane) {
 
                     // Remove the node visually if it's in the way
                     pane.setStyle("-fx-background-color: WHITE; -fx-background-radius: 90px;");
@@ -783,7 +775,7 @@ public class ReportsController {
     // todo: Trends page has a similar function, maybe these two can be modulated.
     // Given the argument types, get data
     // it will return a TOTAL or AVERAGE output of all data readings within that DateTime (Period)
-    private Number condenseComparisonDataToParam(LocalDate fromDate, LocalDate toDate, String utility, String calculation_type) {
+    private double condenseComparisonDataToParam(LocalDate fromDate, LocalDate toDate, String utility, String calculation_type) {
         // Get readings from the specified date
         List<Reading> selectedPeriodReadings = dataService.getReadings(utility, fromDate, toDate);
 
@@ -857,38 +849,53 @@ public class ReportsController {
         String DisplayPeriod2 = fromDate2String + " - " + toDate2String;
 
         class ComparisonHandler {
-            XYChart.Series<String, Number> Series;
-            double DataPeriod1, DataPeriod2;
+            final XYChart.Series<String, Number> series;
+            final double dataPeriod1, dataPeriod2;
 
+            /**
+             * Works out the two periods' values, fills the change and percentage change labels, and adds
+             * styled bars for both periods and their difference to the series.
+             *
+             * @param series the chart series to add the bars to
+             * @param AssociatedLabel the label showing the change between the periods
+             * @param AssociatedLabelPercent the label showing the percentage change
+             * @param Style the CSS style applied to the bars, e.g. {@code "-fx-bar-fill: #FFBA4A;"}
+             * @param Utility {@code "energy"} or {@code "water"}
+             * @param CalculationType how readings are combined, {@code "sum"} for the total or {@code "avg"} for the average
+             * @param fromDate1 the first day of the first period
+             * @param toDate1 the last day of the first period
+             * @param fromDate2 the first day of the second period
+             * @param toDate2 the last day of the second period
+             */
             public ComparisonHandler(XYChart.Series<String, Number> series, Label AssociatedLabel, Label AssociatedLabelPercent, String Style, String Utility, String CalculationType, LocalDate fromDate1, LocalDate toDate1, LocalDate fromDate2, LocalDate toDate2) {
-                Series = series;
+                this.series = series;
 
                 // Get condensed data of period range
-                DataPeriod1 = (double) condenseComparisonDataToParam(fromDate1, toDate1, Utility, CalculationType);
-                DataPeriod2 = (double) condenseComparisonDataToParam(fromDate2, toDate2, Utility, CalculationType);
+                dataPeriod1 = condenseComparisonDataToParam(fromDate1, toDate1, Utility, CalculationType);
+                dataPeriod2 = condenseComparisonDataToParam(fromDate2, toDate2, Utility, CalculationType);
 
                 // set Labels
                 String unit = Utility.equals("water") ? "L" : "kWh";
-                AssociatedLabel.setText(Utility.substring(0,1).toUpperCase(Locale.ROOT) + Utility.substring(1) + ": " + difference() + " " + unit);
+                AssociatedLabel.setText(Utility.substring(0,1).toUpperCase(Locale.ROOT) + Utility.substring(1) + ": " + round(difference()) + " " + unit);
 
                 double percentChangeData = percentChange(2);
 
                 // If Infinity is detected, set N/a instead.
-                if (Double.isInfinite(percentChangeData)) {
+                if (!Double.isFinite(percentChangeData)) {
                     AssociatedLabelPercent.setText("N/a");
                 } else {
                     AssociatedLabelPercent.setText(((percentChangeData < 0) ? "-" : "+") + Math.abs(percentChangeData) + "%");
                 }
 
                 // set bar data
-                XYChart.Data<String, Number> Period1 = new XYChart.Data<>(DisplayPeriod1, DataPeriod1);
+                XYChart.Data<String, Number> Period1 = new XYChart.Data<>(DisplayPeriod1, dataPeriod1);
                 XYChart.Data<String, Number> Difference = new XYChart.Data<>("Difference", Math.abs(difference()));
-                XYChart.Data<String, Number> Period2 = new XYChart.Data<>(DisplayPeriod2, DataPeriod2);
+                XYChart.Data<String, Number> Period2 = new XYChart.Data<>(DisplayPeriod2, dataPeriod2);
 
                 // add to Series
-                Series.getData().add(Period1);
-                Series.getData().add(Difference);
-                Series.getData().add(Period2);
+                series.getData().add(Period1);
+                series.getData().add(Difference);
+                series.getData().add(Period2);
 
                 // Color Bars, Before Adding Data to Bar Graph so Listener can Query (Except Null)
                 stylizeComparisonBar(Period1,Style);
@@ -898,12 +905,15 @@ public class ReportsController {
 
             // Calculates the difference between the two periods
             double difference() {
-                return DataPeriod2 - DataPeriod1;
+                return dataPeriod2 - dataPeriod1;
             }
 
             // Calculates the percentage change between the two periods and round them to NUM decimal points
             double percentChange(int DecimalRound) {
-                double percentage = (difference() / DataPeriod1) * 100;
+                double percentage = (difference() / dataPeriod1) * 100;
+                if (!Double.isFinite(percentage)) {
+                    return percentage; // period 1 was 0, so there's no meaningful % change
+                }
                 DecimalRound = (int) (1 * Math.pow(10, DecimalRound));
 
                 return (double) Math.round(percentage * DecimalRound) /DecimalRound;
@@ -935,7 +945,7 @@ public class ReportsController {
         );
 
         // Add Both Datas to Graph
-        comparisonTotalGraph.getData().addAll(EnergyTotal.Series, WaterTotal.Series);
+        comparisonTotalGraph.getData().addAll(EnergyTotal.series, WaterTotal.series);
 
         // Average Graph
         // Energy Data
@@ -961,7 +971,7 @@ public class ReportsController {
         );
 
         // Add Both Datas to Graph
-        comparisonAverageGraph.getData().addAll(EnergyAvg.Series, WaterAvg.Series);
+        comparisonAverageGraph.getData().addAll(EnergyAvg.series, WaterAvg.series);
 
         // Optional: Hide the legend if individual colors make it irrelevant
 //        comparisonTotalGraph.setLegendVisible(false);
@@ -992,12 +1002,24 @@ public class ReportsController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
 
         xAxis.setTickLabelFormatter(new StringConverter<Number>() {
+            /**
+             * Formats an axis value as a date label such as "Jan 05".
+             *
+             * @param epochMilliSeconds the axis value, in milliseconds since the epoch
+             * @return the date label
+             */
             @Override
             public String toString(Number epochMilliSeconds) {
                 LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMilliSeconds.longValue()), ZoneId.systemDefault());
                 return dateTime.format(formatter);
             }
 
+            /**
+             * Not used: the axis only needs to turn values into labels.
+             *
+             * @param string the label to convert
+             * @return always {@code null}
+             */
             @Override
             public Number fromString(String string) {
                 return null;
@@ -1547,12 +1569,6 @@ public class ReportsController {
         }
     }
 
-    // shows coming soon placeholder and hides everything else
-    private void showComingSoon() {
-        hideAllTabContent();
-        comingSoonLabel.setVisible(true);
-        comingSoonLabel.setManaged(true);
-    }
 
     // hides all tab content and removes it from the layout
     // each show() method can then show only the needed content for that tab

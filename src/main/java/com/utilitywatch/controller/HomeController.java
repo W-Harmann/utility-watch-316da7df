@@ -59,11 +59,20 @@ public class HomeController {
     // references MainController so buttons like the cost tile can navigate to other screens
     private MainController mainController;
 
-    // called when home loads so it can use MainController to navigate to other screens such as costs
+    /**
+     * Gives this controller the {@link MainController}, so the dashboard tiles can navigate to other
+     * screens such as Costs. Called by {@link MainController} when the home screen is loaded.
+     *
+     * @param mainController the main controller that holds the navigation bar and content area
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
+    /**
+     * Shows the welcome message and fills the dashboard with the user's latest readings, goals and
+     * notifications. Called by the FXML loader.
+     */
     @FXML
     public void initialize() {
         // TODO: add username to register/login for a personalised greeting (if user entered one)

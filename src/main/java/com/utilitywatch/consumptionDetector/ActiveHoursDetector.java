@@ -9,8 +9,8 @@ import java.time.LocalTime;
  */
 public class ActiveHoursDetector {
 
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private final LocalTime startTime;
+    private final LocalTime endTime;
 
     /**
      * Constructs the active hours of the user.

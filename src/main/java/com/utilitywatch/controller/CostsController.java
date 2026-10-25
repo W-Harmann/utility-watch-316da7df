@@ -65,7 +65,6 @@ public class CostsController {
     // Monthly budget card
     @FXML private Label budgetSubtitleLabel;
     @FXML private Label budgetSpentLabel;
-    @FXML private HBox budgetStatsRow;
     @FXML private Label budgetSpentValue;
     @FXML private Label budgetLimitValue;
     @FXML private Label budgetUsedValue;
@@ -87,6 +86,11 @@ public class CostsController {
     private final ReadingDAO readingDAO = SharedReadingDAO.getDAO();
     private List<Reading> readings = List.of();
 
+    /**
+     * Loads the logged-in user's readings, selects both utilities, fills the date pickers with the
+     * shared date range and the rate and budget fields with the saved settings, then shows the
+     * estimated costs. Called by the FXML loader.
+     */
     @FXML
     public void initialize() {
         int userId = Session.getInstance().getCurrentUser().getId();

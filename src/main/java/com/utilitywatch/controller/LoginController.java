@@ -13,6 +13,11 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Controller for the login screen ({@code login-view.fxml}). It logs the user in through the shared
+ * {@link com.utilitywatch.login.AuthenticationService} and then opens the main screen, or opens the
+ * register screen.
+ */
 public class LoginController {
 
     @FXML private TextField emailField;

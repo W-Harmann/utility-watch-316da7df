@@ -3,7 +3,10 @@ package com.utilitywatch.login;
 import java.util.ArrayList;
 import java.util.List;
 
-// list in memory
+/**
+ * Stores users in a list in memory, so nothing is kept when the app closes. It is the default
+ * storage used by {@link AuthenticationService} when no DAO is given.
+ */
 public class InMemoryUserDAO implements IUserDAO {
 
     private final List<User> users = new ArrayList<>();

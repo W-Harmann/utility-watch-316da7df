@@ -3,9 +3,13 @@ package com.utilitywatch.controller;
 import com.utilitywatch.login.AuthenticationService;
 import com.utilitywatch.login.SqliteUserDAO;
 
-// one shared AuthenticationService so Login/Register/Main controllers (each
-// created fresh by the FXML loader) all see the same registered users.
-// Backed by real persistence via SqliteUserDAO.
+/**
+ * Holds the one shared {@link AuthenticationService}, so the Login, Register, Main and Settings
+ * controllers (each created fresh by the FXML loader) all see the same registered users. It is
+ * backed by real persistence through {@link SqliteUserDAO}.
+ * <p>When this class is first loaded it also registers a known development account
+ * ({@code test@test.com}) if one does not exist yet.
+ */
 public class SharedAuth {
 
     private static final AuthenticationService instance = new AuthenticationService(new SqliteUserDAO());
@@ -25,6 +29,11 @@ public class SharedAuth {
     private SharedAuth() {
     }
 
+    /**
+     * Returns the shared authentication service.
+     *
+     * @return the shared service
+     */
     public static AuthenticationService getService() {
         return instance;
     }

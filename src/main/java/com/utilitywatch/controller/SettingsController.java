@@ -19,7 +19,15 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.Optional;
 
-// Settings page: edit profile details (US13.4) and delete the account (US12.3)
+/**
+ * Controller for the Settings screen ({@code settings-view.fxml}).
+ * <p><b>Edit profile (US13.4):</b> the name, email and property address fields are pre-filled with
+ * the logged-in user's details. Name and email are required; a refused change keeps the previous
+ * details and shows the reason.
+ * <p><b>Delete account (US12.3):</b> after the user confirms, it deletes their readings and their
+ * account, clears the shared in-memory data (goals, notifications, cost settings and the date range)
+ * so the next person to log in does not see it, and returns to the login screen.
+ */
 public class SettingsController {
 
     @FXML private TextField nameField;
@@ -31,7 +39,7 @@ public class SettingsController {
     private final AuthenticationService authService = SharedAuth.getService();
     private final IReadingDAO readingDAO = SharedReadingDAO.getDAO();
 
-    // pre-fills the fields with the logged-in user's current details
+    /** Pre-fills the fields with the logged-in user's current details. Called by the FXML loader. */
     @FXML
     public void initialize() {
         showCurrentDetails();

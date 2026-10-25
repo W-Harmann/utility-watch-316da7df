@@ -27,6 +27,12 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * Controller for the Readings screen ({@code readings-view.fxml}). It lets the user add, edit and
+ * delete readings and import them from a CSV file. Only the logged-in user's readings are shown.
+ * <p>Each time the table is refreshed, the user's readings are also checked for unusual consumption
+ * patterns, and notifications are added for any that are found.
+ */
 public class ReadingsController {
 
     @FXML private DatePicker datePicker;
@@ -49,6 +55,10 @@ public class ReadingsController {
 
     private final NotificationRepository notificationRepository = NotificationRepository.getInstance();
 
+    /**
+     * Sets up the screen: finds the logged-in user, fills the resource type list, sets up the table
+     * columns and loads the user's readings. Called by the FXML loader.
+     */
     @FXML
     public void initialize() {
         User currentUser = Session.getInstance().getCurrentUser();

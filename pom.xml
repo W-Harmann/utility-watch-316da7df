@@ -70,8 +70,7 @@
                 <configuration>
                     <!-- Don't fail the build on missing or imperfect comments -->
                     <doclint>all,-missing</doclint>
-                    <!-- Include private methods/fields too (default is protected) -->
-                    <show>private</show>
+                    <show>public</show>
                 </configuration>
             </plugin>
         </plugins>

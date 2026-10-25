@@ -14,6 +14,10 @@ import java.io.IOException;
 import java.time.*;
 import java.util.*;
 
+/**
+ * Controller for the Goals screen ({@code goals-view.fxml}). Allows the user to create goals and view active and
+ * completed goals. Progress of goals are measured and displayed and goals can be edited and deleted.
+ */
 public class GoalsController {
     @FXML
     public VBox activeGoalContentBox;

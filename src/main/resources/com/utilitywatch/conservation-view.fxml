@@ -105,7 +105,7 @@
                                 <Region HBox.hgrow="ALWAYS"/>
                                 <Label text="i" styleClass="info-icon-text"/>
                             </HBox>
-                            <Label alignment="CENTER" maxWidth="150.0" text="Compared to last month:" styleClass="report-info-box-title"/>
+                            <Label alignment="CENTER" maxWidth="200.0" text="Compared to last year's season:" styleClass="report-info-box-title"/>
                             <HBox spacing="15.0" VBox.vgrow="ALWAYS">
                                 <VBox alignment="CENTER" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefWidth="0">
                                     <Label alignment="CENTER" maxWidth="150.0" text="Energy:" styleClass="report-info-box-title"/>

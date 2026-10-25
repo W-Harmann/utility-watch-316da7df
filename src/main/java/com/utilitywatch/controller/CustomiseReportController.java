@@ -43,6 +43,10 @@ import static com.utilitywatch.ReadingEvaluator.BOTH;
 // US7.3 - customise which information goes into a consumption report.
 // US11.2 - pick a custom date range (or a quick range like one billing cycle or one year) before exporting.
 // Opened from the home screen's Export Data tile; it replaces the old export on the Costs page.
+/**
+ * Controller for the Customise report screen ({@code customise-report-view.fxml}). Allows the user to export an
+ * analysis of their reading data which can be customised by the user's selection of information to include.
+ */
 public class CustomiseReportController {
 
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("d MMM yyyy");

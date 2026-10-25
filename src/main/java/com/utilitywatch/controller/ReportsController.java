@@ -21,7 +21,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-
+/**
+ * Controller for the Reports screen ({@code report-view.fxml}). Shows the user analyses of the user's readings in the
+ * form of an overview, trends, comparisons, unusual patterns, and statistics.
+ */
 public class ReportsController {
     private LocalDate periodStart;
     private LocalDate periodEnd;

@@ -36,6 +36,10 @@ import static com.utilitywatch.ReadingEvaluator.WATER;
 
 // US10.1 - the Environmental Impacts page
 // US10.3 - footprint over time chart (weekly or monthly)
+/**
+ * Controller for the Impact screen ({@code impact-view.fxml}). Shows the user's estimated environmental impact and a
+ * footprint over time graph. The user can change the current emission factors to change the estimated impact.
+ */
 public class ImpactController {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMM d, yyyy");

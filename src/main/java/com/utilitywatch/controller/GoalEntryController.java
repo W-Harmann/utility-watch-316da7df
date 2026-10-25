@@ -5,6 +5,9 @@ import com.utilitywatch.goals.GoalProgressCalculator;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+/**
+ * Controller for the Goal entries ({@code goal-entry.fxml}). Shows the user their goals and progress.
+ */
 public class GoalEntryController {
     @FXML
     private Label goalContainerResource;

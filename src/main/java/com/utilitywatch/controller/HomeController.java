@@ -18,7 +18,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
-/** shows the user's latest readings, goals, and notifications on the home dashboard */
+
+/**
+ * Controller for the Home screen ({@code home-view.fxml}). Shows the user's latest readings, goals, and notifications
+ * on the home dashboard. The home page can directly open reports, costs, goals, notifications, customise report, and
+ * conservation pages.
+ */
 public class HomeController {
 
     @FXML

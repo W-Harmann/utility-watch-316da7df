@@ -5,6 +5,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import java.time.LocalDate;
 
+/**
+ * Controller for period picker ({@code period-picker.fxml}). Allows the user to get readings inbetween two dates.
+ * Updates on a date changing.
+ */
 public class PeriodPickerController {
 
     @FXML

@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Controller for the notification entries ({@code notification-entry.fxml}). Shows the user their notifications.
+ */
 public class NotificationsEntryController {
 
     @FXML

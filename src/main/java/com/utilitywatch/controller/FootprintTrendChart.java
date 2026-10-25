@@ -23,6 +23,9 @@ import java.util.List;
 // Periods with readings are joined by a line (a genuine 0 kg is a point on the zero line).
 // A period with no readings for a utility gets no point on that line, so the line breaks there.
 // A period with no readings at all is also covered by a grey "No data" band, so it can't be mistaken for 0 kg.
+/**
+ * Controls the footprint trend chart.
+ */
 public class FootprintTrendChart extends LineChart<String, Number> {
 
     private final CategoryAxis xAxis;

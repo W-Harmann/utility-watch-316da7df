@@ -14,6 +14,11 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * The main controller shared on every page for navigation ({@code main-view.fxml}). Shows the navbar on every page. The
+ * home page can directly open home, readings, reports, goals, costs, impacts, notifications, settings, and settings
+ * pages. Can also log out the user.
+ */
 public class MainController {
 
     @FXML

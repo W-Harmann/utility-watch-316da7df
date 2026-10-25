@@ -36,7 +36,14 @@ import static com.utilitywatch.ReadingEvaluator.WATER;
  */
 public class CustomReportBuilder {
 
-    /** Prices and emission factors used for the cost and environmental sections. */
+    /**
+     * Prices and emission factors used for the cost and environmental sections.
+     *
+     * @param energyCostPerKwh the price of one kWh of energy
+     * @param waterCostPerLitre the price of one litre of water
+     * @param energyKgPerKwh the kilograms of CO2e produced per kWh of energy
+     * @param waterKgPerLitre the kilograms of CO2e produced per litre of water
+     */
     public record Rates(double energyCostPerKwh, double waterCostPerLitre,
                         double energyKgPerKwh, double waterKgPerLitre) {
     }
@@ -65,13 +72,28 @@ public class CustomReportBuilder {
     private final ConservationAdvisor conservationAdvisor = new ConservationAdvisor();
 
     /**
+     * Builds a report with today's date as the generated-on date.
+     *
      * @param allReadings every reading the user has (they are filtered here)
-     * @throws IllegalArgumentException if the options are not valid (see ReportOptions.validate)
+     * @param options the utility, date range and sections the user picked
+     * @param rates the prices and emission factors for the cost and environmental sections
+     * @return the report, containing only the selected sections
+     * @throws IllegalArgumentException if the options are not valid (see {@link ReportOptions#validate()})
      */
     public CustomReport build(List<Reading> allReadings, ReportOptions options, Rates rates) {
         return build(allReadings, options, rates, LocalDate.now());
     }
 
+    /**
+     * Builds a report with the generated-on date supplied, so tests do not depend on the current date.
+     *
+     * @param allReadings every reading the user has (they are filtered here)
+     * @param options the utility, date range and sections the user picked
+     * @param rates the prices and emission factors for the cost and environmental sections
+     * @param today the date to record as the generated-on date
+     * @return the report, containing only the selected sections
+     * @throws IllegalArgumentException if the options are not valid
+     */
     CustomReport build(List<Reading> allReadings, ReportOptions options, Rates rates, LocalDate today) {
         Optional<String> problem = options.validate();
         if (problem.isPresent()) {
@@ -166,6 +188,17 @@ public class CustomReportBuilder {
         return new Section(ReportSection.TRENDS_ANALYSIS, tables, notes);
     }
 
+    /**
+     * Describes the overall trend from the first to the last period that has data. A change smaller
+     * than 5% counts as steady.
+     *
+     * @param bucketsWithData how many periods have data
+     * @param first the average use per day in the first period with data
+     * @param last the average use per day in the last period with data
+     * @return text such as {@code "Increasing (+12.0%)"}, {@code "Decreasing (-8.0%)"} or
+     *         {@code "Steady (+1.0%)"}, or a message that there is not enough data (fewer than two
+     *         periods, a missing value, or a first value of 0)
+     */
     static String describeTrend(int bucketsWithData, Double first, Double last) {
         if (bucketsWithData < 2 || first == null || last == null || first == 0) {
             return "Not enough data to show a trend";
@@ -177,7 +210,14 @@ public class CustomReportBuilder {
         return (change > 0 ? "Increasing (" : "Decreasing (") + signedPercent(change) + ")";
     }
 
-    /** Splits the range into 7-day weeks starting on the first day, or calendar months, cut to fit the range. */
+    /**
+     * Splits the range into 7-day weeks starting on the first day, or into calendar months, cut to fit the range.
+     *
+     * @param from the first day of the range
+     * @param to the last day of the range
+     * @param weekly {@code true} for weeks, {@code false} for calendar months
+     * @return the periods in order, each as a two-element array of first and last day (inclusive)
+     */
     static List<LocalDate[]> buckets(LocalDate from, LocalDate to, boolean weekly) {
         List<LocalDate[]> buckets = new ArrayList<>();
         LocalDate start = from;
@@ -230,7 +270,14 @@ public class CustomReportBuilder {
 
     // ---- Unusual Patterns ----
 
-    /** One flagged reading or run of readings. */
+    /**
+     * One flagged reading or run of readings.
+     *
+     * @param start when the flagged use began
+     * @param end when it ended (the same as {@code start} for a single spike)
+     * @param reason what was detected, for example {@code "Spike"}
+     * @param usage the quantity used (summed over a run)
+     */
     record Flag(LocalDateTime start, LocalDateTime end, String reason, double usage) {
     }
 
@@ -264,7 +311,13 @@ public class CustomReportBuilder {
         return new Section(ReportSection.UNUSUAL_PATTERNS, tables, notes);
     }
 
-    /** Spikes, long periods of high use, and use outside active hours, oldest first. */
+    /**
+     * Finds spikes, long periods of high use, and use outside active hours. It uses the same detector
+     * settings as the Unusual Patterns tab on the Reports screen.
+     *
+     * @param sortedReadings one utility's readings, oldest first
+     * @return the flags found, oldest first
+     */
     List<Flag> findUnusual(List<Reading> sortedReadings) {
         List<Flag> flags = new ArrayList<>();
 
@@ -342,6 +395,16 @@ public class CustomReportBuilder {
         return new Section(ReportSection.CONSERVATION_OPPORTUNITIES, tables, notes);
     }
 
+    /**
+     * Chooses saving suggestions. A suggestion is added for each of: average use up, peak use up, and
+     * use outside active hours. A general tip is always added last.
+     *
+     * @param utility {@code "energy"} or {@code "water"}
+     * @param averageChange the percentage change in average use since the previous period
+     * @param peakChange the percentage change in peak use since the previous period
+     * @param outsideHours how many periods of use outside active hours were found
+     * @return the suggestions, in that order
+     */
     static List<String> tips(String utility, double averageChange, double peakChange, long outsideHours) {
         List<String> tips = new ArrayList<>();
         boolean energy = ENERGY.equals(utility);
@@ -466,10 +529,22 @@ public class CustomReportBuilder {
         return readings.stream().map(Reading::getQuantity).toList();
     }
 
+    /**
+     * Turns the user's choice into the utilities to report on.
+     *
+     * @param selection {@code "energy"}, {@code "water"} or {@code "both"}
+     * @return energy and water for {@code "both"}, otherwise just the one given
+     */
     static List<String> utilitiesFor(String selection) {
         return BOTH.equals(selection) ? List.of(ENERGY, WATER) : List.of(selection);
     }
 
+    /**
+     * Gives the heading text for the user's choice.
+     *
+     * @param selection {@code "energy"}, {@code "water"} or {@code "both"}
+     * @return {@code "Energy"}, {@code "Water"} or {@code "Energy and Water"}
+     */
     static String utilityLabel(String selection) {
         return switch (selection) {
             case ENERGY -> "Energy";
@@ -482,6 +557,14 @@ public class CustomReportBuilder {
         return ENERGY.equals(utility) ? "Energy" : "Water";
     }
 
+    /**
+     * Formats a quantity with its unit: two decimal places and kWh for energy, one decimal place
+     * and L for water.
+     *
+     * @param utility {@code "energy"} or {@code "water"}
+     * @param value the quantity
+     * @return text such as {@code "12.50 kWh"} or {@code "340.0 L"}
+     */
     static String amount(String utility, double value) {
         return ENERGY.equals(utility)
                 ? String.format(Locale.ROOT, "%.2f kWh", value)
@@ -499,6 +582,12 @@ public class CustomReportBuilder {
         return signedPercent((current - previous) / previous * 100);
     }
 
+    /**
+     * Formats a percentage with an explicit sign and one decimal place.
+     *
+     * @param value the percentage
+     * @return text such as {@code "+12.5%"} or {@code "-3.0%"}
+     */
     static String signedPercent(double value) {
         return String.format(Locale.ROOT, "%+.1f%%", value);
     }
